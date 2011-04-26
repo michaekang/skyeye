@@ -36,13 +36,19 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@WIN32_FALSE@am__append_1 = -L$(top_builddir)/third-party/readline/
-@LCD_TRUE@am__append_2 = @LCD_CFLAGS@
+@LLVM_EXIST_TRUE@am__append_1 = $(common_dyncom)
+@LLVM_EXIST_TRUE@am__append_2 = `llvm-config --cflags`
+@LLVM_EXIST_TRUE@am__append_3 = `llvm-config --libs ` -lrt -L`llvm-config --libdir`
+@LCD_TRUE@am__append_4 = @LCD_CFLAGS@
 subdir = common
 DIST_COMMON = $(nobase_include_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -73,8 +79,29 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
-am__DEPENDENCIES_1 =
-libcommon_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+libcommon_la_DEPENDENCIES =
+am__libcommon_la_SOURCES_DIST = module/skyeye_module.c misc/support.c \
+	breakpoint/breakpoint.c ctrl/thread_ctrl.c ctrl/sim_ctrl.c \
+	ctrl/step.c ctrl/scheduler.c ctrl/skyeye_thread.c \
+	ctrl/skyeye_cell.c ctrl/skyeye_exec.c portable/mman.c \
+	portable/usleep.c portable/gettimeofday.c \
+	preference/skyeye_pref.c core/skyeye_arch.c \
+	conf_parser/skyeye_options.c conf_parser/skyeye_config.c \
+	conf_parser/misc_options.c conf_parser/conf_obj.c \
+	log/skyeye_log.c cli/skyeye_command.c cli/skyeye_cli.c \
+	cli/default_command.c mm/skyeye_mm.c mach/skyeye_mach.c \
+	device/skyeye_device.c device/pen_buffer.c \
+	device/skyeye_uart_ops.c device/skyeye_signal.c bus/bank_ops.c \
+	bus/io.c bus/ram.c bus/flash.c bus/skyeye_bus.c \
+	bus/bus_recoder.c loader/loader_elf.c loader/loader_file.c \
+	callback/callback.c profile/symbol.c profile/bfd_target.c \
+	dyncom/translate_singlestep_bb.cpp \
+	dyncom/translate_singlestep.cpp dyncom/translate_all.cpp \
+	dyncom/translate.cpp dyncom/timings.cpp dyncom/tag.cpp \
+	dyncom/stat.cpp dyncom/sha1.cpp dyncom/optimize.cpp \
+	dyncom/interface.cpp dyncom/function.cpp dyncom/frontend.cpp \
+	dyncom/fp.cpp dyncom/disasm.cpp dyncom/basicblock.cpp \
+	dyncom/memory.cpp
 am__objects_1 = skyeye_module.lo
 am__objects_2 = support.lo
 am__objects_3 = breakpoint.lo
@@ -95,18 +122,19 @@ am__objects_14 = bank_ops.lo io.lo ram.lo flash.lo skyeye_bus.lo \
 	bus_recoder.lo
 am__objects_15 = loader_elf.lo loader_file.lo
 am__objects_16 = callback.lo
-am__objects_17 = translate_singlestep_bb.lo translate_singlestep.lo \
+am__objects_17 = symbol.lo bfd_target.lo
+am__objects_18 = translate_singlestep_bb.lo translate_singlestep.lo \
 	translate_all.lo translate.lo timings.lo tag.lo stat.lo \
 	sha1.lo optimize.lo interface.lo function.lo frontend.lo fp.lo \
 	disasm.lo basicblock.lo memory.lo
-am__objects_18 = symbol.lo bfd_target.lo
+@LLVM_EXIST_TRUE@am__objects_19 = $(am__objects_18)
 am_libcommon_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
 	$(am__objects_6) $(am__objects_7) $(am__objects_8) \
 	$(am__objects_9) $(am__objects_10) $(am__objects_11) \
 	$(am__objects_12) $(am__objects_13) $(am__objects_14) \
 	$(am__objects_15) $(am__objects_16) $(am__objects_17) \
-	$(am__objects_18)
+	$(am__objects_19)
 libcommon_la_OBJECTS = $(am_libcommon_la_OBJECTS)
 libcommon_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -134,7 +162,7 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcommon_la_SOURCES)
-DIST_SOURCES = $(libcommon_la_SOURCES)
+DIST_SOURCES = $(am__libcommon_la_SOURCES_DIST)
 HEADERS = $(nobase_include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -191,6 +219,7 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LLVM = @LLVM@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
@@ -320,18 +349,23 @@ nobase_include_HEADERS = ./include/sim_control.h ./include/skyeye_callback.h \
 ./include/portable/mman.h ./include/portable/usleep.h ./include/skyeye_ram.h \
 ./include/skyeye_queue.h
 
-libcommon_la_SOURCES = $(common_module) $(common_misc) $(common_breakpoint) $(common_ctrl) $(common_portable) $(common_preference) $(common_core) $(common_conf_parser) $(common_log) $(common_cli) $(common_mm) $(common_mach) $(common_device) $(common_memory) $(common_loader) $(common_callback) $(common_dyncom) $(common_profile)
-libcommon_la_LIBADD = -L$(top_builddir)/third-party/bfd/.libs/ -lbfd \
-	-L$(top_builddir)/third-party/libiberty/pic -liberty \
-	-lreadline @LIBLTDL@ @LIBADD_DL@ $(am__append_1)
+libcommon_la_SOURCES = $(common_module) $(common_misc) \
+	$(common_breakpoint) $(common_ctrl) $(common_portable) \
+	$(common_preference) $(common_core) $(common_conf_parser) \
+	$(common_log) $(common_cli) $(common_mm) $(common_mach) \
+	$(common_device) $(common_memory) $(common_loader) \
+	$(common_callback) $(common_profile) $(am__append_1)
+libcommon_la_LIBADD = -L$(top_builddir)/third-party/bfd/.libs/ -lbfd -L$(top_builddir)/third-party/libiberty/pic -liberty @LIBLTDL@ @LIBADD_DL@
+
+#libcommon_la_LIBADD += -L$(top_builddir)/third-party/readline/
 # we will link the common module with main
 #libcommon_la_LDFLAGS = -module
-libcommon_la_LDFLAGS = `llvm-config --libs ` -lrt -L`llvm-config --libdir`
+libcommon_la_LDFLAGS = $(am__append_3)
 skyeye_module_dir = \"$(prefix)/lib/skyeye\"
 INCLUDES = @COMMON_INCLUDES@ -I$(top_srcdir)/third-party/include/ \
 	-I$(top_srcdir)/third-party/bfd/ \
 	-I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/third-party \
-	@INCLTDL@ `llvm-config --cflags` $(am__append_2)
+	@INCLTDL@ $(am__append_2) $(am__append_4)
 all: all-am
 
 .SUFFIXES:

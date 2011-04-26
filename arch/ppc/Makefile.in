@@ -35,10 +35,16 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@LLVM_EXIST_TRUE@am__append_1 = $(ppc_dyncom)
+@LLVM_EXIST_TRUE@am__append_2 = -DLLVM_EXIST
 subdir = arch/ppc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -70,21 +76,43 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
 libppc_la_LIBADD =
+am__libppc_la_SOURCES_DIST = mach/skyeye_mach_mpc8560.c \
+	mach/skyeye_mach_mpc8572.c mach/mpc8560_boot_linux.c \
+	mach/mpc8572_boot_linux.c mach/skyeye_mach_mpc8641d.c \
+	mach/mpc8641d_boot_linux.c mach/mpc8641d_boot_vxworks.c \
+	common/ppc_alu.c common/ppc_cpu.c common/ppc_exc.c \
+	common/ppc_mmu.c common/ppc_vec.c common/ppc_arch_interface.c \
+	common/ppc_dec.c common/ppc_fpu.c common/ppc_opc.c \
+	common/ppc_e500_core.c common/ppc_cpm.c common/ppc_e500_exc.c \
+	common/ppc_io.c common/ppc_tools.c common/ppc_e500_mpic.c \
+	common/ppc_module.c linux_syscall/ppc_syscall.c \
+	dyncom/ppc_dyncom_run.cpp dyncom/ppc_dyncom_translate.cpp \
+	dyncom/ppc_dyncom_interface.cpp \
+	dyncom/ppc_dyncom_instr_group1.cpp \
+	dyncom/ppc_dyncom_instr_group2.cpp \
+	dyncom/ppc_dyncom_instr_group_f1.cpp \
+	dyncom/ppc_dyncom_instr_group_f2.cpp \
+	dyncom/ppc_dyncom_instr_main.cpp \
+	dyncom/ppc_dyncom_instr_groupv.cpp dyncom/ppc_dyncom_dec.cpp \
+	dyncom/ppc_dyncom_diff_log.cpp
 am__objects_1 = skyeye_mach_mpc8560.lo skyeye_mach_mpc8572.lo \
 	mpc8560_boot_linux.lo mpc8572_boot_linux.lo \
-	skyeye_mach_mpc8641d.lo mpc8641d_boot_linux.lo
+	skyeye_mach_mpc8641d.lo mpc8641d_boot_linux.lo \
+	mpc8641d_boot_vxworks.lo
 am__objects_2 = ppc_alu.lo ppc_cpu.lo ppc_exc.lo ppc_mmu.lo ppc_vec.lo \
 	ppc_arch_interface.lo ppc_dec.lo ppc_fpu.lo ppc_opc.lo \
 	ppc_e500_core.lo ppc_cpm.lo ppc_e500_exc.lo ppc_io.lo \
 	ppc_tools.lo ppc_e500_mpic.lo ppc_module.lo
-am__objects_3 = ppc_dyncom_run.lo ppc_dyncom_translate.lo \
+am__objects_3 = ppc_syscall.lo
+am__objects_4 = ppc_dyncom_run.lo ppc_dyncom_translate.lo \
 	ppc_dyncom_interface.lo ppc_dyncom_instr_group1.lo \
 	ppc_dyncom_instr_group2.lo ppc_dyncom_instr_group_f1.lo \
 	ppc_dyncom_instr_group_f2.lo ppc_dyncom_instr_main.lo \
-	ppc_dyncom_instr_groupv.lo ppc_dyncom_dec.lo
-am__objects_4 = ppc_syscall.lo
+	ppc_dyncom_instr_groupv.lo ppc_dyncom_dec.lo \
+	ppc_dyncom_diff_log.lo
+@LLVM_EXIST_TRUE@am__objects_5 = $(am__objects_4)
 am_libppc_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4)
+	$(am__objects_3) $(am__objects_5)
 libppc_la_OBJECTS = $(am_libppc_la_OBJECTS)
 libppc_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -112,7 +140,7 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libppc_la_SOURCES)
-DIST_SOURCES = $(libppc_la_SOURCES)
+DIST_SOURCES = $(am__libppc_la_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -137,7 +165,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 #DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0
-DEFS = @COMMON_CFLAGS@
+DEFS = @COMMON_CFLAGS@ $(am__append_2)
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -169,6 +197,7 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LLVM = @LLVM@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
@@ -266,19 +295,21 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-ppc_mach = mach/skyeye_mach_mpc8560.c mach/skyeye_mach_mpc8572.c mach/mpc8560_boot_linux.c mach/mpc8572_boot_linux.c mach/skyeye_mach_mpc8641d.c mach/mpc8641d_boot_linux.c
+ppc_mach = mach/skyeye_mach_mpc8560.c mach/skyeye_mach_mpc8572.c mach/mpc8560_boot_linux.c mach/mpc8572_boot_linux.c mach/skyeye_mach_mpc8641d.c mach/mpc8641d_boot_linux.c mach/mpc8641d_boot_vxworks.c
 ppc_comm = common/ppc_alu.c common/ppc_cpu.c common/ppc_exc.c  common/ppc_mmu.c    common/ppc_vec.c \
 common/ppc_arch_interface.c  common/ppc_dec.c       common/ppc_fpu.c  common/ppc_opc.c \
 common/ppc_e500_core.c	      common/ppc_cpm.c						\
 common/ppc_e500_exc.c  common/ppc_io.c   common/ppc_tools.c common/ppc_e500_mpic.c common/ppc_module.c
 
-ppc_dyncom = dyncom/ppc_dyncom_run.cpp dyncom/ppc_dyncom_translate.cpp dyncom/ppc_dyncom_interface.cpp dyncom/ppc_dyncom_instr_group1.cpp dyncom/ppc_dyncom_instr_group2.cpp dyncom/ppc_dyncom_instr_group_f1.cpp dyncom/ppc_dyncom_instr_group_f2.cpp dyncom/ppc_dyncom_instr_main.cpp dyncom/ppc_dyncom_instr_groupv.cpp dyncom/ppc_dyncom_dec.cpp
+ppc_dyncom = dyncom/ppc_dyncom_run.cpp dyncom/ppc_dyncom_translate.cpp dyncom/ppc_dyncom_interface.cpp dyncom/ppc_dyncom_instr_group1.cpp dyncom/ppc_dyncom_instr_group2.cpp dyncom/ppc_dyncom_instr_group_f1.cpp dyncom/ppc_dyncom_instr_group_f2.cpp dyncom/ppc_dyncom_instr_main.cpp dyncom/ppc_dyncom_instr_groupv.cpp dyncom/ppc_dyncom_dec.cpp dyncom/ppc_dyncom_diff_log.cpp
 ppc_linux_syscall = linux_syscall/ppc_syscall.c
 #libppc_a_SOURCES = $(ppc_mach) $(ppc_comm)
-libppc_la_SOURCES = $(ppc_mach) $(ppc_comm) $(ppc_dyncom) $(ppc_linux_syscall)
+libppc_la_SOURCES = $(ppc_mach) $(ppc_comm) $(ppc_linux_syscall) \
+	$(am__append_1)
 pkglib_LTLIBRARIES = libppc.la
 # we will link the common module with main
 libppc_la_LDFLAGS = -module
+
 #noinst_LIBRARIES =      libppc.a
 INCLUDES = -I$(top_srcdir)/common -I$(top_srcdir)/dyncom/ -I$(top_srcdir)/arch/ppc/common -I$(top_srcdir)/arch/ppc/linux_syscall `/usr/local/bin/llvm-config --cflags` -I$(top_srcdir)/utils/debugger @COMMON_INCLUDES@
 all: all-am
@@ -358,12 +389,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpc8560_boot_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpc8572_boot_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpc8641d_boot_linux.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpc8641d_boot_vxworks.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_alu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_arch_interface.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_cpm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_cpu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dyncom_dec.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dyncom_diff_log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dyncom_instr_group1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dyncom_instr_group2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_dyncom_instr_group_f1.Plo@am__quote@
@@ -451,6 +484,13 @@ mpc8641d_boot_linux.lo: mach/mpc8641d_boot_linux.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mach/mpc8641d_boot_linux.c' object='mpc8641d_boot_linux.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mpc8641d_boot_linux.lo `test -f 'mach/mpc8641d_boot_linux.c' || echo '$(srcdir)/'`mach/mpc8641d_boot_linux.c
+
+mpc8641d_boot_vxworks.lo: mach/mpc8641d_boot_vxworks.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mpc8641d_boot_vxworks.lo -MD -MP -MF $(DEPDIR)/mpc8641d_boot_vxworks.Tpo -c -o mpc8641d_boot_vxworks.lo `test -f 'mach/mpc8641d_boot_vxworks.c' || echo '$(srcdir)/'`mach/mpc8641d_boot_vxworks.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/mpc8641d_boot_vxworks.Tpo $(DEPDIR)/mpc8641d_boot_vxworks.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mach/mpc8641d_boot_vxworks.c' object='mpc8641d_boot_vxworks.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mpc8641d_boot_vxworks.lo `test -f 'mach/mpc8641d_boot_vxworks.c' || echo '$(srcdir)/'`mach/mpc8641d_boot_vxworks.c
 
 ppc_alu.lo: common/ppc_alu.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ppc_alu.lo -MD -MP -MF $(DEPDIR)/ppc_alu.Tpo -c -o ppc_alu.lo `test -f 'common/ppc_alu.c' || echo '$(srcdir)/'`common/ppc_alu.c
@@ -661,6 +701,13 @@ ppc_dyncom_dec.lo: dyncom/ppc_dyncom_dec.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dyncom/ppc_dyncom_dec.cpp' object='ppc_dyncom_dec.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ppc_dyncom_dec.lo `test -f 'dyncom/ppc_dyncom_dec.cpp' || echo '$(srcdir)/'`dyncom/ppc_dyncom_dec.cpp
+
+ppc_dyncom_diff_log.lo: dyncom/ppc_dyncom_diff_log.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ppc_dyncom_diff_log.lo -MD -MP -MF $(DEPDIR)/ppc_dyncom_diff_log.Tpo -c -o ppc_dyncom_diff_log.lo `test -f 'dyncom/ppc_dyncom_diff_log.cpp' || echo '$(srcdir)/'`dyncom/ppc_dyncom_diff_log.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ppc_dyncom_diff_log.Tpo $(DEPDIR)/ppc_dyncom_diff_log.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dyncom/ppc_dyncom_diff_log.cpp' object='ppc_dyncom_diff_log.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ppc_dyncom_diff_log.lo `test -f 'dyncom/ppc_dyncom_diff_log.cpp' || echo '$(srcdir)/'`dyncom/ppc_dyncom_diff_log.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

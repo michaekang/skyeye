@@ -33,6 +33,12 @@
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT
 
+/* Has __attribute__((aligned)) */
+#undef HAVE_ATTRIBUTE_ALIGNED
+
+/* Support for __attribute__((packed)) for structs */
+#undef HAVE_ATTRIBUTE_PACKED
+
 /* Define to 1 if you have the <bfd.h> header file. */
 #undef HAVE_BFD_H
 
@@ -117,6 +123,9 @@
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
+
+/* Check LIBRT */
+#undef HAVE_LIBRT
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
@@ -270,6 +279,9 @@
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
 
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
 
@@ -346,6 +358,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

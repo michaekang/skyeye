@@ -40,7 +40,11 @@ target_triplet = @target@
 subdir = device
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -106,7 +110,7 @@ libnandflash_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 libnet_la_LIBADD =
 am__objects_6 = dev_net_cs8900a.lo skyeye_net_tuntap.lo \
 	dev_net_rtl8019.lo skyeye_net.lo skyeye_net_vnet.lo \
-	net_module.lo
+	net_module.lo skyeye_net_vhub.lo
 am_libnet_la_OBJECTS = $(am__objects_6)
 libnet_la_OBJECTS = $(am_libnet_la_OBJECTS)
 libnet_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -218,6 +222,7 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LLVM = @LLVM@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
@@ -340,7 +345,7 @@ lcd/dev_lcd_ep7312.c  lcd/dev_lcd_s3c44b0x.c lcd/dev_lcd_pxa.c lcd/lcd_module.c
 #net/dev_net_rtl8019.c  net/skyeye_net.c    net/skyeye_net_vnet.c net/net_module.c
 #dev_net = net/dev_net_cs8900a.c  net/skyeye_net_tuntap.c net/dev_net_s3c4510b.c
 dev_net = net/dev_net_cs8900a.c  net/skyeye_net_tuntap.c \
-net/dev_net_rtl8019.c  net/skyeye_net.c    net/skyeye_net_vnet.c net/net_module.c
+net/dev_net_rtl8019.c  net/skyeye_net.c    net/skyeye_net_vnet.c net/net_module.c   net/skyeye_net_vhub.c
 
 dev_ts = touchscreen/dev_touchscreen_skyeye.c  touchscreen/skyeye_touchscreen.c touchscreen/ts_module.c
 #libdev_a_SOURCES = skyeye_device.c $(dev_uart) $(dev_flash) $(dev_nandflash) $(dev_sound) $(dev_net) $(dev_ts)
@@ -476,6 +481,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_nandflash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_net.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_net_tuntap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_net_vhub.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_net_vnet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_sound.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_sound_pcm.Plo@am__quote@
@@ -679,6 +685,13 @@ net_module.lo: net/net_module.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/net_module.c' object='net_module.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o net_module.lo `test -f 'net/net_module.c' || echo '$(srcdir)/'`net/net_module.c
+
+skyeye_net_vhub.lo: net/skyeye_net_vhub.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT skyeye_net_vhub.lo -MD -MP -MF $(DEPDIR)/skyeye_net_vhub.Tpo -c -o skyeye_net_vhub.lo `test -f 'net/skyeye_net_vhub.c' || echo '$(srcdir)/'`net/skyeye_net_vhub.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/skyeye_net_vhub.Tpo $(DEPDIR)/skyeye_net_vhub.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='net/skyeye_net_vhub.c' object='skyeye_net_vhub.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o skyeye_net_vhub.lo `test -f 'net/skyeye_net_vhub.c' || echo '$(srcdir)/'`net/skyeye_net_vhub.c
 
 skyeye_sound.lo: sound/skyeye_sound.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT skyeye_sound.lo -MD -MP -MF $(DEPDIR)/skyeye_sound.Tpo -c -o skyeye_sound.lo `test -f 'sound/skyeye_sound.c' || echo '$(srcdir)/'`sound/skyeye_sound.c

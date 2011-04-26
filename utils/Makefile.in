@@ -38,7 +38,11 @@ target_triplet = @target@
 subdir = utils
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -107,16 +111,23 @@ liblog_la_OBJECTS = $(am_liblog_la_OBJECTS)
 liblog_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblog_la_LDFLAGS) $(LDFLAGS) -o $@
+libos_supp_la_LIBADD =
+am__objects_6 = os_module.lo skyeye_os.lo
+am_libos_supp_la_OBJECTS = $(am__objects_6)
+libos_supp_la_OBJECTS = $(am_libos_supp_la_OBJECTS)
+libos_supp_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libos_supp_la_LDFLAGS) $(LDFLAGS) -o $@
 libpmon_la_LIBADD =
-am__objects_6 = pmon.lo pmon_module.lo
-am_libpmon_la_OBJECTS = $(am__objects_6)
+am__objects_7 = pmon.lo pmon_module.lo
+am_libpmon_la_OBJECTS = $(am__objects_7)
 libpmon_la_OBJECTS = $(am_libpmon_la_OBJECTS)
 libpmon_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libpmon_la_LDFLAGS) $(LDFLAGS) -o $@
 libshutdown_la_LIBADD =
-am__objects_7 = shutdown_module.lo
-am_libshutdown_la_OBJECTS = $(am__objects_7)
+am__objects_8 = shutdown_module.lo
+am_libshutdown_la_OBJECTS = $(am__objects_8)
 libshutdown_la_OBJECTS = $(am_libshutdown_la_OBJECTS)
 libshutdown_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -136,12 +147,12 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libbus_log_la_SOURCES) $(libcodecov_la_SOURCES) \
 	$(libdisasm_la_SOURCES) $(libgdbserver_la_SOURCES) \
-	$(liblog_la_SOURCES) $(libpmon_la_SOURCES) \
-	$(libshutdown_la_SOURCES)
+	$(liblog_la_SOURCES) $(libos_supp_la_SOURCES) \
+	$(libpmon_la_SOURCES) $(libshutdown_la_SOURCES)
 DIST_SOURCES = $(libbus_log_la_SOURCES) $(libcodecov_la_SOURCES) \
 	$(libdisasm_la_SOURCES) $(libgdbserver_la_SOURCES) \
-	$(liblog_la_SOURCES) $(libpmon_la_SOURCES) \
-	$(libshutdown_la_SOURCES)
+	$(liblog_la_SOURCES) $(libos_supp_la_SOURCES) \
+	$(libpmon_la_SOURCES) $(libshutdown_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -198,6 +209,7 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LLVM = @LLVM@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
@@ -304,6 +316,7 @@ utils_log = log/log.c log/log_module.c
 utils_bus_log = bus_log/bus_log.c bus_log/bus_log_module.c
 utils_pmon = perf_monitor/pmon.c perf_monitor/pmon_module.c
 utils_shutdown = shutdown/shutdown_module.c
+utils_os = os_supp/os_module.c  os_supp/skyeye_os.c
 libgdbserver_la_SOURCES = $(utils_debugger)
 libgdbserver_la_LDFLAGS = -module
 libcodecov_la_SOURCES = $(utils_code_cov)   
@@ -318,7 +331,9 @@ libshutdown_la_SOURCES = $(utils_shutdown)
 libshutdown_la_LDFLAGS = -module
 libdisasm_la_SOURCES = $(utils_disassembler)
 libdisasm_la_LDFLAGS = -module -L./$(top_builddir)/third-party/opcodes/.libs/ -L./$(top_builddir)/third-party/bfd/.libs/ -L./$(top_builddir)/third-party/libiberty/pic/ -lopcodes -lbfd -liberty
-pkglib_LTLIBRARIES = libcodecov.la libgdbserver.la libdisasm.la liblog.la libpmon.la libbus_log.la libshutdown.la
+libos_supp_la_SOURCES = $(utils_os)
+libos_supp_la_LDFLAGS = -module
+pkglib_LTLIBRARIES = libcodecov.la libgdbserver.la libdisasm.la liblog.la libpmon.la libbus_log.la libshutdown.la libos_supp.la
 INCLUDES = -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common @COMMON_INCLUDES@ 
 all: all-am
 
@@ -395,6 +410,8 @@ libgdbserver.la: $(libgdbserver_la_OBJECTS) $(libgdbserver_la_DEPENDENCIES)
 	$(libgdbserver_la_LINK) -rpath $(pkglibdir) $(libgdbserver_la_OBJECTS) $(libgdbserver_la_LIBADD) $(LIBS)
 liblog.la: $(liblog_la_OBJECTS) $(liblog_la_DEPENDENCIES) 
 	$(liblog_la_LINK) -rpath $(pkglibdir) $(liblog_la_OBJECTS) $(liblog_la_LIBADD) $(LIBS)
+libos_supp.la: $(libos_supp_la_OBJECTS) $(libos_supp_la_DEPENDENCIES) 
+	$(libos_supp_la_LINK) -rpath $(pkglibdir) $(libos_supp_la_OBJECTS) $(libos_supp_la_LIBADD) $(LIBS)
 libpmon.la: $(libpmon_la_OBJECTS) $(libpmon_la_DEPENDENCIES) 
 	$(libpmon_la_LINK) -rpath $(pkglibdir) $(libpmon_la_OBJECTS) $(libpmon_la_LIBADD) $(LIBS)
 libshutdown.la: $(libshutdown_la_OBJECTS) $(libshutdown_la_DEPENDENCIES) 
@@ -422,11 +439,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mips_regdefs.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/os_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pmon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pmon_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ppc_regdefs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shutdown_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye2gdb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skyeye_os.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparc_regdefs.Plo@am__quote@
 
 .c.o:
@@ -582,6 +601,20 @@ log_module.lo: log/log_module.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='log/log_module.c' object='log_module.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o log_module.lo `test -f 'log/log_module.c' || echo '$(srcdir)/'`log/log_module.c
+
+os_module.lo: os_supp/os_module.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT os_module.lo -MD -MP -MF $(DEPDIR)/os_module.Tpo -c -o os_module.lo `test -f 'os_supp/os_module.c' || echo '$(srcdir)/'`os_supp/os_module.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/os_module.Tpo $(DEPDIR)/os_module.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='os_supp/os_module.c' object='os_module.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o os_module.lo `test -f 'os_supp/os_module.c' || echo '$(srcdir)/'`os_supp/os_module.c
+
+skyeye_os.lo: os_supp/skyeye_os.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT skyeye_os.lo -MD -MP -MF $(DEPDIR)/skyeye_os.Tpo -c -o skyeye_os.lo `test -f 'os_supp/skyeye_os.c' || echo '$(srcdir)/'`os_supp/skyeye_os.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/skyeye_os.Tpo $(DEPDIR)/skyeye_os.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='os_supp/skyeye_os.c' object='skyeye_os.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o skyeye_os.lo `test -f 'os_supp/skyeye_os.c' || echo '$(srcdir)/'`os_supp/skyeye_os.c
 
 pmon.lo: perf_monitor/pmon.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pmon.lo -MD -MP -MF $(DEPDIR)/pmon.Tpo -c -o pmon.lo `test -f 'perf_monitor/pmon.c' || echo '$(srcdir)/'`perf_monitor/pmon.c

@@ -35,11 +35,17 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@DBCT_TRUE@am__append_1 = $(arm_dbct)
+@LLVM_EXIST_TRUE@am__append_1 = $(arm_dyncom)
+@DBCT_TRUE@am__append_2 = $(arm_dbct)
+@LLVM_EXIST_TRUE@am__append_3 = -DLLVM_EXIST
 subdir = arch/arm
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/argz.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltdl.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -95,12 +101,13 @@ am__objects_2 = arm7100_mmu.lo arm920t_mmu.lo arm926ejs_mmu.lo \
 am__objects_3 = skyeye_mach_lpc.lo
 am__objects_4 = arm_dyncom_interface.lo arm_disasm.lo \
 	arm_dyncom_translate.lo arm_dyncom_run.lo arm_dyncom_dec.lo
-am__objects_5 = arm2x86.lo arm2x86_coproc.lo arm2x86_dp.lo \
+@LLVM_EXIST_TRUE@am__objects_5 = $(am__objects_4)
+am__objects_6 = arm2x86.lo arm2x86_coproc.lo arm2x86_dp.lo \
 	arm2x86_mem.lo arm2x86_movl.lo arm2x86_mul.lo arm2x86_other.lo \
 	arm2x86_psr.lo arm2x86_shift.lo arm2x86_test.lo tb.lo
-@DBCT_TRUE@am__objects_6 = $(am__objects_5)
+@DBCT_TRUE@am__objects_7 = $(am__objects_6)
 am_libarm_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4) $(am__objects_6)
+	$(am__objects_3) $(am__objects_5) $(am__objects_7)
 libarm_la_OBJECTS = $(am_libarm_la_OBJECTS)
 libarm_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -153,7 +160,8 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 #noinst_LIBRARIES =      libarm.a
-DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -DNO_LCD @COMMON_CFLAGS@
+DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE \
+	-DDEFAULT_INLINE=0 -DNO_LCD @COMMON_CFLAGS@ $(am__append_3)
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -185,6 +193,7 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
+LLVM = @LLVM@
 LN_S = @LN_S@
 LTDLDEPS = @LTDLDEPS@
 LTDLINCL = @LTDLINCL@
@@ -289,8 +298,8 @@ arm_mach = \
 mach/skyeye_mach_lpc.c
 
 arm_dyncom = dyncom/arm_dyncom_interface.cpp dyncom/arm_disasm.cpp dyncom/arm_dyncom_translate.cpp dyncom/arm_dyncom_run.cpp dyncom/arm_dyncom_dec.cpp
-libarm_la_SOURCES = $(arm_comm) $(arm_mmu) $(arm_mach) $(arm_dyncom) \
-	$(am__append_1)
+libarm_la_SOURCES = $(arm_comm) $(arm_mmu) $(arm_mach) $(am__append_1) \
+	$(am__append_2)
 libarm_la_LDFLAGS = -module
 pkglib_LTLIBRARIES = libarm.la
 libarm_la_LIBADD = armemu32.lo
