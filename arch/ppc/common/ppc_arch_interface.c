@@ -81,6 +81,10 @@ const char* ppc_regstr[] = {
 	NULL
 };
 
+/* Copied from linux kernel */
+#define BOOT_ENTRY_ADDR_LOWER   1
+#define BOOT_ENTRY_PIR          5
+
 int ppc_divisor = 0;
 
 static void per_cpu_step(conf_object_t* running_core);
@@ -98,7 +102,9 @@ uint32 boot_romSize;
 uint32 boot_rom_start_addr;
 
 FILE * prof_file;
-
+/* Copied from linux kernel */
+#define BOOT_ENTRY_ADDR_LOWER   1
+#define BOOT_ENTRY_PIR          5
 
 static bool ppc_cpu_init()
 {
@@ -144,6 +150,8 @@ static bool ppc_cpu_init()
 	}
 
 	cpu->boot_core_id = 0;
+	bus_write(32, 0x1000000 + BOOT_ENTRY_ADDR_LOWER * 4, 0xFFFFFFFF);
+	bus_write(32, 0x1000000 + BOOT_ENTRY_PIR * 4, 0xFFFFFFFF);
 	/* initialize decoder */
 	ppc_dec_init(&cpu->core[cpu->boot_core_id]);
 	return true;
@@ -182,14 +190,25 @@ ppc_init_state ()
 	//ppc_boot();
 }
 
-
+uint32_t cold_state = 1;
 static void per_cpu_step(conf_object_t * running_core){
 	uint32 real_addr;
 	e500_core_t *core = (e500_core_t *)get_cast_conf_obj(running_core, "e500_core_t");
 	PPC_CPU_State* cpu = get_current_cpu();
-	/* Check the second core and boot flags */
-	if(core->pir){
-		if(!(cpu->eebpcr & 0x2000000))
+	/* Check the second core and coldstate */
+	if(core->pir && cold_state){
+		//if(!(cpu->eebpcr & 0x2000000))
+		uint32_t addr_lower;
+		uint32_t pir;
+		bus_read(32, 0x1000000 + BOOT_ENTRY_ADDR_LOWER * 4, &addr_lower);
+		bus_read(32, 0x1000000 + BOOT_ENTRY_PIR * 4, &pir);
+		if((addr_lower != 0xFFFFFFFF) && (pir == core->pir)){
+			printf("In %s, addr_lower=0x%x, pir=0x%x\n", __FUNCTION__, addr_lower, pir);
+			cold_state = 0;
+			core->pc = addr_lower;
+			//exit(-1);
+		}
+		else
 			return;
 	}
 	/* sometimes, core->npc will be changed by another core */
