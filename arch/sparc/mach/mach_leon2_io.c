@@ -24,6 +24,7 @@
  *  11/07/08 17:29:54 Aitor Viana Sanchez
  *-----------------------------------------------------------------------------*/
 
+#include "skyeye_addr_space.h"
 #include "../common/types.h"
 #include "../common/bits.h"
 #include "../common/sparc.h"
@@ -334,20 +335,28 @@ uint32 leon2_io_read_word (void * state, uint32 addr)
  */
 uint32 leon2_io_read_long (void * state, uint32 addr)
 {
-    int i;
-    uint32 result;
+	int i;
+	uint32 result = 0;
 
-    for( i = 0; i < io_devices; ++i)
-    {
-        if( (addr - io_area[i].address) < io_area[i].bsize )
-        {
-            result = io_area[i].io_read(NULL, addr);
-            return result;
-        }
-    }
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->read(conf_obj, addr, &result, 4);
+	/* Read the data successfully */
+	if(ret == No_exp){
+		return result;
+	}
 
-    return 0;
-//    IO_ERR;
+	for( i = 0; i < io_devices; ++i)
+	{
+		if( (addr - io_area[i].address) < io_area[i].bsize )
+		{
+			result = io_area[i].io_read(NULL, addr);
+			return result;
+		}
+	}
+
+	return 0;
+	//    IO_ERR;
 }
 
 /* 
@@ -393,20 +402,28 @@ void leon2_io_write_word (void * state, uint32 addr, uint32 v)
  *      - v:        The value to be written
  * =====================================================================================
  */
-void leon2_io_write_long (void * state, uint32 addr, uint32 v)
+void leon2_io_write_long (void * state, uint32 addr, uint32 data)
 {
-    int i;
+	int i;
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->write(conf_obj, addr, &data, 4);
+	/* write the data successfully */
+	if(ret == No_exp){
+		return;
+	}
 
-    for( i = 0; i < io_devices; ++i)
-    {
-        if( (addr - io_area[i].address) < io_area[i].bsize )
-        {
-            io_area[i].io_write(NULL, addr, v);
-            return;
-        }
-    }
 
-//    IO_ERR;
+	for( i = 0; i < io_devices; ++i)
+	{
+		if( (addr - io_area[i].address) < io_area[i].bsize )
+		{
+			io_area[i].io_write(NULL, addr, data);
+			return;
+		}
+	}
+
+	//    IO_ERR;
 }
 
 /* 
@@ -421,6 +438,7 @@ void leon2_io_reset(void *state)
     io_devices = 0;
 
     /*  Register all the I/O devices    */
+    /* david */
     leon2_uart_init(state, UART1_ADDR, 50);
     leon2_timer_core_init(state, TIMER1_ADDR, 100);
     leon2_mcfg_init(MCFG_ADDR);

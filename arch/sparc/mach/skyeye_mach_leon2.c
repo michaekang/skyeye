@@ -22,16 +22,25 @@
 
 
 #include "skyeye_config.h"
+#include "skyeye_addr_space.h"
 
 #include "../common/types.h"
 #include "../common/bits.h"
 
 #include "mach_leon2_regmap.h"
+#include "mach_leon2_io.h"
 #include "leon2_uart.h"
 
 /*-----------------------------------------------------------------------------
  *  PUBLIC INTERFACE
  *-----------------------------------------------------------------------------*/
+exception_t leon2_dev_init(void)
+{
+	/* david */
+	DBG_leon2("In %s, Line %d init leon2 deivce\n", __func__, __LINE__);
+	/* The whole address space */
+	addr_space_t* phys_mem = new_addr_space("leon2_mach_space");
+}
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -46,34 +55,32 @@
 void leon2_mach_init(void * arch_instance, machine_config_t * mach)
 {
 
-    // FIXME!: The state is not treated yet
-    // Also some more initializations need to be performed
+	// FIXME!: The state is not treated yet
+	// Also some more initializations need to be performed
 	machine_config_t * this_mach = mach;
 
-    if( !this_mach )
-    {
-        SKYEYE_ERR ("Error: No machine config structure\n");
-        exit( -1 );
-    }
-    else
-    {
-        SKYEYE_INFO("%s(): %s initialized\n", __func__, mach->machine_name);
-    }
+	if( !this_mach )
+	{
+		SKYEYE_ERR ("Error: No machine config structure\n");
+		exit( -1 );
+	}
+	else
+	{
+		SKYEYE_INFO("%s(): %s initialized\n", __func__, mach->machine_name);
+	}
 
-    /*  These routines are defined in the mach_leon2_io.c source file   */
-    // read functions
-    this_mach->mach_io_read_byte = leon2_io_read_byte;
-    this_mach->mach_io_read_halfword = leon2_io_read_word;
-    this_mach->mach_io_read_word = leon2_io_read_long;
-    // write functions
-    this_mach->mach_io_write_byte = leon2_io_write_byte;
-    this_mach->mach_io_write_halfword = leon2_io_write_word;
-    this_mach->mach_io_write_word = leon2_io_write_long;
-    // other functions
-    this_mach->mach_io_do_cycle = leon2_io_do_cycle;
-    this_mach->mach_io_reset = leon2_io_reset;
-    this_mach->mach_set_intr = leon2_set_int;
-
+	/*  These routines are defined in the mach_leon2_io.c source file   */
+	// read functions
+	this_mach->mach_io_read_byte = leon2_io_read_byte;
+	this_mach->mach_io_read_halfword = leon2_io_read_word;
+	this_mach->mach_io_read_word = leon2_io_read_long;
+	// write functions
+	this_mach->mach_io_write_byte = leon2_io_write_byte;
+	this_mach->mach_io_write_halfword = leon2_io_write_word;
+	this_mach->mach_io_write_word = leon2_io_write_long;
+	// other functions
+	this_mach->mach_io_do_cycle = leon2_io_do_cycle;
+	this_mach->mach_io_reset = leon2_io_reset;
+	this_mach->mach_set_intr = leon2_set_int;
+	leon2_dev_init();
 }
-
-

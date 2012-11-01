@@ -4,6 +4,7 @@
 #ifndef __SPARC_TYPES_H_
 #error "types.h header file must be included before including mach_leon2_regmap.h"
 #endif
+#include <stdio.h>
 
 //#define leon2_declare_device(name) \
 //void name##_write(uint32 size, uint32 addr, uint32 v); \
@@ -27,5 +28,10 @@
 
 typedef  uint32 (*io_read_callback)(void *opaque, uint32 addr);
 typedef  uint32 (*io_write_callback)(void *opaque, uint32 addr, uint32 val);
+
+#define DBG_LEON2  1
+#define DBG_leon2(fmt, ...)      if(DBG_LEON2){                                                     \
+					printf(fmt, ## __VA_ARGS__);   \
+					}
 
 #endif
