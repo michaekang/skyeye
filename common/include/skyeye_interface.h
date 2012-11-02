@@ -29,8 +29,16 @@
  extern "C" {
 #endif
 
-exception_t SKY_register_interface(conf_object_t* obj, const char* name, const char* iface);
+exception_t SKY_register_interface(void* intf_obj, const char* objname, const char* iface_name);
 void* SKY_get_interface(conf_object_t* obj, const char* iface_name);
+exception_t SKY_set_interface(void* from_obj, void* to_obj, const char* iface_name);
+
+typedef struct skyeye_interface{
+	void* obj;
+	char* intf_name;
+	char* class_name;
+	int   registered;	// if No register: 0 else 1
+}skyeye_intf_t;
 
 #ifdef __cplusplus
 }

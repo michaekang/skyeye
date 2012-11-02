@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "skyeye_types.h"
+#include "skyeye_interface.h"
 #include "skyeye_obj.h"
 //#define DEBUG
 #include "skyeye_log.h"
@@ -53,5 +54,24 @@ void* SKY_get_interface(conf_object_t* obj, const char* iface_name){
 	get_strcat_objname(iface_objname, obj->objname, iface_name);
 	DBG("In %s, obj->objname=%s, interface name=%s\n", __FUNCTION__, obj->objname, iface_objname);
 	conf_object_t* intf_obj = get_conf_obj(iface_objname);
+
 	return intf_obj->obj;
+}
+
+/*
+ * from_intf:
+ * to_intf:
+ * iface_name:
+ */
+exception_t SKY_set_interface(void* from_obj, void* to_obj, const char* iface_name){
+	skyeye_intf_t *from_intf = SKY_get_interface(from_obj, iface_name);
+	skyeye_intf_t *to_intf = SKY_get_interface(to_obj, iface_name);
+	if(from_intf->registered)
+		to_intf->obj = from_intf->obj;
+	else{
+		printf("register interface %s fault!\n", iface_name);
+		return Invarg_exp;
+	}
+
+	return No_exp;
 }
