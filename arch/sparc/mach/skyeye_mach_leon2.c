@@ -40,6 +40,15 @@ exception_t leon2_dev_init(void)
 	DBG_leon2("In %s, Line %d init leon2 deivce\n", __func__, __LINE__);
 	/* The whole address space */
 	addr_space_t* phys_mem = new_addr_space("leon2_mach_space");
+	conf_object_t* uart0 = pre_conf_obj("leon2_uart_0", "leon2_uart");
+	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
+	exception_t ret;
+	ret = add_map(phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
+	if(ret != No_exp){
+		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");
+	}
+
+	return No_exp;
 }
 
 /* 
