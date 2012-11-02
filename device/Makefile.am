@@ -113,6 +113,10 @@ dev_leon2_uart = uart_leon2/uart_leon2.c uart_leon2/uart_leon2_module.c
 libleon2_uart_la_SOURCES = $(dev_leon2_uart)
 libleon2_uart_la_LDFLAGS = -module
 
+dev_uart_term = uart_term/uart_term.c uart_term/uart_term_module.c
+libuart_term_la_SOURCES = $(dev_uart_term)
+libuart_term_la_LDFLAGS = -module
+
 
 if WIN32
 WIN32_LD_DEVICE = -no-undefined -shared -module -Xlinker -L../common/.libs/  -Xlinker -lcommon -L/mingw/lib  -Xlinker -L/mingw/ -Xlinker --export-all-symbol
@@ -143,7 +147,7 @@ libpci_la_LDFLAGS += $(WIN32_LD_DEVICE)
 endif
 
 pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la libnandflash.la libsound.la liblcd.la libnet.la libts.la libpci.la
-pkglib_LTLIBRARIES += liblcd_s3c6410.la libsdhci_s3c6410.la libtouchscreen_s3c6410.la libsysctrl_s3c6410.la libgpio_s3c6410.la libspi_s3c6410.la libusbhost_s3c6410.la libac97_s3c6410.la libmfc_s3c6410.la libcamif_s3c6410.la librtc_s3c6410.la libleon2_uart.la
+pkglib_LTLIBRARIES += liblcd_s3c6410.la libsdhci_s3c6410.la libtouchscreen_s3c6410.la libsysctrl_s3c6410.la libgpio_s3c6410.la libspi_s3c6410.la libusbhost_s3c6410.la libac97_s3c6410.la libmfc_s3c6410.la libcamif_s3c6410.la librtc_s3c6410.la libleon2_uart.la libuart_term.la
 
 if GTK_LCD
 pkglib_LTLIBRARIES += libgtk_lcd.la
