@@ -69,6 +69,7 @@ typedef struct UARTState
 
 		uint32 scaler;
 	}regs;
+	skyeye_uart_intf* skyeye_uart;
 }leon2_uart_dev;
 
 #define DBG_LEON2_U	1

@@ -94,6 +94,7 @@ static exception_t leon2_uart_write(conf_object_t *opaque, generic_address_t off
 
 			/*  Indicate that the transmitter hold register is NOT empty    */
 			dev->regs.status.flag.transmitter_hold_register_empty = 0;
+			dev->skyeye_uart->write(dev->skyeye_uart->conf_obj, buf, 1);
 
 			break;
 		case UART_STATUS_REGISTER:
@@ -153,7 +154,11 @@ static conf_object_t* new_leon2_uart(char* obj_name)
 	io_memory->conf_obj = leon2_uart->obj;
 	io_memory->read = leon2_uart_read;
 	io_memory->write = leon2_uart_write;
-	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);
+	SKY_register_interface((void*)io_memory, obj_name, MEMORY_SPACE_INTF_NAME);
+	/* register skyeye_uart interface */
+	skyeye_uart_intf *skyeye_uart = skyeye_mm_zero(sizeof(skyeye_uart_intf));
+	SKY_register_interface((void*)skyeye_uart, obj_name, SKYEYE_UART_INTF);
+	leon2_uart->skyeye_uart = skyeye_uart;
 	DBG_LEON2_UART("In %s, Line %d, create leon2 uart\n", __func__, __LINE__);
 
 	return leon2_uart->obj;
