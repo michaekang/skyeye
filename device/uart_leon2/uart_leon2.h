@@ -24,28 +24,28 @@
  *-----------------------------------------------------------------------------*/
 typedef struct reg_status
 {
-	int data_ready                          :1;
-	int transmitter_shift_register_empty    :1;
-	int transmitter_hold_register_empty     :1;
-	int break_received                      :1;
-	int overrun                             :1;
-	int parity_error                        :1;
-	int framing_error                       :1;
-	int reserved                            :25;
+	uint8 data_ready                          :1;
+	uint8 transmitter_shift_register_empty    :1;
+	uint8 transmitter_hold_register_empty     :1;
+	uint8 break_received                      :1;
+	uint8 overrun                             :1;
+	uint8 parity_error                        :1;
+	uint8 framing_error                       :1;
+	uint32 reserved                            :25;
 }status_t;
 
 typedef struct reg_control
 {
-	int receiver_enable                     :1;
-	int transmitter_enable                  :1;
-	int receiver_interrupt_enable           :1;
-	int transmitter_interrupt_enable        :1;
-	int parity_select                       :1;
-	int parity_enable                       :1;
-	int flow_control                        :1;
-	int loop_back                           :1;
-	int external_clock                      :1;
-	int reserved                            :23;
+	uint8 receiver_enable                     :1;
+	uint8 transmitter_enable                  :1;
+	uint8 receiver_interrupt_enable           :1;
+	uint8 transmitter_interrupt_enable        :1;
+	uint8 parity_select                       :1;
+	uint8 parity_enable                       :1;
+	uint8 flow_control                        :1;
+	uint8 loop_back                           :1;
+	uint8 external_clock                      :1;
+	uint32 reserved                            :23;
 }control_t;
 
 
@@ -72,7 +72,7 @@ typedef struct UARTState
 	skyeye_uart_intf* skyeye_uart;
 }leon2_uart_dev;
 
-#define DBG_LEON2_U	1
+#define DBG_LEON2_U	0
 #define DBG_LEON2_UART(fmt, ...)      if(DBG_LEON2_U){					\
 	                                        printf(fmt, ## __VA_ARGS__);	\
 	                                        }
