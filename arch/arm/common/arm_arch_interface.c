@@ -310,6 +310,9 @@ static void arm_cpu_init()
 
 		register_arm_core_chp(core, i);
 	}
+	/* Set arm endianess is Little endian */
+	generic_arch_t *arch_instance = get_arch_instance(NULL);
+	arch_instance->endianess = Little_endian;
 }
 
 static void

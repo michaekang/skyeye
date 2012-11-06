@@ -264,7 +264,7 @@ void init_disassemble(){
 	disasm_info.skip_zeroes_at_end = DEFAULT_SKIP_ZEROES_AT_END;
 	disasm_info.disassembler_needs_relocs = FALSE;
 
-#if 1
+#if 0
 	if (bfd_big_endian (abfd))
 		disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
 	else if (bfd_little_endian (abfd))
@@ -274,8 +274,13 @@ void init_disassemble(){
        instead.  */
 	disasm_info.endian = BFD_ENDIAN_UNKNOWN;
 #endif
-	/* set the default endianess is BFD_ENDIAN_LITTLE */
-	disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_LITTLE;
+	if(arch_instance->endianess == Big_endian){
+		disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;
+	}
+	else{
+		/* set the default endianess is BFD_ENDIAN_LITTLE */
+		disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_LITTLE;
+	}
 	disasm_info.symtab = sorted_syms;
 	disasm_info.symtab_size = sorted_symcount;
 	disasm_info.read_memory_func = disasm_read_memory;
