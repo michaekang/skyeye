@@ -1,4 +1,4 @@
-import cmd, sys
+import cmd, sys, time
 #import skyeye_lib_path
 #from skyeye_module import *
 from skyeye_common_module import *
@@ -20,6 +20,7 @@ class SkyEyeCli(cmd.Cmd):
 
 ####### Check status to change prompt ########
     def postcmd(self, stop, line):
+	time.sleep(0.01)
         if libcommon.SIM_is_running() == True:
             self.prompt = "(running) "
         else:

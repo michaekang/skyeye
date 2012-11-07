@@ -255,7 +255,7 @@ void stop_all_thread(){
 		 * Before start a thread, check the data
 		 */
                 if((pthread_pool[i].state == Running_state) && (pthread_pool[i].priv_data != NULL)){
-			printf("In %s, the thread %d is set to stopped\n", __FUNCTION__, i);
+			skyeye_log(Debug_log, __FUNCTION__, "the thread %d is set to stop\n", i);
 			pthread_pool[i].state = Stopped_state;
 		}
 	}
