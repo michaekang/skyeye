@@ -101,6 +101,7 @@ extern sparc_instruction_t i_addcc;
 extern sparc_instruction_t i_addxcc;
 extern sparc_instruction_t i_taddcctv;
 extern sparc_instruction_t i_tsubcc;
+extern sparc_instruction_t i_smulcc;
 
 extern sparc_instruction_t i_sub;
 extern sparc_instruction_t i_subx;
@@ -311,7 +312,7 @@ static int iu_cycle_step(void)
     DBG("0x%08x\t0x%08x\t", pc, instr);
 //    DBG("%s(): instr = 0x%x\n", __func__, instr);
 
-
+	usleep(1);
     if( (pi = iu_get_instr(instr)) == NULL )
     {
         printf("Instruction not implemented at PC=0x%x\n", pc);
@@ -371,6 +372,7 @@ static void iu_isa_register(void)
     iu_i_register(&i_addxcc);
     iu_i_register(&i_taddcctv);
     iu_i_register(&i_tsubcc);
+    iu_i_register(&i_smulcc);
 
     // Sparc.v8 B.15 Substract instructions
     iu_i_register(&i_sub);
