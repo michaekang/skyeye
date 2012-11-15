@@ -77,42 +77,42 @@ static int rd, rs1, rs2, imm;
 #define SIMM13_OFF_last   12
 
 sparc_instruction_t i_smul = {
-    execute,
-    disassemble,
-    SMUL_CODE_MASK,
-    PRIVILEDGE,
-    OP,
+	execute,
+	disassemble,
+	SMUL_CODE_MASK,
+	PRIVILEDGE,
+	OP,
 };
 
 
 
 static int execute(void *state)
 {
-    int64 result = 0;
+	int64 a, b, result = 0;
 
-    if( imm < 0 )
-    {
-        result = (int64)(REG(rs1) * REG(rs2));
-//        DBG("smul reg[%d], reg[%d], reg[%d]\n", rs1, rs2, rd);
-        print_inst_RS_RS_RD("smul",  rs1, rs2, rd);
-    }
-    else
-    {
-        result = (int64)(REG(rs1) * (int)sign_ext13(imm));
-//        DBG("smul reg[%d], 0x%x, reg[%d]\n", rs1, imm, rd);
-        print_inst_RS_IM13_RD("smul", rs1, sign_ext13(imm), rd);
-    }
+	a = (int64)REG(rs1);
+	if( imm < 0 )
+	{
+		b = (int64)REG(rs2);
+		print_inst_RS_RS_RD("smul",  rs1, rs2, rd);
+	}
+	else
+	{
+		b = (int64)sign_ext13(imm);
+		print_inst_RS_IM13_RD("smul", rs1, sign_ext13(imm), rd);
+	}
+	a = (a << 32) >> 32;
+	b = (b << 32) >> 32;
+	result = a * b;
 
-    REG(rd) = (int)result;
-    YREG = (int)(result >> 32);
-//    REG(rd) = (int32)bits(result, 31, 0);
-//    YREG = (int32)bits(result, 63, 32);
-    PCREG = NPCREG;
-    NPCREG += 4;
+	REG(rd) = (int)result;
+	YREG = (int)(result >> 32);
 
-    // Everyting takes some time
-    return SMUL_CYCLES;
+	PCREG = NPCREG;
+	NPCREG += 4;
 
+	// Everyting takes some time
+	return SMUL_CYCLES;
 }
 
 static int disassemble(uint32 instr, void *state)

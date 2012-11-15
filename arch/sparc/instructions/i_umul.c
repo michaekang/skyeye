@@ -92,12 +92,12 @@ static int execute(void *state)
 
     if( imm < 0 )
     {
-        result = (uint64)((uint32)REG(rs1) * (uint32)REG(rs2));
+        result = (uint64)((uint32)REG(rs1) * (uint64)REG(rs2));
         print_inst_RS_RS_RD("umul",  rs1, rs2, rd);
     }
     else
     {
-        result = (uint64)((uint32)REG(rs1) * (uint32)sign_ext13(imm));
+        result = (uint64)((uint32)REG(rs1) * (uint64)sign_ext13(imm));
         print_inst_RS_IM13_RD("umul", rs1, sign_ext13(imm), rd);
     }
 
