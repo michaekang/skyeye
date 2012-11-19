@@ -104,6 +104,7 @@ extern sparc_instruction_t i_tsubcc;
 extern sparc_instruction_t i_smulcc;
 extern sparc_instruction_t i_sdiv;
 extern sparc_instruction_t i_udivcc;
+extern sparc_instruction_t i_xnorcc;
 
 extern sparc_instruction_t i_sub;
 extern sparc_instruction_t i_subx;
@@ -476,6 +477,7 @@ static void iu_isa_register(void)
     iu_i_register(&i_sdiv);
     iu_i_register(&i_smul);
     iu_i_register(&i_umul);
+    iu_i_register(&i_xnorcc);
 
     iu_i_register(&i_mulscc);
 
