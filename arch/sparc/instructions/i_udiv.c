@@ -88,40 +88,48 @@ sparc_instruction_t i_udiv = {
 
 static int execute(void *state)
 {
-    uint64 dividend = 0;
+	uint64 x, dividend = 0;
 
-    dividend = (YREG << 32) | REG(rs1);
+	dividend = YREG;
+	dividend = (dividend << 32) | REG(rs1);
 
-    if( imm < 0 )
-    {
-        if( REG(rs2) == 0 )
-            traps->signal(DIV_BY_ZERO);
-        else
-        {
-            REG(rd) = (uint32)(dividend / REG(rs2));
-//            DBG("udiv reg[%d], reg[%d], reg[%d]\n", rs1, rs2, rd);
-            print_inst_RS_RS_RD("udiv", rs1, rs2, rd);
-        }
-    }
-    else
-    {
-        if( imm == 0 )
-        {
-            traps->signal(DIV_BY_ZERO);
-        }
-        else
-        {
-            REG(rd) = (uint32)(dividend / sign_ext13(imm));
-//            DBG("udiv reg[%d], 0x%x, reg[%d]\n", rs1, imm, rd);
-            print_inst_RS_IM13_RD("udiv", rs1, sign_ext13(imm), rd);
-        }
-    }
+	if( imm < 0 )
+	{
+		if( REG(rs2) == 0 ){
+			traps->signal(DIV_BY_ZERO);
+			return UDIV_CYCLES;
+		}
+		else
+		{
+			x = (dividend / REG(rs2));
+			REG(rd) = x;
+			print_inst_RS_RS_RD("udiv", rs1, rs2, rd);
+		}
+	}
+	else
+	{
+		if( imm == 0 )
+		{
+			traps->signal(DIV_BY_ZERO);
+			return UDIV_CYCLES;
+		}
+		else
+		{
+			x = (dividend / sign_ext13(imm));
+			REG(rd) = x;
+			print_inst_RS_IM13_RD("udiv", rs1, sign_ext13(imm), rd);
+		}
+	}
 
-    PCREG = NPCREG;
-    NPCREG += 4;
+	/* If overflow occurs, rd = 0xffffffff */
+	if((x >> 31) > 0)
+		REG(rd) = 0xffffffff;
 
-    // Everyting takes some time
-    return UDIV_CYCLES;
+	PCREG = NPCREG;
+	NPCREG += 4;
+
+	// Everyting takes some time
+	return UDIV_CYCLES;
 
 }
 
