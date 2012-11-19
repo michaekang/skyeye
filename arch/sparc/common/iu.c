@@ -168,6 +168,7 @@ extern sparc_instruction_t i_stdf;
 extern sparc_instruction_t i_stfsr;
 
 extern sparc_instruction_t i_udiv;
+extern sparc_instruction_t i_sdiv;
 extern sparc_instruction_t i_smul;
 extern sparc_instruction_t i_umul;
 
@@ -310,7 +311,7 @@ static int iu_cycle_step(void)
 
     if( (pi = iu_get_instr(instr)) == NULL )
     {
-        DBG("Instruction not implemented at PC=0x%x\n", pc);
+        printf("Instruction not implemented at PC=0x%x\n", pc);
         skyeye_exit(1);
     }
 
@@ -462,6 +463,7 @@ static void iu_isa_register(void)
     iu_i_register(&i_stfsr);
 
     iu_i_register(&i_udiv);
+    iu_i_register(&i_sdiv);
     iu_i_register(&i_smul);
     iu_i_register(&i_umul);
 
