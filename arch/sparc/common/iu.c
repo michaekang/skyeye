@@ -99,6 +99,8 @@ extern sparc_instruction_t i_addx;
 extern sparc_instruction_t i_addcc;
 /* david */
 extern sparc_instruction_t i_addxcc;
+extern sparc_instruction_t i_taddcctv;
+extern sparc_instruction_t i_tsubcc;
 
 extern sparc_instruction_t i_sub;
 extern sparc_instruction_t i_subx;
@@ -367,6 +369,8 @@ static void iu_isa_register(void)
     iu_i_register(&i_addcc);
     /* david */
     iu_i_register(&i_addxcc);
+    iu_i_register(&i_taddcctv);
+    iu_i_register(&i_tsubcc);
 
     // Sparc.v8 B.15 Substract instructions
     iu_i_register(&i_sub);
