@@ -102,6 +102,8 @@ extern sparc_instruction_t i_addxcc;
 extern sparc_instruction_t i_taddcctv;
 extern sparc_instruction_t i_tsubcc;
 extern sparc_instruction_t i_smulcc;
+extern sparc_instruction_t i_sdiv;
+extern sparc_instruction_t i_udivcc;
 
 extern sparc_instruction_t i_sub;
 extern sparc_instruction_t i_subx;
@@ -172,7 +174,6 @@ extern sparc_instruction_t i_stdf;
 extern sparc_instruction_t i_stfsr;
 
 extern sparc_instruction_t i_udiv;
-extern sparc_instruction_t i_sdiv;
 extern sparc_instruction_t i_smul;
 extern sparc_instruction_t i_umul;
 
@@ -471,6 +472,7 @@ static void iu_isa_register(void)
     iu_i_register(&i_stfsr);
 
     iu_i_register(&i_udiv);
+    iu_i_register(&i_udivcc);
     iu_i_register(&i_sdiv);
     iu_i_register(&i_smul);
     iu_i_register(&i_umul);
