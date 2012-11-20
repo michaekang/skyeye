@@ -169,6 +169,10 @@ extern sparc_instruction_t i_call;
 extern sparc_instruction_t i_rett;
 
 extern sparc_instruction_t i_ta;
+extern sparc_instruction_t i_tcc;
+extern sparc_instruction_t i_tne;
+extern sparc_instruction_t i_tneg;
+extern sparc_instruction_t i_tleu;
 
 extern sparc_instruction_t i_stf;
 extern sparc_instruction_t i_stdf;
@@ -453,18 +457,18 @@ static void iu_isa_register(void)
     /*  Sparc.v8 B.27 Trap on Integer condition codes instructions  */
     iu_i_register(&i_ta);
 //    iu_i_register(&i_tn);
-//    iu_i_register(&i_tne);
+    iu_i_register(&i_tne);
 //    iu_i_register(&i_te);
 //    iu_i_register(&i_tg);
 //    iu_i_register(&i_tle);
 //    iu_i_register(&i_tge);
 //    iu_i_register(&i_tl);
 //    iu_i_register(&i_tgu);
-//    iu_i_register(&i_tleu);
-//    iu_i_register(&i_tcc);
+    iu_i_register(&i_tleu);
+    iu_i_register(&i_tcc);
 //    iu_i_register(&i_tcs);
 //    iu_i_register(&i_tpos);
-//    iu_i_register(&i_tneg);
+    iu_i_register(&i_tneg);
 //    iu_i_register(&i_tvc);
 //    iu_i_register(&i_tvs);
 
