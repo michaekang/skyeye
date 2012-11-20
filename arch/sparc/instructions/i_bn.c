@@ -54,7 +54,7 @@ static int cond, disp22, annul, op;
 
 #define COND_MASK    0x01f80000
 #define COND_OFF     25
-#define COND         0x8
+#define COND         0x0
 
 #define A_MASK      0x20000000
 #define A_OFF       29
