@@ -100,7 +100,7 @@ static int execute(void *state)
     int c = psr_get_carry();
 
     x = REG(rs1);
-    int src1 = REG(rd);
+    int src1 = REG(rs1);
     if( imm < 0 )
     {
         y = REG(rs2);
