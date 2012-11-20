@@ -97,12 +97,10 @@ static int execute(void *state)
     if( imm < 0 )
     {
         value = REG(rs1) ^ REG(rs2);
-        DBG("wr reg[%d], reg[%d], psr\n", rs1, rs2);
     }
     else
     {
         value = REG(rs1) ^ sign_ext13(imm);
-        DBG("wr reg[%d], 0x%x, psr\n", rs1, sign_ext13(imm));
     }
 
 
@@ -112,12 +110,14 @@ static int execute(void *state)
         traps->signal(ILLEGAL_INSTR);
         return 0;
     }
-
     /*  Clear the reserved bits and the ver, impl bits  */
     clear_bits(value, PSR_reserved_last, PSR_reserved_first);
     clear_bits(value, PSR_impl_last, PSR_ver_first);
 
-    PSRREG = value;
+    /* only set PSR bits 0 ~ 23*/
+    clear_bits(PSRREG, 23, 0);
+
+    PSRREG |= value;
     iu_set_cwp(ncwp);
 
     PCREG = NPCREG;

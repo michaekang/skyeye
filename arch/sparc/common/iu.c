@@ -219,7 +219,7 @@ static void iu_init_state(void)
     state->cycle_counter = 0;
     state->regwptr[0] = &state->global[0];
     state->regwptr[1] = state->regbase + (0 * 16);  /*  we start in the cwp = 0 */
-    PSRREG = 0x0;
+    PSRREG = 0xf2000000;
     WIMREG = 0x2;
 
     /*  
