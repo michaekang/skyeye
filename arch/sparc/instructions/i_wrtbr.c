@@ -104,7 +104,10 @@ static int execute(void *state)
         DBG("wr reg[%d], imm, tbr\n", rs1);
     }
 
-    TBRREG = value;
+    /* only set TBR bits 31 ~ 12 */
+    clear_bits(value, 11, 0);
+    clear_bits(TBRREG, 31, 12);
+    TBRREG |= value;
 
     PCREG = NPCREG;
     NPCREG += 4;
