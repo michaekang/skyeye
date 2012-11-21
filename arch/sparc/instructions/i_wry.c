@@ -100,13 +100,13 @@ static int execute(void *state)
 
     /*  WRY is distinguished from WRASR only by the rd field. The rd must be
      *  zero and OP3 = 0x30 to write the Y register */
-//    if( rd == 0 )
+    if( rd == 0 )
         YREG = value;
-//    else
-//    {
-//        SKYEYE_ERR("ASR register not implemented\n");
-//        skyeye_exit(1);
-//    }
+    else
+    {
+        SKYEYE_ERR("ASR register not implemented\n");
+        //skyeye_exit(1);
+    }
 
     PCREG = NPCREG;
     NPCREG += 4;
