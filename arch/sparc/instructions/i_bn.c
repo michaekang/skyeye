@@ -48,16 +48,16 @@ static int cond, disp22, annul, op;
 #define BN_CODE_MASK 0x0080000
 #define PRIVILEDGE  0
 
-#define OP_MASK    0xc0000000
-#define OP_OFF     30
+#define OP_OFF_first     30
+#define OP_OFF_last      31
 #define OP         0x0
 
-#define COND_MASK    0x01f80000
-#define COND_OFF     25
+#define COND_OFF_first     25
+#define COND_OFF_last      28
 #define COND         0x0
 
-#define A_MASK      0x20000000
 #define A_OFF       29
+
 #define DISP22_MASK 0x003fffff
 #define DISP22_OFF  0
 
@@ -98,10 +98,9 @@ static int execute(void *state)
 
 static int disassemble(uint32 instr, void *state)
 {
-
-    op = (instr & OP_MASK) >> OP_OFF;
+    op = bits(instr, OP_OFF_last, OP_OFF_first);
     annul = bit(instr, A_OFF);
-    cond = (instr & COND_MASK) >> COND_OFF;
+    cond = bits(instr, COND_OFF_last, COND_OFF_first);
 
     if( (instr & BN_CODE_MASK) && (op == OP) && (cond == COND) )
     {
