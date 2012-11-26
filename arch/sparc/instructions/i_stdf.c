@@ -91,7 +91,7 @@ static int execute(void *state)
     /*  If the EF field of the PSR register is 0, a store floating-point
      *  instruction causes an fp_disabled_trap
      */
-    if( bit(PSRREG, PSR_EF) )
+    if( !bit(PSRREG, PSR_EF) )
     {
         traps->signal(FP_DISABLED);
         return(STDF_CYCLES);
