@@ -162,6 +162,7 @@ extern sparc_instruction_t i_save;
 extern sparc_instruction_t i_restore;
 
 extern sparc_instruction_t i_ldf;
+extern sparc_instruction_t i_ldfsr;
 extern sparc_instruction_t i_lddf;
 
 extern sparc_instruction_t i_call;
@@ -446,6 +447,7 @@ static void iu_isa_register(void)
 
     /*  Sparc.v8 B.2 Load Floating Point instructions   */
     iu_i_register(&i_ldf);
+    iu_i_register(&i_ldfsr);
     iu_i_register(&i_lddf);
 
     /*  Sparc.v8 B.24 Call and Link instructions   */
@@ -509,7 +511,7 @@ static sparc_instruction_t *iu_get_instr(uint32 instr)
     {
         if( (i_set[format][i].instr) && i_set[format][i].instr->disassemble(instr, state) )
         {
-//            DBG("%s: opcode - 0x%x\n", __func__, i_set[i].instr->opcode_mask);
+            //DBG("%s: opcode - 0x%x\n", __func__, i_set[format][i].instr->opcode_mask);
             return i_set[format][i].instr;
         }
     }
