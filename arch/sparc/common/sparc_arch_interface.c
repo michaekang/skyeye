@@ -405,6 +405,11 @@ void sparc_register_iu(iu_config_t *iu_)
 static uint32 sparc_get_step(){
         return sparc_state.steps;
 }
+
+static uint32 sparc_get_regnum(){
+        return 71;
+}
+
 static char* sparc_get_regname_by_id(int id){
         return sparc_regstr[id];
 }
@@ -435,7 +440,7 @@ static uint32 sparc_get_regval_by_id(int id){
 	default:
 		printf("have not register id %d\n", id);
 	return 0;
-}       
+	}
 }
 
 /* 
@@ -463,6 +468,7 @@ void init_sparc_arch()
 	sparc_arch.get_regval_by_id = sparc_get_regval_by_id;
         sparc_arch.get_regname_by_id = sparc_get_regname_by_id;
 	sparc_arch.get_step = sparc_get_step;
+	sparc_arch.get_regnum = sparc_get_regnum;
 
 	register_arch (&sparc_arch);
 }
