@@ -28,10 +28,10 @@
 #include <stdlib.h>
 #include "skyeye_options.h"
 #include "skyeye_config.h"
-#include "skyeye_types.h"
 #include "skyeye_arch.h"
 #include "skyeye_command.h"
 #include "skyeye_callback.h"
+#include "code_cov.h"
 #include "portable/portable.h"
 #define COV_ON 1
 #define COV_OFF 0
@@ -59,7 +59,7 @@ void cov_init(size_t start_addr, size_t end_addr){
 	if(!prof_mem)
 		fprintf(stderr, "Can not alloc memory for code coverage, profiling is disabled.\n");
 	else{
-		printf("Begin do code coverage between 0x%x and 0x%x .\n", prof_start, prof_end);
+		printf("Begin do code coverage between 0x%x and 0x%x.\n", prof_start, prof_end);
 		bzero(prof_mem, prof_size);
 	}
 //	register_option("code_coverage", do_code_cov_option, "");
@@ -68,28 +68,42 @@ void cov_init(size_t start_addr, size_t end_addr){
  * flags: 4 means read, 2 means write, 1 means eXecute
  *
  */
-	void cov_prof(int flags,generic_address_t addr){
-		if(addr < prof_start || addr >= prof_end)
-			return;	
-		int offset = (addr - prof_start) / 8;
-		unsigned int * prof_addr  =(unsigned int *)&prof_mem[offset] ;
-		*prof_addr |= flags << ((addr - prof_start) % 8);
-		//printf("addr=0x%x, flags=0x%x, offset=0x%x,(addr - prof_start)%8=0x%x\n", addr, flags, offset, (addr - prof_start)%8);
-		return;
-	}
+void cov_prof(int flags,generic_address_t addr){
+	if(addr < prof_start || addr >= prof_end)
+		return;	
+	int offset = (addr - prof_start) / 8;
+	unsigned int * prof_addr  =(unsigned int *)&prof_mem[offset] ;
+	*prof_addr |= flags << ((addr - prof_start) % 8);
+	printf("addr=0x%x, flags=0x%x, offset=0x%x,(addr - prof_start)%8=0x%x\n", addr, flags, offset, (addr - prof_start)%8);
+	return;
+}
 
 /**
  * deinitialization function
  */
 void cov_fini(char * filename){
+	int count = 0;
 	if (prof_mem == NULL)
 		return;
+
 	FILE * fp = fopen(filename, "w+");
 	if(!fp){
 		fprintf(stderr, "Warning: can not open file %s for code coverage\n", filename);
 		return;
 	}
-	int count = fwrite(prof_mem, (prof_end - prof_start), 1, fp);
+
+	/* Write the header into data file */
+	int header_size = sizeof(prof_header_t);
+	prof_header_t *header = malloc(header_size);
+	header->prof_start = prof_start;
+	header->prof_end = prof_end;
+	header->header_length = header_size;
+	header->ver = 1;
+	count = fwrite(header, header_size, 1, fp);
+	if(count < header_size)
+		printf("Write header error!\n");
+	
+	count = fwrite(prof_mem, (prof_end - prof_start), 1, fp);
 	if(count < (prof_end - prof_start))
 		printf("Write %d bytes for code coverage .\n", (prof_end - prof_start));	
 	fclose(fp);

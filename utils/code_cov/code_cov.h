@@ -24,6 +24,7 @@
 
 #ifndef __CODE_COV_H__
 #define __CODE_COV_H__
+#include "skyeye_types.h"
 
 /*  Perform the code coverage if configured */
 /*  Code coverage   */
@@ -38,14 +39,25 @@
 #define READ_FLAG 0x4
 #define WRITE_FLAG 0x2
 #define EXEC_FLAG 0x1
+#define MAX_DESC_STR 32
 
-void cov_init(int start_addr, int end_addr);
-void cov_prof(int flags, WORD addr);
+void cov_init(size_t start_addr, size_t end_addr);
+void cov_prof(int flags, generic_address_t addr);
 void cov_fini(char * filename);
 //add
 
 
 int cov_module_init();
 
+typedef struct prof_header_s{
+	/* the version of header file */
+	int ver;
+	/* The length of header */
+	int header_length;
+	int prof_start;
+	int prof_end;
+	/* The description info for profiling file */
+	char desc[MAX_DESC_STR];
+}prof_header_t;
 	
 #endif

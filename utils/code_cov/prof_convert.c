@@ -24,17 +24,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_DESC_STR 32
-typedef struct prof_header_s{
-        /* the version of header file */
-        int ver;
-        /* The length of header */
-        int header_length;
-        int prof_start;
-        int prof_end;
-        /* The description info for profiling file */
-        char desc[MAX_DESC_STR];
-}prof_header_t;
+#include "code_cov.h"
 
 /*
  * dump header of data file
@@ -57,12 +47,14 @@ int main(int argc, char** argv){
 	}
 	int header_size = sizeof(prof_header_t);
 	prof_header_t *header = malloc(header_size);
+	
 	size_t count = fread(header, 1, header_size, in_fp);
 	if(count < header_size){
 		printf("count = 0x%x, header_size=0x%x\n", count, header_size);
 		fprintf(stderr, "The format of data file is not correctly.\n");
 		exit(-1);
 	}
+
 	if(argc == 2){
 		dump_header(header, stdout);	
 		goto dump_exit;
