@@ -4,7 +4,9 @@
 #include "skyeye_log.h"
 #include "skyeye_uart_ops.h"
 
+#ifndef __MINGW32__
 typedef char BOOL;
+#endif
 
 typedef struct receive_t{
 	uint8_t* rec_buf;
@@ -18,7 +20,11 @@ typedef struct skyeye_uart_term{
 	rec_t*	receive;
 	char*	obj_name;
 	int	mod;
+#ifndef __MINGW32__
 	int	socket;
+#else
+	SOCKET socket;
+#endif
 	BOOL	attached;
 }uart_term_device;
 

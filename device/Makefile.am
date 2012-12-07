@@ -144,6 +144,8 @@ liblcd_la_LDFLAGS += $(WIN32_LD_DEVICE)
 libnet_la_LDFLAGS += $(WIN32_LD_DEVICE)
 libts_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 libpci_la_LDFLAGS += $(WIN32_LD_DEVICE)
+libleon2_uart_la_LDFLAGS  += $(WIN32_LD_DEVICE)
+libuart_term_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 endif
 
 pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la libnandflash.la libsound.la liblcd.la libnet.la libts.la libpci.la

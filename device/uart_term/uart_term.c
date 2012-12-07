@@ -35,17 +35,28 @@
 #include <memory_space.h>
 #include <skyeye_device.h>
 #include "skyeye_thread.h"
-/* linux head file */
-#include <net/if.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdint.h>
+
+#ifndef __MINGW32__
+/* linux head file */
+#include <poll.h>
+#include <net/if.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <poll.h>
-#include <stdint.h>
-
+#else
+#include <windows.h>
+#include <direct.h>
+#include <string.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>>
+#endif
 
 #include "uart_term.h"
 
@@ -106,7 +117,12 @@ static exception_t uart_term_write(conf_object_t *opaque, void* buf, size_t coun
 	int ret = -1;
 	uart_term_device *dev = opaque->obj;
 	if(dev->attached){
+		printf("<shenoubang>write buf: %s\n", buf);
+#ifndef __MINGW32__
 		ret = write(dev->socket, buf, count);
+#else
+		ret = send(dev->socket, buf, count, 0);
+#endif
 		if(ret < 0)
 			return Invarg_exp;
 	}
@@ -123,6 +139,7 @@ static int create_term(uart_term_device* dev_uart, int port){
 	strncpy(&uart_instance_prog[bin_dir_len], uart_prog, strlen(uart_prog));
 
 	sprintf(port_str, "%d", port);
+#ifndef __MINGW32__
 	switch (pid = fork())
 	{
 		case -1:
@@ -145,6 +162,34 @@ static int create_term(uart_term_device* dev_uart, int port){
 		default:
 			break;
 	}
+#else
+#ifdef DBG_XTERM
+	char cmdline[2048] = "mintty.exe -hold -e ";
+#else
+	char cmdline[2048] = "mintty.exe -e ";
+	strcat(cmdline, uart_instance_prog);
+	strcat(cmdline, " ");
+	strcat(cmdline, dev_uart->obj_name);
+	strcat(cmdline, " ");
+	strcat(cmdline, port_str);
+#endif
+	PROCESS_INFORMATION process_information;
+	STARTUPINFO startupinfo;
+	BOOL result;
+	memset(&process_information, 0, sizeof(process_information));
+	memset(&startupinfo, 0, sizeof(startupinfo));
+	startupinfo.cb = sizeof(startupinfo);
+	result = CreateProcess("C:/msys/1.0/bin/mintty.exe", cmdline, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupinfo, &process_information);
+	if (result == 0) {
+		SKYEYE_ERR("ERROR: CreateProcess failed!");
+		return -1;
+	}
+	else {
+		WaitForSingleObject(process_information.hProcess, INFINITE);
+		CloseHandle(process_information.hProcess);
+		CloseHandle(process_information.hThread);
+	}
+#endif
 	return 0;
 }
 
@@ -156,17 +201,55 @@ static int create_uart_console(void* uart){
 	struct sockaddr_in server, from;
 	char * froms;
 	printf("In %s\n", __FUNCTION__);
+
+#ifndef __MINGW32__
 	int term_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (term_socket < 0) SKYEYE_ERR("opening stream socket");
 
 	/* enable the reuse of this socket if this process dies */
 	if (setsockopt(term_socket, SOL_SOCKET, SO_REUSEADDR, (uint8_t*)&on, sizeof(on))<0)
 		SKYEYE_ERR("turning on REUSEADDR");
+#else
+	int nsize;
+	int err;
+	fd_set fdread;
+	struct timeval tv;
+	WSADATA wsaData;
+	SOCKET term_socket = INVALID_SOCKET;
+	BOOL bOptVal = FALSE;
+	int bOptLen = sizeof(BOOL);
+
+	/*
+	 * initiates use of the Winsock DLL by a process
+	 * shenoubang modified it 2012-12-4
+	 */
+	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (err != 0) {
+		/* Tell the user that we could not find a usable */
+		/* Winsock DLL.                                  */
+		printf("WSAStartup failed with error: %d\n", err);
+		return 1;
+	}
+	/* creates a socket that is bound to a specific transport service provider */
+	term_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (term_socket == INVALID_SOCKET) {
+		SKYEYE_ERR("socket function failed with error: %u\n", WSAGetLastError());
+		WSACleanup();
+		return 1;
+	}
+	bOptVal = TRUE;
+	err = setsockopt(term_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &bOptVal, bOptLen);
+	if (err == SOCKET_ERROR) {
+	SKYEYE_ERR("setsockopt for RESUEADDR failed with error: %u\n", WSAGetLastError());
+		return 1;
+	}
+#endif
 retry:
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_port = htons(0);	/* bind to an OS selected local port */
 
+#ifndef __MINGW32__
 	if (bind(term_socket, (struct sockaddr *)&server, sizeof(server)) < 0) {
 		switch (errno) {
 		case EAGAIN:
@@ -178,6 +261,19 @@ retry:
 			SKYEYE_ERR("binding tcp stream socket");
 		}
 	}
+#else
+	if (bind(term_socket, (SOCKADDR *)&server, sizeof(server)) < 0) {
+		switch (errno) {
+		case EAGAIN:
+			goto retry;
+
+		case WSAEADDRINUSE:
+			SKYEYE_ERR("Port is already in use\n");
+		default:
+			SKYEYE_ERR("binding tcp stream socket");
+		}
+	}
+#endif
 
 	length = sizeof(server);
 	if (getsockname(term_socket, (struct sockaddr *) &server, &length) == -1)
@@ -205,6 +301,7 @@ retry:
 		}
 		else { /* begin receive data. */
 			int res;
+#ifndef __MINGW32__
 			struct pollfd fds;
 
 #define	POLL_TIMEOUT	-1		/* wait forever ? FIXME ? */
@@ -216,16 +313,36 @@ retry:
 			fds.revents = 0;
 
 			res = poll(&fds, 1, POLL_TIMEOUT);
+#else
+			FD_ZERO(&fdread);
+			FD_SET(term_socket, &fdread);
+			select(0, &fdread, NULL, NULL, NULL);
+#endif
+#ifndef __MINGW32__
 
 			if (fds.revents & POLLIN) {
-				if(receive->rec_tail >= receive->rec_count)
+#else
+			if (FD_ISSET(term_socket, &fdread)) {
+#endif
+				if(receive->rec_tail >= receive->rec_count) {
 					fprintf(stderr, "Overflow for uart link.\n");
-				else
+				}
+				else {
+#ifndef __MINGW32__
 					res = read(dev_uart->socket, receive->rec_buf + receive->rec_tail, receive->rec_count - receive->rec_tail);
+#else
+					res = recv(dev_uart->socket, receive->rec_buf + receive->rec_tail, receive->rec_count - receive->rec_tail, 0);
+#endif
+				}
 				if (res == 0) {
 					/* a read of 0 bytes is an EOF */
 					dev_uart->attached = 0;
+#ifndef __MINGW32__
 					close(dev_uart->socket);
+#else
+					closesocket(dev_uart->socket);
+					WSACleanup();
+#endif
 				} else if (res<0) {
 					perror("read");
 				} else {

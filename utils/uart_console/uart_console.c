@@ -32,15 +32,12 @@
 	 */
 #include <errno.h>
 #include <fcntl.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <poll.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <sim_control.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/termios.h>
 #include <sys/time.h>
@@ -48,6 +45,16 @@
 #include <sys/un.h>
 #include <termio.h>
 #include <unistd.h>
+
+#ifndef __MINGW32__
+#include <poll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#else
+#include <windows.h>
+#include <winsock2.h>
+#endif
 
 #ifdef __svr4__
 #include <sys/systeminfo.h>
@@ -86,7 +93,14 @@ static void poll_flags(char * strp, int flags);
 
 int main(int argc, char ** argv)
 {
+#ifndef __MINGW32__
 	struct pollfd fds[2];
+#else
+	int fd_stdin;
+	int fd_stdout;
+	fd_set fdread;
+	fd_set fdwrite;
+#endif
 	uint8_t buf[1024];
 	int i;
 	char * hostp;
@@ -107,15 +121,25 @@ int main(int argc, char ** argv)
 	hostp = argv[i];
 	portp = argv[i+1];
 
+#ifndef __MINGW32__
 	fds[0].fd = setup_term();
 
 	fds[1].fd = setup_netlink(hostp, portp);
 
 	fds[0].events = POLLIN|POLLRDNORM;
 	fds[1].events = POLLIN|POLLRDNORM;
+#else
+	fd_stdin = setup_term();
+	fd_stdout = setup_netlink(hostp, portp);
+	FD_ZERO(&fdread);
+	FD_ZERO(&fdwrite);
+	FD_SET(fd_stdin, &fdread);
+	FD_SET(fd_stdout, &fdwrite);
+#endif
 
 #define	POLL_TIMEOUT	-1		/* wait forever ? FIXME ? */
 
+#ifndef __MINGW32__
 	do {
 		int res;
 		int count;
@@ -162,6 +186,38 @@ DBG(				dump_buf("socketin:", buf, res););
 		}
 
 	} while (1);
+#else
+	do {
+		int res;
+
+		select(0, &fdread, &fdwrite, NULL, NULL);
+		if (FD_ISSET(fd_stdin, &fdread)) {
+			res = read(fd_stdin, buf, 1024);
+			if(res == 0) {
+				close(fd_stdin);
+				EXIT(0);
+			}
+			else if (res < 0) {
+				perror("read:");
+			}
+			else {
+				DBG(dump_buf("ttyin:", buf, res););
+				write(fd_stdout, buf, res);
+			}
+		}
+		if (FD_ISSET(fd_stdout, &fdwrite)) {
+			res = read(fd_stdout, buf, 1024);
+			EXIT(0);
+		}
+		else if(res < 0) {
+			perror("Read: ");
+		}
+		else {
+			DBG(dump_buf("socketin:", buf, res););
+			write(fd_stdin, buf, res);
+		}
+	}while(1);
+#endif
 
 	/*NOTREACHED*/
 }
@@ -186,7 +242,11 @@ DBG(	printf("\nstdin:\n"); tcparams(fd); );
 	}
 
 	tio.c_iflag |= IGNBRK | IGNPAR | ICRNL;
+#ifndef __MINGW32__
 	tio.c_lflag &= ~ISIG & ~ICANON & ~ECHO & ~ECHOE & ~ECHOK & ~ECHONL & ~ECHOCTL & ~ECHOPRT & ~ECHOKE;
+#else
+	tio.c_lflag &= ~ISIG & ~ICANON & ~ECHO & ~ECHOE & ~ECHOK & ~ECHONL & ~ECHOCTL &  ~ECHOKE;
+#endif
 
 	tio.c_cc[VMIN] = 1;
 	tio.c_cc[VTIME] = 0;
@@ -195,7 +255,6 @@ DBG(	printf("\nstdin:\n"); tcparams(fd); );
 		perror("setup_term: tcsetattr");
 		EXIT(1);
 	}
-
 
 DBG(	tcparams(fd); printf("\nstdout:\n"); tcparams(1); );
 
@@ -244,7 +303,11 @@ int setup_netlink(char * hostp, char * portp)
 
 		if (connect(skt, (struct sockaddr*)&target, sizeof(target)) != -1) goto gotit;
 		perror("connecting");
+#ifndef __MINGW32__
 		sleep(1);
+#else
+		Sleep(1000);
+#endif
 		close(skt);
 	}
 
@@ -255,6 +318,7 @@ gotit:;
 	return skt;
 }
 
+#ifndef __MINGW32__
 void tcparams(int fd)
 {
 	int mlines;
@@ -330,9 +394,9 @@ void tcparams(int fd)
 	test(tio.c_lflag, IEXTEN);
 	printf("\n");
 }
+#endif
 
-
-
+#ifndef __MINGW32__
 void poll_flags(char * strp, int flags)
 {
 	printf("%s",strp);
@@ -350,7 +414,7 @@ void poll_flags(char * strp, int flags)
 	printf("\n");
 	fflush(stdout);
 }
-
+#endif
 
 void dump_buf(char * strp, uint8_t * bufp, int len)
 {

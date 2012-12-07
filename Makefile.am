@@ -81,9 +81,11 @@ ACLOCAL_AMFLAGS=-I m4
 bin_PROGRAMS += skyeye
 skyeye_SOURCES = utils/main/skyeye.c
 if WIN32
-uart_instance_SOURCES =
+bin_PROGRAMS += uart_instance
+uart_instance_SOURCES = utils/uart_console/uart_console.c
 mknandflashdump_SOURCES =
 prof_convert_SOURCES =
+uart_instance_LDADD = -lgw32c
 else
 bin_PROGRAMS += uart_instance mknandflashdump prof_convert
 uart_instance_SOURCES = utils/uart_console/uart_console.c
