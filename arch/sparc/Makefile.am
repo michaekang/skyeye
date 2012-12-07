@@ -1,6 +1,6 @@
 
 sparc_mach = mach/leon2_timer_unit.c mach/leon2_uart.c mach/mach_leon2_io.c mach/skyeye_mach_leon2.c mach/leon2_mcfg.c mach/leon2_cfg.c mach/leon2_irqctrl.c
-sparc_comm = common/sparc_arch_interface.c common/traps.c common/iu.c common/sparcemu.c common/stat.c common/helper.c common/tcg-target.c common/sparc_module.c
+sparc_comm = common/sparc_arch_interface.c common/traps.c common/iu.c common/sparcemu.c common/stat.c common/helper.c common/tcg-target.c common/sparc_module.c common/fpu.c
 sparc_insn = instructions/i_add.c instructions/i_addcc.c instructions/i_addx.c instructions/i_addxcc.c instructions/i_and.c instructions/i_andcc.c instructions/i_andn.c	\
 			 instructions/i_andncc.c instructions/i_mulscc.c	\
 			 instructions/i_ba.c instructions/i_bcc.c instructions/i_bcs.c instructions/i_be.c instructions/i_bg.c instructions/i_bge.c instructions/i_bgu.c instructions/i_bl.c 	\
@@ -14,7 +14,7 @@ sparc_insn = instructions/i_add.c instructions/i_addcc.c instructions/i_addx.c i
 			 instructions/i_udiv.c instructions/i_utils.c instructions/i_wrpsr.c instructions/i_wrtbr.c instructions/i_wrwim.c instructions/i_wry.c	\
 			 instructions/i_xnor.c instructions/i_xor.c
 # david add
-sparc_insn += instructions/i_sdiv.c instructions/i_tsubcc.c instructions/i_taddcctv.c instructions/i_smulcc.c instructions/i_udivcc.c instructions/i_xnorcc.c instructions/i_tcc.c instructions/i_tneg.c instructions/i_tne.c instructions/i_tleu.c instructions/i_ldfsr.c
+sparc_insn += instructions/i_sdiv.c instructions/i_tsubcc.c instructions/i_taddcctv.c instructions/i_smulcc.c instructions/i_udivcc.c instructions/i_xnorcc.c instructions/i_tcc.c instructions/i_tneg.c instructions/i_tne.c instructions/i_tleu.c instructions/i_ldfsr.c instructions/i_fdivd.c
 libsparc_la_SOURCES = $(sparc_mach) $(sparc_comm) $(sparc_insn)
 
 # we will link the common module with main

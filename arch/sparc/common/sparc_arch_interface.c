@@ -37,6 +37,7 @@
 
 extern void sparc_step_once(void);
 extern void leon2_mach_init(void * state, machine_config_t * mach);
+extern int init_sparc_fpu(void);
 static iu_config_t *iu;
 
 
@@ -92,6 +93,7 @@ void sparc_init_state(void)
          *  here
          */
         status = init_sparc_iu();
+        status = init_sparc_fpu();
 
         /*  RESET the statistics    */
         STAT_reset();
