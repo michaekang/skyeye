@@ -14,7 +14,7 @@ sparc_insn = instructions/i_add.c instructions/i_addcc.c instructions/i_addx.c i
 			 instructions/i_udiv.c instructions/i_utils.c instructions/i_wrpsr.c instructions/i_wrtbr.c instructions/i_wrwim.c instructions/i_wry.c	\
 			 instructions/i_xnor.c instructions/i_xor.c
 # david add
-sparc_insn += instructions/i_sdiv.c instructions/i_tsubcc.c instructions/i_taddcctv.c instructions/i_smulcc.c instructions/i_udivcc.c instructions/i_xnorcc.c instructions/i_tcc.c instructions/i_tneg.c instructions/i_tne.c instructions/i_tleu.c instructions/i_ldfsr.c instructions/i_fdivd.c
+sparc_insn += instructions/i_sdiv.c instructions/i_tsubcc.c instructions/i_taddcctv.c instructions/i_smulcc.c instructions/i_udivcc.c instructions/i_xnorcc.c instructions/i_tcc.c instructions/i_tneg.c instructions/i_tne.c instructions/i_tleu.c instructions/i_ldfsr.c instructions/i_fdivd.c instructions/i_fcmpd.c
 libsparc_la_SOURCES = $(sparc_mach) $(sparc_comm) $(sparc_insn)
 
 # we will link the common module with main
