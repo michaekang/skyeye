@@ -37,6 +37,7 @@ op3             = 100001
 #include "../common/sparc.h"
 #include "../common/traps.h"
 #include "../common/iu.h"
+#include "../common/fpu.h"
 #include "../common/memory.h"
 #include "../common/debug.h"
 #include "i_utils.h"
@@ -87,6 +88,7 @@ static int execute(void *state)
 {
     int status;
     uint32 addr;
+    uint32 mask = 0xffffffff;
 
     /*  Check whether the FPU is enabled or not */
     if( !bit(PSRREG, PSR_EF) )
@@ -122,10 +124,16 @@ static int execute(void *state)
      * If you want to correct the definition of fpu,
      * you need correct the bits that are cleared"
      */
-    clear_bits(value, 21, 17);
-    clear_bits(value, 29, 28);
-    clear_bit(value, 12);
-    FPSRREG = 0;
+    clear_bits(mask, FSR_res_last, FSR_res_first);
+    clear_bits(mask, FSR_ver_last, FSR_ver_first);
+    clear_bits(mask, FSR_ftt_last, FSR_ftt_first);
+    clear_bit(mask, FSR_qne);
+    clear_bit(mask, FSR_NS);
+    clear_bits(mask, 29, 28);
+    clear_bit(mask, 12);
+
+    value &= mask;
+    FPSRREG &= ~mask;
 
     FPSRREG |= value;
 
