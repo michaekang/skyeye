@@ -224,5 +224,8 @@ enum{
 
 #define fsr_set_fcc(x)	FPSRREG &= ~(0x3 << FSR_fcc_first);		\
 				   FPSRREG |= (x << FSR_fcc_first)
+#define fsr_get_fcc()	(FPSRREG >> FSR_fcc_first) & 0x3;
+			
+
 
 #endif
