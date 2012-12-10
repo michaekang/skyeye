@@ -64,6 +64,7 @@ static int cond, disp22, annul, op, fmt;
 
 #define FMT_OFF_first	22
 #define FMT_OFF_last	24
+#define FMT	0x2
 
 sparc_instruction_t i_bpos = {
     execute,
@@ -121,7 +122,7 @@ static int disassemble(uint32 instr, void *state)
     cond = bits(instr, COND_OFF_last, COND_OFF_first);
     fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
-    if( (instr & BPOS_CODE_MASK) && (op == OP) && (cond == COND) )
+    if((instr & BPOS_CODE_MASK) && (op == OP) && (cond == COND) && fmt == FMT)
     {
         disp22 = bits(instr, DISP22_OFF_last, DISP22_OFF_first);
         return 1;
