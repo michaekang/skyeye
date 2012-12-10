@@ -42,7 +42,7 @@ cond            = 1100
 
 static int execute(void *);
 static int disassemble(uint32 instr, void *state);
-static int cond, disp22, annul, op;
+static int cond, disp22, annul, op, fmt;
 
 #define BGU_CYCLES    1
 #define BGU_CODE_MASK 0x18800000
@@ -61,6 +61,12 @@ static int cond, disp22, annul, op;
 
 #define DISP22_OFF_first  0
 #define DISP22_OFF_last   21
+
+#define FMT_OFF_first	22
+#define FMT_OFF_last   24
+
+#define FMT	0x2
+
 
 sparc_instruction_t i_bgu = {
     execute,
@@ -120,8 +126,10 @@ static int disassemble(uint32 instr, void *state)
     op = bits(instr, OP_OFF_last, OP_OFF_first);
     annul = bit(instr, A_OFF);
     cond = bits(instr, COND_OFF_last, COND_OFF_first);
+    fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
-    if( (instr & BGU_CODE_MASK) && (op == OP) && (cond == COND) )
+
+    if((instr & BGU_CODE_MASK) && (op == OP) && (cond == COND) && fmt == FMT)
     {
         disp22 = bits(instr, DISP22_OFF_last, DISP22_OFF_first);
         return 1;

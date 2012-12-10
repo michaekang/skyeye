@@ -42,7 +42,7 @@ cond            = 1110
 
 static int execute(void *);
 static int disassemble(uint32 instr, void *state);
-static int cond, disp22, annul, op;
+static int cond, disp22, annul, op, fmt;
 
 #define BPOS_CYCLES    1
 #define BPOS_CODE_MASK 0x1c800000
@@ -61,6 +61,9 @@ static int cond, disp22, annul, op;
 
 #define DISP22_OFF_first  0
 #define DISP22_OFF_last   21
+
+#define FMT_OFF_first	22
+#define FMT_OFF_last	24
 
 sparc_instruction_t i_bpos = {
     execute,
@@ -116,6 +119,7 @@ static int disassemble(uint32 instr, void *state)
     op = bits(instr, OP_OFF_last, OP_OFF_first);
     annul = bit(instr, A_OFF);
     cond = bits(instr, COND_OFF_last, COND_OFF_first);
+    fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
     if( (instr & BPOS_CODE_MASK) && (op == OP) && (cond == COND) )
     {
