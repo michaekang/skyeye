@@ -1,9 +1,9 @@
 /*
  * =====================================================================================
  *
- *       Filename:  i_bne.c
+ *       Filename:  i_fbe.c
  *
- *    Description:  Implementation of the BNE instruction
+ *    Description:  Implementation of the FBE instruction
  *
  *        Version:  1.0
  *        Created:  16/04/08 18:09:22
@@ -20,7 +20,7 @@
 
 31-30  29   28-25    24-22       21-0
 +----+----+--------+------------------------------------------+
-| op | a  |  cond  |   010   |          disp22                |
+| op | a  |  cond  |   110   |          disp22                |
 +----+----+--------+------------------------------------------+
 
 op              = 00
@@ -28,7 +28,7 @@ cond            = 1001
 
 31-30  29   28-25    24-22       21-0
 +----+----+--------+------------------------------------------+
-| op | a  |  1001  |   010   |          disp22                |
+| op | a  |  1001  |   110   |          disp22                |
 +----+----+--------+------------------------------------------+
 
 */
@@ -36,6 +36,7 @@ cond            = 1001
 #include "../common/sparc.h"
 #include "../common/traps.h"
 #include "../common/iu.h"
+#include "../common/fpu.h"
 #include "i_utils.h"
 
 #include <stdio.h>
@@ -44,8 +45,8 @@ static int execute(void *);
 static int disassemble(uint32 instr, void *state);
 static int cond, disp22, annul, op, fmt;
 
-#define BNE_CYCLES    1
-#define BNE_CODE_MASK 0x12800000
+#define FBE_CYCLES    1
+#define FBE_CODE_MASK 0x13800000
 #define PRIVILEDGE  0
 
 #define OP_OFF_first     30
@@ -62,13 +63,13 @@ static int cond, disp22, annul, op, fmt;
 #define DISP22_OFF_last   21
 
 #define FMT_OFF_first	22
-#define FMT_OFF_last   24
-#define FMT		0x2
+#define FMT_OFF_last	24
+#define FMT		0x6
 
-sparc_instruction_t i_bne = {
+sparc_instruction_t i_fbe = {
     execute,
     disassemble,
-    BNE_CODE_MASK,
+    FBE_CODE_MASK,
     PRIVILEDGE,
     OP,
 };
@@ -78,24 +79,24 @@ static int execute(void *state)
 {
     int32 addr = (disp22 << 10) >> 8;   /*  sign extend */
 
-    int z = psr_get_zero();
+    int fcc = fsr_get_fcc();
 
-    /*  Branch on not equal, not z  */
-    if( z == 1 )
+    /*  Branch on equal */
+    if( fcc != 0 )
     {
         if( annul )
         {
             /*  the delay slot is annulled  */
             PCREG = NPCREG + 4;
             NPCREG += 8;
-            print_inst_BICC("bne,a", addr);
+            print_inst_BICC("fbe,a", addr);
         }
         else
         {
             /*  the delay slot is executed  */
             PCREG = NPCREG;
             NPCREG += 4;
-            print_inst_BICC("bne", addr);
+            print_inst_BICC("fbe", addr);
         }
     }
     else
@@ -103,13 +104,13 @@ static int execute(void *state)
         addr += PCREG;
         PCREG = NPCREG;
         NPCREG = addr;
-        print_inst_BICC("bne", addr);
+        print_inst_BICC("fbe", addr);
     }
 
-//    DBG("bne,a 0x%x\n", addr);
+//    DBG("fbe,a 0x%x\n", addr);
 
     // Everyting takes some time
-    return(BNE_CYCLES);
+    return(FBE_CYCLES);
 
 }
 
@@ -121,7 +122,7 @@ static int disassemble(uint32 instr, void *state)
     cond = bits(instr, COND_OFF_last, COND_OFF_first);
     fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
-    if((instr & BNE_CODE_MASK) && (op == OP) && (cond == COND) && (fmt == FMT))
+    if( (instr & FBE_CODE_MASK) && (op == OP) && (cond == COND) && (fmt = FMT))
     {
         disp22 = bits(instr, DISP22_OFF_last, DISP22_OFF_first);
         return 1;
