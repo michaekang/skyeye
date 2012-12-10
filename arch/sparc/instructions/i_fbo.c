@@ -1,17 +1,17 @@
 /*
  * =====================================================================================
  *
- *       Filename:  i_bvc.c
+ *       Filename:  i_fbo.c
  *
- *    Description:  Implementation of the BVC instruction
+ *    Description:  Implementation of the FBO instruction
  *
  *        Version:  1.0
  *        Created:  16/04/08 18:09:22
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Aitor Viana Sanchez (avs), aitor.viana.sanchez@esa.int
- *        Company:  European Space Agency (ESA-ESTEC)
+ *         Author:  David Yu, keweihk@gmail.com
+ *        Company:  Tsinghua skyeye team
  *
  * =====================================================================================
  */
@@ -20,15 +20,15 @@
 
 31-30  29   28-25    24-22       21-0
 +----+----+--------+------------------------------------------+
-| op | a  |  cond  |   010   |          disp22                |
+| op | a  |  cond  |   110   |          disp22                |
 +----+----+--------+------------------------------------------+
 
 op              = 00
-cond            = 1111
+cond            = 1110
 
 31-30  29   28-25    24-22       21-0
 +----+----+--------+------------------------------------------+
-| op | a  |  1111  |   010   |          disp22                |
+| op | a  |  1110  |   110   |          disp22                |
 +----+----+--------+------------------------------------------+
 
 */
@@ -36,6 +36,7 @@ cond            = 1111
 #include "../common/sparc.h"
 #include "../common/traps.h"
 #include "../common/iu.h"
+#include "../common/fpu.h"
 #include "i_utils.h"
 
 #include <stdio.h>
@@ -44,11 +45,10 @@ static int execute(void *);
 static int disassemble(uint32 instr, void *state);
 static int cond, disp22, annul, op, fmt;
 
-#define BVC_CYCLES    1
-#define BVC_CODE_MASK 0x1e800000
+#define FBO_CYCLES    1
+#define FBO_CODE_MASK 0x1f800000
 #define PRIVILEDGE  0
 
-#define OP_MASK    0xc0000000
 #define OP_OFF_first     30
 #define OP_OFF_last      31
 #define OP         0x0
@@ -64,40 +64,39 @@ static int cond, disp22, annul, op, fmt;
 
 #define FMT_OFF_first	22
 #define FMT_OFF_last	24
-#define FMT		0x2
+#define FMT		0x6
 
-
-sparc_instruction_t i_bvc = {
+sparc_instruction_t i_fbo = {
     execute,
     disassemble,
-    BVC_CODE_MASK,
+    FBO_CODE_MASK,
     PRIVILEDGE,
     OP,
 };
 
+
 static int execute(void *state)
 {
     int32 addr = (disp22 << 10) >> 8;   /*  sign extend */
-    uint32 v;
 
-    v = psr_get_overflow();
+    int fcc = fsr_get_fcc();
 
-    /*  Branch on overflow clear, not v */
-    if( v == 1 )
+    /*  Branch on not equal, not z  */
+    if( fcc == 3 )
     {
         if( annul )
         {
             /*  the delay slot is annulled  */
             PCREG = NPCREG + 4;
             NPCREG += 8;
-            print_inst_BICC("bvc,a", addr);
+            print_inst_BICC("fbo,a", addr);
         }
         else
         {
             /*  the delay slot is executed  */
             PCREG = NPCREG;
             NPCREG += 4;
-        print_inst_BICC("bvc", addr);
+            print_inst_BICC("fbo", addr);
         }
     }
     else
@@ -105,13 +104,13 @@ static int execute(void *state)
         addr += PCREG;
         PCREG = NPCREG;
         NPCREG = addr;
-        print_inst_BICC("bvc", addr);
+        print_inst_BICC("fbo", addr);
     }
 
-//    DBG("bvc,a 0x%x\n", addr);
+//    DBG("fbo,a 0x%x\n", addr);
 
     // Everyting takes some time
-    return(BVC_CYCLES);
+    return(FBO_CYCLES);
 
 }
 
@@ -123,7 +122,7 @@ static int disassemble(uint32 instr, void *state)
     cond = bits(instr, COND_OFF_last, COND_OFF_first);
     fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
-    if( (instr & BVC_CODE_MASK) && (op == OP) && (cond == COND) && (fmt == FMT))
+    if( (instr & FBO_CODE_MASK) && (op == OP) && (cond == COND) && (fmt = FMT))
     {
         disp22 = bits(instr, DISP22_OFF_last, DISP22_OFF_first);
         return 1;

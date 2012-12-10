@@ -29,6 +29,7 @@ extern sparc_instruction_t i_fcmpd;
 extern sparc_instruction_t i_fbne;
 extern sparc_instruction_t i_fbuge;
 extern sparc_instruction_t i_fbule;
+extern sparc_instruction_t i_fbo;
 
 static void fpu_init_state(void)
 {
@@ -44,6 +45,7 @@ static void fpu_isa_register(void)
 	iu_i_register(&i_fbne);
 	iu_i_register(&i_fbuge);
 	iu_i_register(&i_fbule);
+	iu_i_register(&i_fbo);
 }
 
 int init_sparc_fpu(void)
