@@ -45,7 +45,7 @@ opf		= 001001110
 
 static int execute(void *);
 static int disassemble(uint32 instr, void *state);
-static int rd, rs1, rs2;
+static int rd, rs1, rs2, fmt;
 
 #define FDIVD_CYCLES    1
 #define FDIVD_CODE_MASK 0x81a009c0
@@ -55,9 +55,9 @@ static int rd, rs1, rs2;
 #define OP_OFF_last      31
 #define OP         0x2
 
-#define OPF_OFF_first     19
-#define OPF_OFF_last      24
-#define OPF         0x34
+#define OPF_OFF_first     5
+#define OPF_OFF_last      13
+#define OPF         0x4e
 
 #define RD_OFF_first      25
 #define RD_OFF_last       29
@@ -67,6 +67,10 @@ static int rd, rs1, rs2;
 
 #define RS2_OFF_first     0
 #define RS2_OFF_last      4
+
+#define FMT_OFF_first	19
+#define FMT_OFF_last	24
+#define FMT		0x34
 
 
 sparc_instruction_t i_fdivd = {
@@ -150,8 +154,9 @@ static int disassemble(uint32 instr, void *state)
 
 	op = bits(instr, OP_OFF_last, OP_OFF_first);
 	opf = bits(instr, OPF_OFF_last, OPF_OFF_first);
+	fmt = bits(instr, FMT_OFF_last, FMT_OFF_first);
 
-	if( (instr & FDIVD_CODE_MASK) && (op == OP) && (opf == OPF) )
+	if( (instr & FDIVD_CODE_MASK) && (op == OP) && (opf == OPF) && (fmt == FMT))
 	{
 		rd = bits(instr, RD_OFF_last, RD_OFF_first);
 		rs1 = bits(instr, RS1_OFF_last, RS1_OFF_first);
