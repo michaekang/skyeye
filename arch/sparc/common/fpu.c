@@ -26,6 +26,7 @@
 extern sparc_return_t iu_i_register(sparc_instruction_t *i_new);
 extern sparc_instruction_t i_fdivd;
 extern sparc_instruction_t i_fcmpd;
+extern sparc_instruction_t i_fcmps;
 extern sparc_instruction_t i_fbne;
 extern sparc_instruction_t i_fbuge;
 extern sparc_instruction_t i_fbule;
@@ -46,6 +47,7 @@ static void fpu_isa_register(void)
 	iu_i_register(&i_fbuge);
 	iu_i_register(&i_fbule);
 	iu_i_register(&i_fbo);
+	iu_i_register(&i_fcmps);
 }
 
 int init_sparc_fpu(void)
@@ -53,6 +55,18 @@ int init_sparc_fpu(void)
 	fpu_init_state();
 	fpu_isa_register();
 	return 0;
+}
+
+uint32_t fpu_get_single(unsigned int reg)
+{
+	uint32_t val = 0;
+	val = FPREG(reg);
+	return val;
+}
+
+void fpu_put_single(uint64_t val, unsigned int reg)
+{
+	FPREG(reg) = val;
 }
 
 uint64_t fpu_get_double(unsigned int reg)
