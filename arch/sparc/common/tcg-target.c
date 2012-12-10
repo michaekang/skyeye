@@ -56,6 +56,16 @@ static const char * const sparc_reg_names[32] = {
 };
 
 #define RNAME(x)    sparc_reg_names[x]
+inline void print_fpinst_RS_RS_RD(char *mnemonic, int rs1, int rs2, int rd)
+{
+    DBG("%s f%d, f%d, f%d\n", mnemonic, rs1, rs2, rd);
+}
+
+inline void print_fpinst_RS_RS(char *mnemonic, int rs1, int rs2)
+{
+    DBG("%s f%d, f%d\n", mnemonic, rs1, rs2);
+}
+
 
 inline void print_inst_RS_RS_RD(char *mnemonic, int rs1, int rs2, int rd)
 {

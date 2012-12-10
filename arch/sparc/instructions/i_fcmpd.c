@@ -106,6 +106,7 @@ static int execute(void *state)
 		fsr_set_fcc(3);
 	}
 
+	print_fpinst_RS_RS("fcmpd", rs1, rs2);
 	PCREG = NPCREG;
 	NPCREG += 4;
 
