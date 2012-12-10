@@ -81,6 +81,7 @@ static int execute(void *state)
 	 * va_* are used to save the registers' value
 	 */
 	d_precision va_rs1, va_rs2;
+	double result = 0;
 	/*  Check whether the FPU is enabled or not */
 	if( !bit(PSRREG, PSR_EF) )
 	{
@@ -95,12 +96,13 @@ static int execute(void *state)
 	}
 	va_rs1.data = fpu_get_double(rs1);
 	va_rs2.data = fpu_get_double(rs2);
+	result = va_rs1.value - va_rs2.value;
 
-	if(va_rs1.value == va_rs2.value){
+	if(result == 0){
 		fsr_set_fcc(0);
-	}else if(va_rs1.value < va_rs1.value){
+	}else if(result < 0){
 		fsr_set_fcc(1);
-	}else if(va_rs1.value == va_rs1.value){
+	}else if(result > 0){
 		fsr_set_fcc(2);
 	}else{
 		fsr_set_fcc(3);
