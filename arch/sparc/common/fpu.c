@@ -25,6 +25,7 @@
 
 extern sparc_return_t iu_i_register(sparc_instruction_t *i_new);
 extern sparc_instruction_t i_fdivd;
+extern sparc_instruction_t i_fstod;
 extern sparc_instruction_t i_fcmpd;
 extern sparc_instruction_t i_fcmps;
 extern sparc_instruction_t i_fbne;
@@ -43,6 +44,7 @@ static void fpu_init_state(void)
 static void fpu_isa_register(void)
 {
 	iu_i_register(&i_fdivd);
+	iu_i_register(&i_fstod);
 	iu_i_register(&i_fcmpd);
 	iu_i_register(&i_fbne);
 	iu_i_register(&i_fbe);
