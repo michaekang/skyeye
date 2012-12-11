@@ -337,6 +337,10 @@ class SkyEyeCli(cmd.Cmd):
 #        print "outline info"
         libcommon.com_info(arg)
 
+    def do_set(self, arg):
+#        print "outline set"
+        libcommon.com_set_all(arg)
+
     def do_x(self, arg):
 #        print "outline x"
         libcommon.com_x(arg)

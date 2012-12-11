@@ -441,8 +441,59 @@ static uint32 sparc_get_regval_by_id(int id){
 		return CWP;
 	default:
 		printf("have not register id %d\n", id);
-	return 0;
+		return -1;
 	}
+	return 0;
+}
+
+exception_t sparc_set_regval_by_id(int id, uint32 value){
+	if(id < 32)
+		REG(id) = value;
+	else if (id < 64)
+		FPREG(id - 32) = value;
+	switch(id - 64){
+	case 0:
+		YREG = value;
+		break;
+	case 1:
+		PSRREG = value;
+		break;
+       	case 2:
+		WIMREG = value;
+		break;
+	case 3:
+		TBRREG = value;
+		break;
+	case 4:
+		PCREG = value;
+		break;
+	case 5:
+		NPCREG = value;
+		break;
+	case 6:
+		FPSRREG = value;
+		break;
+	case 7:
+		CPSRREG = value;
+		break;
+	default:
+		printf("have not register id %d\n", id);
+		return Dll_open_exp;
+	}
+	return No_exp;
+}
+
+uint32 get_regnum_by_name(char* name)
+{
+	int i = 0;
+	int reg_num = sparc_get_regnum();
+	char* reg_name;
+	for(i = 0; i < reg_num; i++){
+		reg_name = sparc_get_regname_by_id(i);
+		if(strcmp(name, reg_name) == 0)
+			return i;
+	}
+	return -1;
 }
 
 /* 
@@ -468,6 +519,7 @@ void init_sparc_arch()
 	sparc_arch.parse_mach = sparc_parse_mach;
     //sparc_arch.parse_mem = sparc_parse_mem;
 	sparc_arch.get_regval_by_id = sparc_get_regval_by_id;
+	sparc_arch.set_regval_by_id = sparc_set_regval_by_id;
         sparc_arch.get_regname_by_id = sparc_get_regname_by_id;
 	sparc_arch.get_step = sparc_get_step;
 	sparc_arch.get_regnum = sparc_get_regnum;

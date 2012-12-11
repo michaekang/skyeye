@@ -355,6 +355,7 @@ int com_info(char* arg){
 	}
 	return 0;
 }
+
 int com_load_conf(char* arg){
 	exception_t ret;
 	if ((ret = skyeye_read_config(arg)) != No_exp){
@@ -365,6 +366,33 @@ int com_load_conf(char* arg){
 			printf("Can not open the config file %s\n", arg);
 		else
 			printf("Unknown error when read config from the file %s\n", arg);
+	}
+	return 0;
+}
+
+int com_set_all(char* arg)
+{
+	char* info_target[] = {"reg", "addr"};
+	int i = 0;
+	if(arg == NULL){
+		printf("Available options is %s, %s\n", info_target[0], info_target[1]);
+		return 0;
+	}
+	for(i = 0; i < 2; i++){
+		if(!strncmp(arg,info_target[i], strlen(info_target[i]))){
+			break;
+		}
+	}
+	switch(i){
+	case 0:
+		printf("set reg\n");
+		break;
+	case 1:
+		printf("set addr\n");
+		break;
+	default:
+		printf("error\n");
+		return -1;
 	}
 	return 0;
 }
