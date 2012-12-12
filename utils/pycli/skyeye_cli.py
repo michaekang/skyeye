@@ -424,6 +424,12 @@ class SkyEyeCli(cmd.Cmd):
         print "x : display memory value at the address. "
         help_info_close()
 
+    def help_set(self):
+        help_info_open()
+        print "<set addr=xxxx value=xxxx size=xxxx>\nwrite value into the memory address, size is 1,2,4."
+        print "<set reg=xxxx value=xxxx>\nset register's value, for example set reg=f0 value=0xfffff."
+        help_info_close()
+
     def help_pmon(self):
         help_info_open()
         print "pmon : enable the performance monitor." 
