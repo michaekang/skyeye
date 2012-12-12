@@ -107,14 +107,30 @@ int com_si(char* arg){
 int com_x(char* arg){
 	int flag = 0;
 	char** endptr;
-	int addr;
+	char result[64];
+	int addr, size;
 	uint32 value;
 	if(arg == NULL || *arg == '\0') 
 		return Invarg_exp;
 	else{
+		flag = get_parameter(result, arg, "addr");
+		if(flag > 0)
+			addr = strtoul(result, NULL, 0);
+		else{
+			printf("Format error: x addr=xxxx size=xxxx\n");
+			return -1;
+		}
+		flag = get_parameter(result, arg, "size");
+		if(flag > 0)
+			size = strtoul(result, NULL, 0);
+		else{
+			printf("size default setting 1 word\n");
+			size = 1;
+		}
+
+		#if 0
 		errno = 0;
 		addr = strtoul(arg, endptr, 16);
-		#if 0
 	/* if *nptr is not '\0' but **endptr is '\0', the entire string is valid */
 		if(**endptr != '\0'){
 			printf("Can not run the given steps.\n ");
@@ -133,9 +149,17 @@ int com_x(char* arg){
 		}
 		#endif
 	}
-	bus_read(32, addr, &value);
-	printf("0x%x:0x%x\n", addr, value);
-	return flag;
+	int i;
+	for(i = 1; i <= size; i++){
+		bus_read(32, addr, &value);
+		printf("0x%x:0x%x\t", addr, value);
+		addr += 4;
+		if(i%5 == 0)
+			printf("\n");
+	}
+	printf("\n");
+
+	return 0;
 }
 
 
@@ -409,7 +433,7 @@ int com_set_all(char* arg)
 			addr = strtoul(result, NULL, 0);
 			//printf("set addr = 0x%x\t", addr);
 		}else{
-			printf("Format error: set addr = xxxx value = xxxxx size = xxxxxx\n");
+			printf("Format error: set addr = xxxx value = xxxxx size = xxxx\n");
 			return -1;
 		}
 		i = get_parameter(result, arg, "value");
@@ -417,7 +441,7 @@ int com_set_all(char* arg)
 			value = strtoul(result, NULL, 0);
 			//printf("value = 0x%x\t", value);
 		}else{
-			printf("Format error: set addr = xxxx value = xxxxx size = xxxxxx\n");
+			printf("Format error: set addr = xxxx value = xxxxx size = xxxx\n");
 			return -1;
 		}
 		i = get_parameter(result, arg, "size");
