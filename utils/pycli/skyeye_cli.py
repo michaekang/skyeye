@@ -421,6 +421,7 @@ class SkyEyeCli(cmd.Cmd):
 
     def help_x(self):
         help_info_open()
+        print "x addr=xxx size=xxxx"
         print "x : display memory value at the address. "
         help_info_close()
 
@@ -442,6 +443,7 @@ class SkyEyeCli(cmd.Cmd):
 
     def help_disassemble(self):
         help_info_open()
+        print "disassemble addr=xxx count=xxx"
         print "disassemble : Disassemble the given address."
         help_info_close()
 
