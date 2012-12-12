@@ -95,6 +95,7 @@ generic_arch_t * get_arch_instance(const char* arch_name){
 		running_arch_list->get_regval_by_id = config->arch->get_regval_by_id;	
 		running_arch_list->get_regname_by_id = config->arch->get_regname_by_id;	
 		running_arch_list->set_regval_by_id = config->arch->set_regval_by_id;
+		running_arch_list->get_regid_by_name = config->arch->get_regid_by_name;
 		running_arch_list->get_regnum = config->arch->get_regnum;
 		running_arch_list->mmu_read = config->arch->mmu_read;	
 		running_arch_list->mmu_write = config->arch->mmu_write;	
