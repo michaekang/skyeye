@@ -181,6 +181,33 @@ stripwhite (string)
   return s;
 }
 
+int get_parameter(char* result, char* args, const char* param)
+{
+	char *p = NULL;
+	char *q = NULL;
+
+	q = strstr(args, param);
+	if(q != NULL){
+		p = strstr(q + strlen(param), "=");
+		if(p != NULL){
+			while(*(++p) == ' ');
+			strcpy(result, p);
+			q = result;
+			while(*q++)
+				if(*q == ' '){ *q = '\0'; break; };
+		}
+		else{
+			printf("Format error!\t<%s> = xxxxx\n", param);
+			return 0;
+		}
+	}
+	else{
+		printf("Format error!\t<%s> = xxxxx\n", param);
+		return 0;
+	}
+
+	return 1;
+}
 /* **************************************************************** */
 /*                                                                  */
 /*                  Interface to Readline Completion                */

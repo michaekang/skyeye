@@ -62,4 +62,5 @@ skyeye_module_t* get_module_list();
 skyeye_option_t* get_option_list();
 int valid_argument (char* caller, char *arg);
 void too_dangerous (char *caller);
+int get_parameter(char* result, char* args, const char* param);
 #endif

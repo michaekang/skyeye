@@ -181,7 +181,7 @@ typedef struct
         exception_t (*set_regval_by_id)(int id, uint32 value);
 	uint32 (*get_regnum)(void);
 	char* (*get_regname_by_id)(int id);
-	uint32 (*get_regnum_by_name)(char* name);
+	uint32 (*get_regid_by_name)(char* name);
 
 	int (*parse_cpu) (const char *param[]);
 	int (*parse_mach) (machine_config_t * mach, const char *param[]);

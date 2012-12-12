@@ -373,6 +373,7 @@ int com_load_conf(char* arg){
 int com_set_all(char* arg)
 {
 	char* info_target[] = {"reg", "addr"};
+	char result[64];
 	int i = 0;
 	if(arg == NULL){
 		printf("Available options is %s, %s\n", info_target[0], info_target[1]);
@@ -385,10 +386,29 @@ int com_set_all(char* arg)
 	}
 	switch(i){
 	case 0:
-		printf("set reg\n");
+		i = get_parameter(result, arg, "reg");
+		char* reg_name[64];
+		int reg_value;
+		if(i > 0){
+			strcpy(reg_name, result);
+			printf("set reg = %s\t", reg_name);
+		}
+		i = get_parameter(result, arg, "value");
+		if(i > 0){
+			reg_value = strtoul(result, NULL, 0);
+			printf("value = 0x%x\n", reg_value);
+		}
+		generic_arch_t* arch_instance = get_arch_instance(NULL);
+		uint32 reg_id = arch_instance->get_regid_by_name(reg_name);
+		arch_instance->set_regval_by_id(reg_id, reg_value);
 		break;
 	case 1:
-		printf("set addr\n");
+		i = get_parameter(result, arg, "addr");
+		if(i > 0)
+			printf("set addr = %s\t", result);
+		i = get_parameter(result, arg, "value");
+		if(i > 0)
+			printf("value = %s\n", result);
 		break;
 	default:
 		printf("error\n");

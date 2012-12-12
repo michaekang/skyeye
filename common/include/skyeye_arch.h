@@ -24,6 +24,7 @@ typedef struct generic_arch_s
 	uint32 (*get_regval_by_id)(int id);
 	uint32 (*get_regnum)(void);
 	char* (*get_regname_by_id)(int id);
+	uint32 (*get_regid_by_name)(char* name);
 	exception_t (*set_regval_by_id)(int id, uint32 value);
 	/*
 	 * read a data by virtual address.
