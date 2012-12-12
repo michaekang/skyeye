@@ -384,6 +384,7 @@ int com_set_all(char* arg)
 			break;
 		}
 	}
+	generic_arch_t* arch_instance = get_arch_instance(NULL);
 	switch(i){
 	case 0:
 		i = get_parameter(result, arg, "reg");
@@ -391,27 +392,59 @@ int com_set_all(char* arg)
 		int reg_value;
 		if(i > 0){
 			strcpy(reg_name, result);
-			printf("set reg = %s\t", reg_name);
+			//printf("set reg = %s\t", reg_name);
 		}
 		i = get_parameter(result, arg, "value");
 		if(i > 0){
 			reg_value = strtoul(result, NULL, 0);
-			printf("value = 0x%x\n", reg_value);
+			//printf("value = 0x%x\n", reg_value);
 		}
-		generic_arch_t* arch_instance = get_arch_instance(NULL);
 		uint32 reg_id = arch_instance->get_regid_by_name(reg_name);
 		arch_instance->set_regval_by_id(reg_id, reg_value);
 		break;
 	case 1:
 		i = get_parameter(result, arg, "addr");
-		if(i > 0)
-			printf("set addr = %s\t", result);
+		int addr, value, size;
+		if(i > 0){
+			addr = strtoul(result, NULL, 0);
+			//printf("set addr = 0x%x\t", addr);
+		}else{
+			printf("Format error: set addr = xxxx value = xxxxx size = xxxxxx\n");
+			return -1;
+		}
 		i = get_parameter(result, arg, "value");
-		if(i > 0)
-			printf("value = %s\n", result);
+		if(i > 0){
+			value = strtoul(result, NULL, 0);
+			//printf("value = 0x%x\t", value);
+		}else{
+			printf("Format error: set addr = xxxx value = xxxxx size = xxxxxx\n");
+			return -1;
+		}
+		i = get_parameter(result, arg, "size");
+		if(i > 0){
+			size = strtoul(result, NULL, 0);
+			//printf("size = 0x%x\n", size);
+		}else{
+			printf("default setting size = 4\n");
+			size = 4;
+		}
+		switch(size){
+			case 1:
+				bus_write(8, addr, value);
+				break;
+			case 2:
+				bus_write(16, addr, value);
+				break;
+			case 4:
+				bus_write(32, addr, value);
+				break;
+			default:
+				printf("size value should be 1 , 2, 4!\n");
+				break;
+		}
 		break;
 	default:
-		printf("error\n");
+		printf("set command parameter error\n");
 		return -1;
 	}
 	return 0;
