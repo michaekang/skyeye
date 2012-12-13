@@ -96,8 +96,8 @@ int main(int argc, char ** argv)
 #ifndef __MINGW32__
 	struct pollfd fds[2];
 #else
-	int fd_stdin;
 	int fd_stdout;
+	int fd_socket;
 	fd_set fdread;
 	fd_set fdwrite;
 #endif
@@ -129,12 +129,12 @@ int main(int argc, char ** argv)
 	fds[0].events = POLLIN|POLLRDNORM;
 	fds[1].events = POLLIN|POLLRDNORM;
 #else
-	fd_stdin = setup_term();
-	fd_stdout = setup_netlink(hostp, portp);
+	fd_stdout = setup_term();
+	fd_socket = setup_netlink(hostp, portp);
 	FD_ZERO(&fdread);
 	FD_ZERO(&fdwrite);
-	FD_SET(fd_stdin, &fdread);
-	FD_SET(fd_stdout, &fdwrite);
+	FD_SET(fd_stdout, &fdread);
+	FD_SET(fd_socket, &fdwrite);
 #endif
 
 #define	POLL_TIMEOUT	-1		/* wait forever ? FIXME ? */
@@ -190,31 +190,21 @@ DBG(				dump_buf("socketin:", buf, res););
 	do {
 		int res;
 
-		select(0, &fdread, &fdwrite, NULL, NULL);
-		if (FD_ISSET(fd_stdin, &fdread)) {
-			res = read(fd_stdin, buf, 1024);
-			if(res == 0) {
-				close(fd_stdin);
+		select(0, NULL, &fdwrite, NULL, NULL);
+		if (FD_ISSET(fd_socket, &fdwrite)) {
+			res = recv(fd_socket, buf, 1024, 0);
+			fflush(stdout);
+			if (res == 0) {
 				EXIT(0);
 			}
-			else if (res < 0) {
-				perror("read:");
+			else if(res < 0) {
+				perror("recvout: ");
+				EXIT(0);
 			}
 			else {
-				DBG(dump_buf("ttyin:", buf, res););
+				DBG(dump_buf("socketout:", buf, res););
 				write(fd_stdout, buf, res);
 			}
-		}
-		if (FD_ISSET(fd_stdout, &fdwrite)) {
-			res = read(fd_stdout, buf, 1024);
-			EXIT(0);
-		}
-		else if(res < 0) {
-			perror("Read: ");
-		}
-		else {
-			DBG(dump_buf("socketin:", buf, res););
-			write(fd_stdin, buf, res);
 		}
 	}while(1);
 #endif
@@ -232,7 +222,7 @@ int setup_term()
 	struct termios tio;
 	int fd;
 
-	fd = 0;	/* stdin */
+	fd = 1;	/* stdout */
 
 DBG(	printf("\nstdin:\n"); tcparams(fd); );
 
@@ -251,7 +241,8 @@ DBG(	printf("\nstdin:\n"); tcparams(fd); );
 	tio.c_cc[VMIN] = 1;
 	tio.c_cc[VTIME] = 0;
 
-	if (tcsetattr(fd, TCSANOW, &tio)<0) {
+	//if (tcsetattr(fd, TCSANOW, &tio)<0) {
+	if (tcsetattr(fd, TCSADRAIN, &tio)<0) {
 		perror("setup_term: tcsetattr");
 		EXIT(1);
 	}
@@ -270,50 +261,72 @@ DBG(	tcparams(fd); printf("\nstdout:\n"); tcparams(1); );
 int setup_netlink(char * hostp, char * portp)
 {
 	int	port;
-	struct	sockaddr_in target;
 	int	num;
+#ifndef __MINGW32__
 	int	skt;
 
-	printf("Connecting to %s:%s\n", hostp, portp);
+#else
+	int err;
+	SOCKET skt;
+	WSADATA wsaData;
+	/*
+	 * initiates use of the Winsock DLL by a process
+	 * shenoubang modified it 2012-12-4
+	 */
+	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (err != 0) {
+		/*
+		* Tell the user that we could not find a usable
+		* Winsock DLL.
+		*/
+		printf("WSAStartup failed with error: %d\n", err);
+		return 1;
+	}
 
+#endif
+
+	printf("Connecting to %s:%s\n", hostp, portp);
 	if (sscanf(portp, "%d", &port)!=1 || port<1 || port>65535) {
 		fprintf(stderr, "Connection port must be a number from 1 to 65535");
 		EXIT(1);
 	}
-#if 0
-	addr = gethostbyname(hostp);
-	if (addr == (struct hostent*)0) {
-		fprintf(stderr,"Unknown host machine %s",hostp);
-		EXIT(1);
-	}
-
-	memcpy((void*)&target.sin_addr, (void*)addr->h_addr, addr->h_length);
-#endif
-	target.sin_addr.s_addr = INADDR_ANY;
+	struct	sockaddr_in target;
 	target.sin_family = AF_INET;
+#ifndef __MINGW32__
+	target.sin_addr.s_addr = INADDR_ANY;
+#else
+	target.sin_addr.s_addr = inet_addr("127.0.0.1");
+#endif
 	target.sin_port = htons(port);
 
 	for(num = 0; num < 3; num++) {
-		skt = socket(AF_INET, SOCK_STREAM, 0);
 
+		skt = socket(AF_INET, SOCK_STREAM, 0);
 		if (skt < 0) {
-			fprintf(stderr,"opening stream socket");
+			perror("opening stream socket");
 			EXIT(1);
 		}
 
+#ifndef __MINGW32__
 		if (connect(skt, (struct sockaddr*)&target, sizeof(target)) != -1) goto gotit;
-		perror("connecting");
+#else
+		if(connect(skt, (SOCKADDR*)&target, sizeof(target)) != -1) goto gotit;
+#endif
+		printf("connecting error: %s\n", strerror(errno));
+		fflush(stdout);
 #ifndef __MINGW32__
 		sleep(1);
 #else
-		Sleep(1000);
+		Sleep(1);
 #endif
 		close(skt);
 	}
 
 	return -1;
 
-gotit:;
+gotit:
+	fflush(stdout);
+	;
 
 	return skt;
 }

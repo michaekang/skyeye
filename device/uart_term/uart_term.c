@@ -65,7 +65,13 @@ const char* default_bin_dir = "/opt/skyeye/bin/";
 #else
 const char* default_bin_dir = SKYEYE_BIN;
 #endif
+
+#ifndef __MINGW32__
 const char* uart_prog = "uart_instance";
+#else
+const char* uart_prog = "uart_instance.exe";
+//const char* uart_prog = "ls.exe";
+#endif
 
 static exception_t uart_term_raise(conf_object_t* object, int line_no)
 {
@@ -117,7 +123,6 @@ static exception_t uart_term_write(conf_object_t *opaque, void* buf, size_t coun
 	int ret = -1;
 	uart_term_device *dev = opaque->obj;
 	if(dev->attached){
-		printf("<shenoubang>write buf: %s\n", buf);
 #ifndef __MINGW32__
 		ret = write(dev->socket, buf, count);
 #else
@@ -134,11 +139,12 @@ static int create_term(uart_term_device* dev_uart, int port){
 	char port_str[32];
 	char uart_instance_prog[1024];
 	int bin_dir_len = strlen(default_bin_dir);
+
 	memset(&uart_instance_prog[0], '\0', 1024);
 	strncpy(&uart_instance_prog[0], default_bin_dir, bin_dir_len);
 	strncpy(&uart_instance_prog[bin_dir_len], uart_prog, strlen(uart_prog));
-
 	sprintf(port_str, "%d", port);
+
 #ifndef __MINGW32__
 	switch (pid = fork())
 	{
@@ -164,30 +170,31 @@ static int create_term(uart_term_device* dev_uart, int port){
 	}
 #else
 #ifdef DBG_XTERM
-	char cmdline[2048] = "mintty.exe -hold -e ";
+	char cmdline[2048] = "C:/msys/1.0/bin/mintty.exe -h always -e ";
 #else
-	char cmdline[2048] = "mintty.exe -e ";
+	char cmdline[2048] = "C:/msys/1.0/bin/mintty.exe -e ";
+#endif
 	strcat(cmdline, uart_instance_prog);
 	strcat(cmdline, " ");
 	strcat(cmdline, dev_uart->obj_name);
 	strcat(cmdline, " ");
 	strcat(cmdline, port_str);
-#endif
 	PROCESS_INFORMATION process_information;
 	STARTUPINFO startupinfo;
 	BOOL result;
 	memset(&process_information, 0, sizeof(process_information));
 	memset(&startupinfo, 0, sizeof(startupinfo));
 	startupinfo.cb = sizeof(startupinfo);
-	result = CreateProcess("C:/msys/1.0/bin/mintty.exe", cmdline, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupinfo, &process_information);
+	result = CreateProcess(NULL, cmdline, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupinfo, &process_information);
 	if (result == 0) {
 		SKYEYE_ERR("ERROR: CreateProcess failed!");
 		return -1;
 	}
 	else {
-		WaitForSingleObject(process_information.hProcess, INFINITE);
-		CloseHandle(process_information.hProcess);
-		CloseHandle(process_information.hThread);
+		return 0;
+		//WaitForSingleObject(process_information.hProcess, INFINITE);
+		//CloseHandle(process_information.hProcess);
+		//CloseHandle(process_information.hThread);
 	}
 #endif
 	return 0;
@@ -200,7 +207,6 @@ static int create_uart_console(void* uart){
 	int on, length;
 	struct sockaddr_in server, from;
 	char * froms;
-	printf("In %s\n", __FUNCTION__);
 
 #ifndef __MINGW32__
 	int term_socket = socket(AF_INET, SOCK_STREAM, 0);
