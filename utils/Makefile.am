@@ -50,6 +50,10 @@ libgdbserver_la_LDFLAGS += $(WIN32_LD_COMMON)
 libbus_log_la_LDFLAGS += $(WIN32_LD_COMMON)
 libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker -lopcodes -Xlinker -lopcodes -Xlinker -liberty -Xlinker /mingw/bin/libbfd-2-18-50-20070907.dll
 libos_supp_la_LDFLAGS += $(WIN32_LD_COMMON)
+libpmon_la_LDFLAGS += $(WIN32_LD_COMMON)
+libpycli_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker /mingw/python26.dll
+libshutdown_la_LDFLAGS += $(WIN32_LD_COMMON)
+libcodecov_la_LDFLAGS  += $(WIN32_LD_COMMON)
 else
 libdisasm_la_LDFLAGS += -L./$(top_builddir)/third-party/opcodes/.libs/ -L./$(top_builddir)/third-party/bfd/.libs/ -L./$(top_builddir)/third-party/libiberty/pic/ -lopcodes -lbfd -liberty
 endif
