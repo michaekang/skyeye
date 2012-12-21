@@ -343,11 +343,17 @@ void SIM_fini(){
 	/* unload all the module */
 	SKY_unload_all_modules();
 	/* free the memory */
+#ifndef __MINGW32__
 	skyeye_erase_map();
+#endif
 	printf("exit.\n");
 
+#ifndef __MINGW32__
 	/* restore the environment */
 	tcsetattr(0, TCSANOW, &pref->saved_term);
+#else
+	tcsetattr(0, TCSAFLUSH, &pref->saved_term);
+#endif
 
 	return;
 	//exit(0);

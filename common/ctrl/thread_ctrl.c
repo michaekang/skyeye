@@ -224,7 +224,9 @@ void destroy_threads(void){
 							pthread_self()))
 					continue;
 				pthread_cancel(pthread_pool[i].id);
+#ifndef __MINGW32__
 				pthread_join(pthread_pool[i].id, NULL);
+#endif
 		}
         }
 }
