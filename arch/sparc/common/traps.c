@@ -203,8 +203,8 @@ static int trigger(void)
     else
     {
         /*  FIXME: this needs to be specified   */
-        SKYEYE_ERR("Interrupt while ET disabled, processor halt (PC = 0x%x, NPC = 0x%x)\n", PCREG, NPCREG);
-        skyeye_exit(1);
+        printf("Interrupt while ET disabled, processor halt (PC = 0x%x, NPC = 0x%x)\n", PCREG, NPCREG);
+	run_command("stop");
     }
 
     return SPARC_SUCCESS;
