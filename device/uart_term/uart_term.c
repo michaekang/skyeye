@@ -291,7 +291,7 @@ retry:
 	/* main loop */
 	do {
 		if (!dev_uart->attached) {
-			printf("Waiting for connection to %s:%d", dev_uart->obj_name, ntohs(server.sin_port));
+			printf("Waiting for connection to %s:%d\n", dev_uart->obj_name, ntohs(server.sin_port));
 			length = sizeof(from);
 			/* save the uart socket */
 			dev_uart->socket = accept(term_socket, (struct sockaddr *)&from, (int*)&length);

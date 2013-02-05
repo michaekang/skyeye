@@ -319,7 +319,6 @@ static int iu_cycle_step(void)
     DBG("0x%08x\t0x%08x\t", pc, instr);
 //    DBG("%s(): instr = 0x%x\n", __func__, instr);
 
-	usleep(1);
     if( (pi = iu_get_instr(instr)) == NULL )
     {
         printf("Instruction not implemented at PC=0x%x\n", pc);
