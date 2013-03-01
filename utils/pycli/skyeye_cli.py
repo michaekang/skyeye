@@ -76,11 +76,11 @@ class SkyEyeCli(cmd.Cmd):
                         cmds_doc.append(cmd)
                     else:
                         cmds_undoc.append(cmd)
-#            self.stdout.write("%s\n"%str(self.doc_leader))
-#            self.print_topics(self.doc_header,   cmds_doc,   15,80)
+            self.stdout.write("%s\n"%str(self.doc_leader))
+            self.print_topics(self.doc_header,   cmds_doc,   15,80)
+            self.print_topics(self.undoc_header, cmds_undoc, 15,80)
 #            self.print_topics(self.misc_header,  help.keys(),15,80)
-#            self.print_topics(self.undoc_header, cmds_undoc, 15,80)
-            self.print_topics("\nSkyEye command list", cmds_undoc, 15,80)
+#            self.print_topics("\nSkyEye command list", cmds_undoc, 15,80)
 
     def complete(self, text, state):
         if state == 0:
@@ -162,7 +162,7 @@ class SkyEyeCli(cmd.Cmd):
 
     def help_list_modules(self):
         help_info_open()
-        print "list-modules : List all the loaded module."
+	print "list-modules : List all the loaded module."
         help_info_close()
 
     def help_list_options(self):
@@ -416,7 +416,7 @@ class SkyEyeCli(cmd.Cmd):
 
     def help_info(self):
         help_info_open()
-        print "info : show information for various objects. "
+	print "info : show information for various objects.\nparameter : registers "
         help_info_close()
 
     def help_x(self):
