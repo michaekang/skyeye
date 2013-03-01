@@ -118,7 +118,7 @@ void sparc_init_state(void)
         }
 #endif
 	init_sparc_exec();
-	printf("In %s, the above code not finished porting.\n", __FUNCTION__);
+	DBG("In %s, the above code not finished porting.\n", __FUNCTION__);
     }
 }
 
@@ -140,7 +140,7 @@ void sparc_reset_state(void)
         skyeye_exit(-1);
     }
 #endif
-	printf("In %s, the above code not finished porting.\n", __FUNCTION__);
+	DBG("In %s, the above code not finished porting.\n", __FUNCTION__);
 }
 
 /* 
