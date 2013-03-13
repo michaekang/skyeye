@@ -42,8 +42,6 @@
 #include "skyeye_options.h"
 char Run_Exit = 0;
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(run);
-
 static int stop_now = 0;
 
 

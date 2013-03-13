@@ -10,8 +10,6 @@
 #include "coldfire.h"
 
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(i);
-
 #define MALLOC_STEP 16
 struct _Instruction *Instruction = NULL;
 short InstructionCount=0;

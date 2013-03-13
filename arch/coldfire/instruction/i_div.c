@@ -63,9 +63,6 @@ REM <ea>y,Dw:Dx   32bit Dx / 32bit <ea>y => 32bit Dw
 
 int DIVSTime[8]={18, 20, 20, 20, 20, -1, -1, -1};
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(i_div);
-
-
 #define DIV_W_REGISTER(word) 	(((word)&0x0e00) >> 9)
 #define DIV_W_DIVS(word)	(((word)&0x0100))
 #define DIV_L_DX(word)		(((word)&0x7000) >> 12)

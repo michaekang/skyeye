@@ -10,8 +10,6 @@
 
 #include "coldfire.h"
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(exception);
-
 static short exception_pending = 0;
 static unsigned int (*iack_func[8])(unsigned int interrupt_level)
 	= { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };

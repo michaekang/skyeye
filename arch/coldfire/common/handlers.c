@@ -11,9 +11,6 @@
 
 #include "coldfire.h"
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(handlers);
-
-
 void SR_Set(short Instr, int Source, int Destination, int Result)
 {
 	char Sm = (Source >= 0) ? 0 : 1;

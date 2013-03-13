@@ -15,8 +15,6 @@
 /*#define SKYEYE_DBGR_OFF*/
 #include "coldfire.h"
 
-SKYEYE_DBGR_DEFAULT_CHANNEL(ram);
-
 void ram_init(void);
 static void ram_setup(struct _memory_segment *s);
 static void rom_setup(struct _memory_segment *s);
