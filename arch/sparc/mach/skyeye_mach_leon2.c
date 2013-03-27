@@ -48,11 +48,7 @@ exception_t leon2_dev_init(void)
 	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
 	ret = add_map(phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
 	/* register interface for uart */
-	skyeye_uart_intf* uart_term0_method = (memory_space_intf*)SKY_get_interface(uart_term0, SKYEYE_UART_INTF);
-	skyeye_uart_intf* uart0_leon2_method = (memory_space_intf*)SKY_get_interface(uart0, SKYEYE_UART_INTF);
-	uart0_leon2_method->conf_obj = uart_term0_method->conf_obj;
-	uart0_leon2_method->write = uart_term0_method->write;
-	uart0_leon2_method->read = uart_term0_method->read;
+	SKY_set_interface(uart_term0, uart0, SKYEYE_UART_INTF);
 
 	if(ret != No_exp){
 		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");

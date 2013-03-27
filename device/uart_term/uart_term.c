@@ -261,7 +261,13 @@ static conf_object_t* new_uart_term(char* obj_name){
 	uart_method->conf_obj = dev_uart->obj;
 	uart_method->read = uart_term_read;
 	uart_method->write = uart_term_write;
-	SKY_register_interface(uart_method, obj_name, SKYEYE_UART_INTF);
+
+	skyeye_intf_t* skyeye_uart = skyeye_mm_zero(sizeof(skyeye_intf_t));
+	skyeye_uart->intf_name = SKYEYE_UART_INTF;
+	skyeye_uart->class_name = "uart_term";
+	skyeye_uart->registered = 1;
+	skyeye_uart->obj = (void*)uart_method;
+	SKY_register_interface(skyeye_uart, obj_name, SKYEYE_UART_INTF);
 
 	dev_uart->attached = 0;
 	dev_uart->socket = -1;
