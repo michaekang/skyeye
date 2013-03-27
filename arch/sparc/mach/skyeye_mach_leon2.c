@@ -38,7 +38,6 @@
 exception_t leon2_dev_init(void)
 {
 	exception_t ret;
-	/* david */
 	DBG_leon2("In %s, Line %d init leon2 deivce\n", __func__, __LINE__);
 	/* The whole address space */
 	addr_space_t* phys_mem = new_addr_space("leon2_mach_space");

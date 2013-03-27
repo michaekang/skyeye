@@ -438,7 +438,6 @@ void leon2_io_reset(void *state)
     io_devices = 0;
 
     /*  Register all the I/O devices    */
-    /* david */
     //leon2_uart_init(state, UART1_ADDR, 50);
     leon2_timer_core_init(state, TIMER1_ADDR, 100);
     leon2_mcfg_init(MCFG_ADDR);

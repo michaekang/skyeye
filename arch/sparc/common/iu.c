@@ -97,7 +97,6 @@ extern sparc_instruction_t i_sra;
 extern sparc_instruction_t i_add;
 extern sparc_instruction_t i_addx;
 extern sparc_instruction_t i_addcc;
-/* david */
 extern sparc_instruction_t i_addxcc;
 extern sparc_instruction_t i_taddcctv;
 extern sparc_instruction_t i_tsubcc;
@@ -374,7 +373,6 @@ static void iu_isa_register(void)
     iu_i_register(&i_add);
     iu_i_register(&i_addx);
     iu_i_register(&i_addcc);
-    /* david */
     iu_i_register(&i_addxcc);
     iu_i_register(&i_taddcctv);
     iu_i_register(&i_tsubcc);
