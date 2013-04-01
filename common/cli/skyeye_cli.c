@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include "skyeye_cli.h"
 #include "sim_control.h"
-extern char *xmalloc ();
 
 #ifndef PARAMS
 #define PARAMS(protos) protos
@@ -62,16 +61,6 @@ char *stripwhite ();
 /* When non-zero, this global means the user is done using this program. */
 int done;
 
-char *
-dupstr (s)
-     char *s;
-{
-  char *r;
-
-  r = xmalloc (strlen (s) + 1);
-  strcpy (r, s);
-  return (r);
-}
 #if 0
 void cli_output(){
 }

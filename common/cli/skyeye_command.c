@@ -154,40 +154,6 @@ exception_t run_command(char* command_str){
 	return No_exp;
 }
 
-/* Generator function for command completion.  STATE lets us know whether
-   to start from scratch; without any state (i.e. STATE == 0), then we
-   start at the top of the list. */
-char *
-command_generator (text, state)
-     const char *text;
-     int state;
-{
-  //static int list_index, len;
-  char *name;
-  static int len;
-  static COMMAND * node;
-
-  /* If this is a new word to complete, initialize now.  This includes
-     saving the length of TEXT for efficiency, and initializing the index
-     variable to 0. */
-  if (!state)
-    {
-      len = strlen (text);
-      node = command_list;
-    }
-
-  /* Return the next name which partially matches from the command list. */
-  while (node && (name = node->name))
-    {
-      node = node->next;
-      if(strncmp (name, text, len) == 0)
-        return (dupstr(name));
-    }
-
-  /* If no names matched, then return NULL. */
-  return ((char *)NULL);
-}
-
 /* Print out help for ARG, or for all of the commands if ARG is
    not present. */
 int com_help (arg)
