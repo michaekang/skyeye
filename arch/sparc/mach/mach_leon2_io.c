@@ -303,8 +303,18 @@ void leon2_io_do_cycle(void * state)
  */
 uint32 leon2_io_read_byte(void * state, uint32 addr)
 {
-    IO_ERR;
-    return ERROR;
+	uint32 result = 0;
+
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->read(conf_obj, addr, &result, 1);
+	/* Read the data successfully */
+	if(ret == No_exp){
+		return result;
+	}
+
+	IO_ERR;
+	return ERROR;
 }
 
 /* 
@@ -319,8 +329,18 @@ uint32 leon2_io_read_byte(void * state, uint32 addr)
  */
 uint32 leon2_io_read_word (void * state, uint32 addr)
 {
-    IO_ERR;
-    return ERROR;
+	uint32 result = 0;
+
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->read(conf_obj, addr, &result, 2);
+	/* Read the data successfully */
+	if(ret == No_exp){
+		return result;
+	}
+
+	IO_ERR;
+	return ERROR;
 }
 
 /* 
@@ -370,9 +390,13 @@ uint32 leon2_io_read_long (void * state, uint32 addr)
  *      - v:        The value to be written
  * =====================================================================================
  */
-void leon2_io_write_byte (void * state, uint32 addr, uint32 v)
+exception_t leon2_io_write_byte (void * state, uint32 addr, uint32 data)
 {
-    IO_ERR;
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->write(conf_obj, addr, &data, 1);
+	/* write the data successfully */
+	return ret;
 }
 
 /* 
@@ -386,9 +410,13 @@ void leon2_io_write_byte (void * state, uint32 addr, uint32 v)
  *      - v:        The value to be written
  * =====================================================================================
  */
-void leon2_io_write_word (void * state, uint32 addr, uint32 v)
+exception_t leon2_io_write_word (void * state, uint32 addr, uint32 data)
 {
-    IO_ERR;
+	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
+	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
+	exception_t ret = phys_mem->memory_space->write(conf_obj, addr, &data, 2);
+	/* write the data successfully */
+	return ret;
 }
 
 /* 
@@ -402,7 +430,7 @@ void leon2_io_write_word (void * state, uint32 addr, uint32 v)
  *      - v:        The value to be written
  * =====================================================================================
  */
-void leon2_io_write_long (void * state, uint32 addr, uint32 data)
+exception_t leon2_io_write_long (void * state, uint32 addr, uint32 data)
 {
 	int i;
 	conf_object_t* conf_obj = get_conf_obj("leon2_mach_space");
@@ -410,7 +438,7 @@ void leon2_io_write_long (void * state, uint32 addr, uint32 data)
 	exception_t ret = phys_mem->memory_space->write(conf_obj, addr, &data, 4);
 	/* write the data successfully */
 	if(ret == No_exp){
-		return;
+		return No_exp;
 	}
 
 

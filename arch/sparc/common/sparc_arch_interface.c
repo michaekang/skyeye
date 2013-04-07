@@ -210,7 +210,6 @@ static int sparc_ICE_write_byte (generic_address_t addr, uint8_t v)
 #endif
 	return bus_write(8, addr, v);
 }
-
 /* 
  * ===  FUNCTION  ======================================================================
  *         Name:  sparc_ICE_read_byte
@@ -228,6 +227,61 @@ static int sparc_ICE_read_byte(generic_address_t addr, uint8_t *pv)
         return 0;   // success
 #endif
 	return bus_read(8, addr, pv);
+}
+
+exception_t sparc_mmu_read(short size, generic_address_t addr, uint32_t * value)
+{
+	int en_mmu = 0;
+	skyeye_config_t* config = get_current_config();
+	if(en_mmu){
+		//enable mmu 	
+	}else{
+		//read the physical address
+		switch(size){
+			case 4:
+				*value = config->mach->mach_io_read_word(NULL, addr);
+				break;
+			case 2:
+				*value = config->mach->mach_io_read_halfword(NULL, addr);
+				break;
+			case 1:
+				*value = config->mach->mach_io_read_byte(NULL, addr);
+				break;
+			default:
+				printf("In %s size is error!\n", __func__);
+				return Invarg_exp;
+		}
+	}
+	return No_exp;
+}
+
+exception_t sparc_mmu_write(short size, generic_address_t addr, uint32_t* value)
+{
+	int en_mmu = 0;
+	skyeye_config_t* config = get_current_config();
+	exception_t ret = Invarg_exp;
+	if(en_mmu){
+		//enable mmu 	
+	}else{
+		//write the physical address
+		switch(size){
+			case 4:
+				ret = config->mach->mach_io_write_word(NULL, addr, *value);
+				break;
+			case 2:
+				ret = config->mach->mach_io_write_halfword(NULL, addr, *value);
+				break;
+			case 1:
+				ret = config->mach->mach_io_write_byte(NULL, addr, *value);
+				break;
+			default:
+				printf("In %s size is error!\n", __func__);
+				ret = Invarg_exp;
+				break;
+		}
+	}
+
+	return ret;
 }
 
 static int sparc_parse_cpu (const char *param[])
@@ -527,6 +581,8 @@ void init_sparc_arch()
 	sparc_arch.get_regid_by_name= sparc_get_regid_by_name;
 	sparc_arch.get_step = sparc_get_step;
 	sparc_arch.get_regnum = sparc_get_regnum;
+	sparc_arch.mmu_read= sparc_mmu_read;
+	sparc_arch.mmu_write= sparc_mmu_write;
 
 	register_arch (&sparc_arch);
 }
