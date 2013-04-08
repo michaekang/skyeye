@@ -14,6 +14,7 @@ typedef struct skyeye_class{
 	char* class_desc;
 	conf_object_t* (*new_instance)(char* obj_name);
 	exception_t (*free_instance)(char* obj_name);
+	exception_t (*reset_instance)(conf_object_t* obj, const char* parameter);
 	attr_value_t* (*get_attr)(const char* attr_name, conf_object_t* obj);
 	exception_t (*set_attr)(const char* attr_name, conf_object_t* obj, attr_value_t);
 	char** interface_list;
