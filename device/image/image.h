@@ -29,12 +29,12 @@
 typedef struct image_ptr{
 	uint32_t start_addr;
 	uint32_t end_addr;
-	uint32_t* mem_ptr;
+	uint8_t* mem_ptr;
 }image_ptr_t;
 
 typedef struct image_module{
 	conf_object_t* obj;
-	image_ptr_t* image_ptr;		//256
+	uint8_t** image_ptr;		//256
 	uint32_t size;
 	uint8_t init_value;
 	char* file;

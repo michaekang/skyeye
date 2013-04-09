@@ -36,8 +36,9 @@
 #include <skyeye_log.h>
 
 #include "image.h"
+#define BANK_SIZE	0x1000000	//16M
 
-char* image_attr[] = {"size", "init_value", "files"};
+static char* image_attr[] = {"size", "init_value", "files"};
 static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t* value)
 {
 	image_module_t *dev = opaque->obj;
@@ -66,19 +67,61 @@ static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, 
 static exception_t image_read(conf_object_t *opaque, generic_address_t offset, void* buf, size_t count)
 {
 	image_module_t *dev = opaque->obj;
+	if(offset > dev->size){
+		printf("image is not enough!\n");
+		return Not_found_exp;
+	}
+	while(count > 0){
+		int index = offset / BANK_SIZE;
+		int bank_offset = offset % BANK_SIZE;
+		if(dev->image_ptr[index]){
+			*(char*)buf++ = (dev->image_ptr)[index][bank_offset];
+			count--; offset++;
+		}
+		else{
+			int malloc_size = dev->size - (index * BANK_SIZE);
+			if(malloc_size > BANK_SIZE)
+				dev->image_ptr[index] = skyeye_mm_zero(BANK_SIZE);
+			else{
+				dev->image_ptr[index] = skyeye_mm_zero(malloc_size);
+			}
+		}
+	}
+
 	return No_exp;
 }
 
-static exception_t image_write(conf_object_t *opaque, generic_address_t offset, uint32_t* buf, size_t count)
+static exception_t image_write(conf_object_t *opaque, generic_address_t offset, void* buf, size_t count)
 {
 	image_module_t *dev = opaque->obj;
+	if(offset > dev->size){
+		printf("image is not enough!\n");
+		return Not_found_exp;
+	}
+	while(count > 0){
+		int index = offset / BANK_SIZE;
+		int bank_offset = offset % BANK_SIZE;
+		if(dev->image_ptr[index]){
+			dev->image_ptr[index][bank_offset] = *(char*)buf++; 
+			count--; offset++;
+		}
+		else{
+			int malloc_size = dev->size - (index * BANK_SIZE);
+			if(malloc_size > BANK_SIZE)
+				dev->image_ptr[index] = skyeye_mm_zero(BANK_SIZE);
+			else{
+				dev->image_ptr[index] = skyeye_mm_zero(malloc_size);
+			}
+		}
+	}
+
 	return No_exp;
 }
 
 static conf_object_t* new_image(char* obj_name)
 {
 	image_module_t* dev= skyeye_mm_zero(sizeof(image_module_t));
-	image_ptr_t* image_ptr = skyeye_mm_zero(sizeof(image_ptr_t) * 256);
+	uint8_t** image_ptr = skyeye_mm_zero(sizeof(uint8_t*) * 256);
 	dev->image_ptr = image_ptr;
 	dev->obj = new_conf_object(obj_name, dev);
 
@@ -86,6 +129,7 @@ static conf_object_t* new_image(char* obj_name)
 	io_memory->read = image_read;
 	io_memory->write = image_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	
+
 	return dev->obj;
 }
 
