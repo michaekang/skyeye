@@ -24,6 +24,7 @@
 #include "skyeye_config.h"
 #include "skyeye_addr_space.h"
 #include "skyeye_uart_ops.h"
+#include "skyeye_attr.h"
 
 #include "../common/types.h"
 #include "../common/bits.h"
@@ -52,6 +53,9 @@ exception_t leon2_dev_init(void)
 	if(ret != No_exp){
 		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");
 	}
+	conf_object_t* image0 = pre_conf_obj("image0", "image");
+	attr_value_t* value = make_new_attr(Val_Integer, 0x100000);
+	ret = set_conf_attr(image0, "size", value);
 
 	return No_exp;
 }

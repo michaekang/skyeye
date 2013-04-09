@@ -38,36 +38,31 @@
 #include "image.h"
 
 char* image_attr[] = {"size", "init_value", "files"};
-static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t value)
+static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t* value)
 {
 	image_module_t *dev = opaque->obj;
 	int index;
-	char result[64];
 	//parse the parameter
 	for(index = 0; index < 3; index++){
 		if(!strncmp(attr_name, image_attr[index], strlen(image_attr[index])))
 			break;
 	}
-	int ret = 0;
 	switch(index){
 		case 0:
-			value.u.integer = strtoul(result, NULL, 0);
-			dev->size = value.u.integer;
-			printf("size 0x%x\n", value.u.integer);
+			dev->size = value->u.integer;
+			printf("size 0x%x\n", value->u.integer);
 			break;
 		case 1:
-			printf("init %s\n", result);
 			break;
 		case 2:
-			printf("files %s\n", result);
 			break;
 		default:
 			printf("parameter error\n");
 			return Invarg_exp;
-
 	}
 	return No_exp;
 }
+
 static exception_t image_read(conf_object_t *opaque, generic_address_t offset, void* buf, size_t count)
 {
 	image_module_t *dev = opaque->obj;
@@ -80,10 +75,12 @@ static exception_t image_write(conf_object_t *opaque, generic_address_t offset, 
 	return No_exp;
 }
 
-static conf_object_t* new_image(char* obj_name){
+static conf_object_t* new_image(char* obj_name)
+{
 	image_module_t* dev= skyeye_mm_zero(sizeof(image_module_t));
 	image_ptr_t* image_ptr = skyeye_mm_zero(sizeof(image_ptr_t) * 256);
 	dev->image_ptr = image_ptr;
+	dev->obj = new_conf_object(obj_name, dev);
 
 	memory_space_intf* io_memory = skyeye_mm_zero(sizeof(memory_space_intf));
 	io_memory->read = image_read;
@@ -117,7 +114,6 @@ static exception_t reset_image(conf_object_t* opaque, const char* args)
 		case 0:
 			ret = get_parameter(result, args, "size");
 			value.u.integer = strtoul(result, NULL, 0);
-			image_set_attr(opaque, "size", value);
 			printf("size %s\n", result);
 			break;
 		case 1:
@@ -143,7 +139,7 @@ void init_image(){
 		.free_instance = free_image,
 		.reset_instance = reset_image,
 		.get_attr = NULL,
-		.set_attr = NULL
+		.set_attr = image_set_attr 
 	};
 		
 	SKY_register_class(class_data.class_name, &class_data);

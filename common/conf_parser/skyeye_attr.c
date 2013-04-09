@@ -28,6 +28,7 @@
 #include <skyeye_mm.h>
 
 #include <skyeye_log.h>
+#include "skyeye_class.h"
 
 /**
 * @brief Register an attribute to the system
@@ -76,6 +77,7 @@ attr_value_t* SKY_get_attr(conf_object_t* conf_obj, const char* attr_name){
 *
 * @return 
 */
+
 set_attr_error_t SKY_set_attr(conf_object_t* conf_obj, const char* attr_name, attr_value_t* attr){
 	char attr_objname[MAX_OBJNAME];
 	if(strlen(conf_obj->objname) + strlen(attr_name) + 1 > MAX_OBJNAME){
@@ -101,7 +103,7 @@ set_attr_error_t SKY_set_attr(conf_object_t* conf_obj, const char* attr_name, at
 		return Set_error;
 	}
 }
-
+/*
 attr_value_t* make_new_attr(value_type_t type){
 	attr_value_t* attr = skyeye_mm(sizeof(attr_value_t));
 	attr->type = type;
@@ -112,3 +114,55 @@ attr_value_t* make_new_attr(value_type_t type){
 		return NULL;
 	}
 }
+*/
+exception_t set_conf_attr(conf_object_t* obj, char* attr_name, attr_value_t* value){
+	conf_object_t* class_obj = get_conf_obj(obj->class_name);
+	if(class_obj == NULL){
+		skyeye_log(Error_log, __FUNCTION__, "Can not find the object %s\n", obj->class_name);
+		return Invarg_exp;
+	}
+	skyeye_class_t* class_data = class_obj->obj;
+	if(class_data == NULL){
+		skyeye_log(Error_log, __FUNCTION__, "Can not find the class %s\n", obj->class_name);
+		return Invarg_exp;
+	}
+
+	int ret = class_data->set_attr(obj, attr_name, value);
+
+	return ret;
+}
+
+attr_value_t* make_new_attr(value_type_t type, void* value)
+{
+	attr_value_t* attr = skyeye_mm(sizeof(attr_value_t));
+	switch(type){
+		case Val_Invalid:
+			break;
+		case Val_String:
+			break;
+		case Val_Integer:
+			attr->type = type;
+			attr->u.integer = (int32_t)value;
+			break;
+		case Val_Floating:
+			break;
+		case Val_List:
+			break;
+		case Val_Data:
+			break;
+		case Val_Nil:
+			break;
+		case Val_Object:
+			break;
+		case Val_Dict:
+			break;
+		case Val_Boolean:
+			break;
+		case Val_ptr:
+			break;
+		default:
+			break;
+	}
+	return attr;
+}
+

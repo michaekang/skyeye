@@ -78,5 +78,6 @@ void SKY_register_attr(conf_object_t* obj, const char*  attr_name, attr_value_t*
 set_attr_error_t SKY_set_attr(conf_object_t* obj, const char* attr_name, attr_value_t* attr);
 
 attr_value_t* SKY_get_attr(conf_object_t* conf_obj, const char* attr_name);
-attr_value_t* make_new_attr(value_type_t type);
+//attr_value_t* make_new_attr(value_type_t type);
+attr_value_t* make_new_attr(value_type_t type, void* value);
 #endif

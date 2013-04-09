@@ -25,6 +25,7 @@
 #include "skyeye_obj.h"
 #include "skyeye_class.h"
 #include "skyeye_log.h"
+#include "skyeye_mm.h"
 void SKY_register_class(const char* name, skyeye_class_t* skyeye_class){
 	skyeye_log(Debug_log, __FUNCTION__, "register the class %s\n", name);
 	new_conf_object(name, skyeye_class);
@@ -44,5 +45,7 @@ conf_object_t* pre_conf_obj(const char* objname, const char* class_name){
 		return NULL;
 	}
 	conf_object_t* instance = class_data->new_instance(objname);
+
+	instance->class_name = skyeye_strdup(class_name);
 	return instance;
 }
