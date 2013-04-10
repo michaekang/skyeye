@@ -79,9 +79,9 @@ static exception_t image_read(conf_object_t *opaque, generic_address_t offset, v
 			count--; offset++;
 		}
 		else{
-			int malloc_size = dev->size - (index * BANK_SIZE);
-			printf("bank %d, malloc_size 0x%x\n", index, malloc_size);
-			if(malloc_size > BANK_SIZE)
+			uint32_t malloc_size = dev->size - (index * BANK_SIZE);
+			//printf("%s offset 0x%x addr 0x%x, malloc_size 0x%x\n", __func__, offset, index * BANK_SIZE, malloc_size);
+			if(malloc_size >= BANK_SIZE)
 				dev->image_ptr[index] = skyeye_mm_zero(BANK_SIZE);
 			else{
 				dev->image_ptr[index] = skyeye_mm_zero(malloc_size);
@@ -107,8 +107,9 @@ static exception_t image_write(conf_object_t *opaque, generic_address_t offset, 
 			count--; offset++;
 		}
 		else{
-			int malloc_size = dev->size - (index * BANK_SIZE);
-			if(malloc_size > BANK_SIZE)
+			uint32_t malloc_size = dev->size - (index * BANK_SIZE);
+			//printf("%s offset 0x%x addr 0x%x, malloc_size 0x%x\n", __func__, offset, index * BANK_SIZE, malloc_size);
+			if(malloc_size >= BANK_SIZE)
 				dev->image_ptr[index] = skyeye_mm_zero(BANK_SIZE);
 			else{
 				dev->image_ptr[index] = skyeye_mm_zero(malloc_size);
