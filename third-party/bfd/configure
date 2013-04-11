@@ -18901,6 +18901,12 @@ case "${host}" in
     WIN32LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   fi
   ;;
+*-*-mingw*)
+  if test "$enable_shared" = "yes"; then
+    WIN32LDFLAGS="-no-undefined -shared"
+    WIN32LIBADD="-Xlinker -L`pwd`/../libiberty -Xlinker -liberty -Xlinker -lstdc++ -Xlinker -lole32 -Xlinker -lmingwex -Xlinker -lmingw32 -Xlinker -lpthread -Xlinker -limagehlp -Xlinker -lgcc -Xlinker -lpsapi  -Xlinker -lshell32 -Xlinker -lmoldnamed -Xlinker -lgw32c -Xlinker -lkernel32 -Xlinker -lmsvcrt -Xlinker -lws2_32 -Xlinker -lwinmm -Xlinker -ladvapi32"
+  fi
+  ;;
 *-*-linux*)
   # We borrow WIN32LIBADD so that the shared libbfd won't depend on
   # libiberty.a.

@@ -48,12 +48,12 @@ if WIN32
 WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib -Xlinker -lcommon -Xlinker --export-all-symbol
 libgdbserver_la_LDFLAGS += $(WIN32_LD_COMMON)
 libbus_log_la_LDFLAGS += $(WIN32_LD_COMMON)
-libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker -lopcodes -Xlinker -lopcodes -Xlinker -liberty -Xlinker /mingw/bin/libbfd-2-18-50-20070907.dll
+libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker $(top_srcdir)/third-party/opcodes/.libs/libopcodes.a -Xlinker $(top_srcdir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll -Xlinker $(top_srcdir)/third-party/libiberty/pic/libiberty.a -Xlinker --export-all-symbol
 libos_supp_la_LDFLAGS += $(WIN32_LD_COMMON)
 libpmon_la_LDFLAGS += $(WIN32_LD_COMMON)
 libshutdown_la_LDFLAGS += $(WIN32_LD_COMMON)
 libcodecov_la_LDFLAGS  += $(WIN32_LD_COMMON)
-libpycli_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker /mingw/python26.dll
+libpycli_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker /mingw/libs/libpython27.a
 liblog_la_LDFLAGS += $(WIN32_LD_COMMON)
 else
 libdisasm_la_LDFLAGS += -L./$(top_builddir)/third-party/opcodes/.libs/ -L./$(top_builddir)/third-party/bfd/.libs/ -L./$(top_builddir)/third-party/libiberty/pic/ -lopcodes -lbfd -liberty

@@ -52,7 +52,7 @@ case $host in
     ;;
   *-*-mingw32*)
     CFLAGS="$CFLAGS -mms-bitfields -DWINVER=0x0501"
-    LIBS="$LIBS -Xlinker -lmsvcrt -Xlinker -lws2_32 -Xlinker -lwinmm -Xlinker -ladvapi32"
+    LIBS="$LIBS -Xlinker -lstdc++ -Xlinker -lole32 -Xlinker -lmingwex -Xlinker -lmingw32 -Xlinker -lpthread -Xlinker -limagehlp -Xlinker -lgcc -Xlinker -lpsapi  -Xlinker -lshell32 -Xlinker -lmoldnamed -Xlinker -lgw32c -Xlinker -lkernel32 -Xlinker -lmsvcrt -Xlinker -lws2_32 -Xlinker -lwinmm -Xlinker -ladvapi32"
     #dbct=true
     ;;
   *-*-cygwin*)
