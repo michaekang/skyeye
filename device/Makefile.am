@@ -16,6 +16,7 @@ dev_mfc_s3c6410 = mfc_s3c6410/mfc_s3c6410.c mfc_s3c6410/mfc_s3c6410_module.c
 dev_rtc_s3c6410 = rtc_s3c6410/rtc_s3c6410.c rtc_s3c6410/rtc_s3c6410_module.c
 dev_camif_s3c6410 = camif_s3c6410/camif_s3c6410.c camif_s3c6410/camif_s3c6410_module.c
 dev_image = image/image.c image/image_module.c
+dev_ram = ram/ram.c ram/ram_module.c
 
 #dev_flash = flash/armflash.c  flash/dev_flash_sst39lvf160.c flash/flash_module.c\
 #flash/dev_flash_am29.c  flash/dev_flash_intel.c  flash/skyeye_flash.c
@@ -94,6 +95,9 @@ libcamif_s3c6410_la_LDFLAGS = -module
 libimage_la_SOURCES = $(dev_image)
 libimage_la_LDFLAGS = -module
 
+libram_la_SOURCES = $(dev_ram)
+libram_la_LDFLAGS = -module
+
 libflash_la_SOURCES = $(dev_flash)
 libflash_la_LDFLAGS = -module
 
@@ -155,7 +159,7 @@ libuart_term_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 endif
 
 pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la libnandflash.la libsound.la liblcd.la libnet.la libts.la libpci.la
-pkglib_LTLIBRARIES += liblcd_s3c6410.la libsdhci_s3c6410.la libtouchscreen_s3c6410.la libsysctrl_s3c6410.la libgpio_s3c6410.la libspi_s3c6410.la libusbhost_s3c6410.la libac97_s3c6410.la libmfc_s3c6410.la libcamif_s3c6410.la librtc_s3c6410.la libleon2_uart.la libuart_term.la libimage.la
+pkglib_LTLIBRARIES += liblcd_s3c6410.la libsdhci_s3c6410.la libtouchscreen_s3c6410.la libsysctrl_s3c6410.la libgpio_s3c6410.la libspi_s3c6410.la libusbhost_s3c6410.la libac97_s3c6410.la libmfc_s3c6410.la libcamif_s3c6410.la librtc_s3c6410.la libleon2_uart.la libuart_term.la libimage.la libram.la
 
 if GTK_LCD
 pkglib_LTLIBRARIES += libgtk_lcd.la
