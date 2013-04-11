@@ -527,7 +527,7 @@ static conf_object_t* new_s3c6410_lcd(char* obj_name){
 	io_memory->write = s3c6410_fb_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);
 
-	dev->lcd_ctrl = make_new_attr(Val_ptr);
+	dev->lcd_ctrl = make_new_attr(Val_ptr, NULL);
 	SKY_register_attr(dev->obj, "lcd_ctrl_0", dev->lcd_ctrl);
 
 	//int timer_id;

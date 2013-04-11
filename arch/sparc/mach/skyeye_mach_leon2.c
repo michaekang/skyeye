@@ -54,9 +54,24 @@ exception_t leon2_dev_init(void)
 		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");
 	}
 	conf_object_t* image0 = pre_conf_obj("image0", "image");
-	attr_value_t* value = make_new_attr(Val_Integer, 0x100000);
+	attr_value_t* value = make_new_attr(Val_UInteger, 0x80000000);
 	ret = set_conf_attr(image0, "size", value);
 
+	conf_object_t* ram0= pre_conf_obj("ram0", "ram");
+	value = make_new_attr(Val_Object, image0);
+	ret = set_conf_attr(ram0, "image", value);
+	memory_space_intf* ram0_io_memory = (memory_space_intf*)SKY_get_interface(ram0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(phys_mem, 0x00000000, 0x80000000, 0x0, ram0_io_memory, 1, 1);
+
+	conf_object_t* image1 = pre_conf_obj("image1", "image");
+	value = make_new_attr(Val_UInteger, 0x2fffffff);
+	ret = set_conf_attr(image1, "size", value);
+
+	conf_object_t* ram1= pre_conf_obj("ram1", "ram");
+	value = make_new_attr(Val_Object, image1);
+	ret = set_conf_attr(ram1, "image", value);
+	memory_space_intf* ram1_io_memory = (memory_space_intf*)SKY_get_interface(ram1, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(phys_mem, 0xd0000000, 0x2fffffff, 0x0, ram1_io_memory, 1, 1);
 	return No_exp;
 }
 

@@ -30,6 +30,7 @@ typedef enum {
         Val_Invalid = -1,
         Val_String,
         Val_Integer,
+        Val_UInteger,
         Val_Floating,
         Val_List,
         Val_Data,
@@ -47,6 +48,7 @@ typedef struct attr_value {
         union {
                 const char *string;          /* Sim_Val_String */
                 integer_t integer;           /* Sim_Val_Integer */
+                integer_t uinteger;           /* Sim_Val_Integer */
                 bool_t boolean;                /* Sim_Val_Boolean */
                 double floating;             /* Sim_Val_Floating */
 
@@ -62,7 +64,7 @@ typedef struct attr_value {
                         uint8 *data;         /* [size] */
                 } data;
 
-                struct conf_object* object;       /* Sim_Val_Object */
+                conf_object_t* object;       /* Sim_Val_Object */
 		void* ptr;
         } u;
 } attr_value_t;

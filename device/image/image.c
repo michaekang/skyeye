@@ -50,8 +50,8 @@ static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, 
 	}
 	switch(index){
 		case 0:
-			dev->size = value->u.integer;
-			printf("size 0x%x\n", value->u.integer);
+			dev->size = value->u.uinteger;
+			printf("size 0x%x\n", value->u.uinteger);
 			break;
 		case 1:
 			break;
@@ -80,6 +80,7 @@ static exception_t image_read(conf_object_t *opaque, generic_address_t offset, v
 		}
 		else{
 			int malloc_size = dev->size - (index * BANK_SIZE);
+			printf("bank %d, malloc_size 0x%x\n", index, malloc_size);
 			if(malloc_size > BANK_SIZE)
 				dev->image_ptr[index] = skyeye_mm_zero(BANK_SIZE);
 			else{

@@ -144,6 +144,10 @@ attr_value_t* make_new_attr(value_type_t type, void* value)
 			attr->type = type;
 			attr->u.integer = (int32_t)value;
 			break;
+		case Val_UInteger:
+			attr->type = type;
+			attr->u.uinteger = (uint32_t)value;
+			break;
 		case Val_Floating:
 			break;
 		case Val_List:
@@ -153,12 +157,16 @@ attr_value_t* make_new_attr(value_type_t type, void* value)
 		case Val_Nil:
 			break;
 		case Val_Object:
+			attr->type = type;
+			attr->u.object= (conf_object_t*)value;
 			break;
 		case Val_Dict:
 			break;
 		case Val_Boolean:
 			break;
 		case Val_ptr:
+			attr->type = type;
+			attr->u.ptr= (void*)value;
 			break;
 		default:
 			break;

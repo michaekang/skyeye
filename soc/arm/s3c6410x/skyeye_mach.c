@@ -668,8 +668,7 @@ static conf_object_t* new_s3c6410_mach(char* obj_name){
 		conf_object_t* gtk_painter = pre_conf_obj("gtk_lcd_1", "gtk_lcd");
 
 		lcd_control_intf* lcd_ctrl = (lcd_control_intf*)SKY_get_interface(gtk_painter, LCD_CTRL_INTF_NAME);
-		attr_value_t* attr = make_new_attr(Val_ptr);
-		attr->u.ptr = lcd_ctrl;
+		attr_value_t* attr = make_new_attr(Val_ptr, lcd_ctrl);
 		/* set the attribute of lcd */
 		SKY_set_attr(lcd, "lcd_ctrl_0", attr);
 #endif

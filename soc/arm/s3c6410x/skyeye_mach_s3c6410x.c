@@ -1280,8 +1280,7 @@ s3c6410x_mach_init (void *arch_instance, machine_config_t *this_mach)
 			SKY_register_interface(android_if, sdl_painter->objname, ANDROID_INTF_NAME);
 
 			lcd_control_intf* lcd_ctrl = (lcd_control_intf*)SKY_get_interface(sdl_painter, LCD_CTRL_INTF_NAME);
-			attr_value_t* attr = make_new_attr(Val_ptr);
-			attr->u.ptr = lcd_ctrl;
+			attr_value_t* attr = make_new_attr(Val_ptr, lcd_ctrl);
 
 			mach_lcd_ctrl = lcd_ctrl;
 			/* set the attribute of lcd */
@@ -1307,8 +1306,7 @@ s3c6410x_mach_init (void *arch_instance, machine_config_t *this_mach)
 			SKY_register_interface(lcd_ts, gtk_painter->objname, LCD_TS_INTF_NAME);
 
 			lcd_control_intf* lcd_ctrl = (lcd_control_intf*)SKY_get_interface(gtk_painter, LCD_CTRL_INTF_NAME);
-			attr_value_t* attr = make_new_attr(Val_ptr);
-			attr->u.ptr = lcd_ctrl;
+			attr_value_t* attr = make_new_attr(Val_ptr, lcd_ctrl);
 
 			mach_lcd_ctrl = lcd_ctrl;
 			/* set the attribute of lcd */

@@ -309,12 +309,11 @@ uint32 leon2_io_read_byte(void * state, uint32 addr)
 	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
 	exception_t ret = phys_mem->memory_space->read(conf_obj, addr, &result, 1);
 	/* Read the data successfully */
-	if(ret == No_exp){
-		return result;
+	if(ret != No_exp){
+		printf("In %s addr 0x%x, data 0x%x\n", __func__, addr, result);
+		skyeye_exit(-1);
 	}
-
-	IO_ERR;
-	return ERROR;
+	return result;
 }
 
 /* 
