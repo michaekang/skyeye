@@ -128,6 +128,7 @@ static conf_object_t* new_image(char* obj_name)
 	dev->obj = new_conf_object(obj_name, dev);
 
 	memory_space_intf* io_memory = skyeye_mm_zero(sizeof(memory_space_intf));
+	io_memory->conf_obj = dev->obj;
 	io_memory->read = image_read;
 	io_memory->write = image_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	

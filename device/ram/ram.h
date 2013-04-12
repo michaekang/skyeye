@@ -26,9 +26,9 @@
 #ifndef __RAM_H__
 #define __RAM_H__
 
-typedef struct ram_module{
+typedef struct ram_device{
 	conf_object_t* obj;
 	memory_space_intf* image;
-}ram_module_t;
+}ram_device_t;
 
 #endif

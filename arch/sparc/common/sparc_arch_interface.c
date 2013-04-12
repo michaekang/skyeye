@@ -238,13 +238,13 @@ exception_t sparc_mmu_read(short size, generic_address_t addr, uint32_t * value)
 	}else{
 		//read the physical address
 		switch(size){
-			case 4:
+			case 32:
 				*value = config->mach->mach_io_read_word(NULL, addr);
 				break;
-			case 2:
+			case 16:
 				*value = config->mach->mach_io_read_halfword(NULL, addr);
 				break;
-			case 1:
+			case 8:
 				*value = config->mach->mach_io_read_byte(NULL, addr);
 				break;
 			default:
@@ -265,14 +265,14 @@ exception_t sparc_mmu_write(short size, generic_address_t addr, uint32_t* value)
 	}else{
 		//write the physical address
 		switch(size){
-			case 4:
-				ret = config->mach->mach_io_write_word(NULL, addr, *value);
+			case 32:
+				ret = config->mach->mach_io_write_word(NULL, addr, value);
 				break;
-			case 2:
-				ret = config->mach->mach_io_write_halfword(NULL, addr, *value);
+			case 16:
+				ret = config->mach->mach_io_write_halfword(NULL, addr, value);
 				break;
-			case 1:
-				ret = config->mach->mach_io_write_byte(NULL, addr, *value);
+			case 8:
+				ret = config->mach->mach_io_write_byte(NULL, addr, value);
 				break;
 			default:
 				printf("In %s size is error!\n", __func__);

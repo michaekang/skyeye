@@ -42,7 +42,7 @@
 static char* ram_attr[] = {"image"};
 static exception_t ram_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t* value)
 {
-	ram_module_t *dev = opaque->obj;
+	ram_device_t *dev = opaque->obj;
 	int index;
 	//parse the parameter
 	for(index = 0; index < 3; index++){
@@ -118,7 +118,7 @@ static exception_t ram_read_byte(conf_object_t *opaque, generic_address_t offset
 
 static exception_t ram_read(conf_object_t *opaque, generic_address_t offset, void* buf, size_t count)
 {
-	ram_module_t *dev = opaque->obj;
+	ram_device_t *dev = opaque->obj;
 	switch(count){
 		case 4:
 			return  ram_read_word(opaque, offset,  buf);
@@ -208,10 +208,11 @@ static exception_t ram_write(conf_object_t *opaque, generic_address_t offset, vo
 
 static conf_object_t* new_ram(char* obj_name)
 {
-	ram_module_t* dev= skyeye_mm_zero(sizeof(ram_module_t));
+	ram_device_t* dev= skyeye_mm_zero(sizeof(ram_device_t));
 	dev->obj = new_conf_object(obj_name, dev);
 
 	memory_space_intf* io_memory = skyeye_mm_zero(sizeof(memory_space_intf));
+	io_memory->conf_obj = dev->obj;
 	io_memory->read = ram_read;
 	io_memory->write = ram_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	
@@ -225,7 +226,7 @@ static void free_ram(conf_object_t* dev){
 
 static exception_t reset_ram(conf_object_t* opaque, const char* args)
 {
-	ram_module_t *dev = opaque->obj;
+	ram_device_t *dev = opaque->obj;
 	char result[64];
 	int index;
 	attr_value_t value;
@@ -235,7 +236,7 @@ static exception_t reset_ram(conf_object_t* opaque, const char* args)
 	}else{
 		//parse the parameter
 		for(index = 0; index < 3; index++){
-			if(!strncmp(args, ram_attr[index], strlen(image_attr[index])))
+			if(!strncmp(args, ram_attr[index], strlen(ram_attr[index])))
 				break;
 		}
 	}
@@ -245,7 +246,7 @@ static exception_t reset_ram(conf_object_t* opaque, const char* args)
 void init_ram(){
 	static skyeye_class_t class_data = {
 		.class_name = "ram",
-		.class_desc = "ram module",
+		.class_desc = "ram device",
 		.new_instance = new_ram,
 		.free_instance = free_ram,
 		.reset_instance = reset_ram,
