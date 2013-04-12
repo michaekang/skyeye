@@ -143,14 +143,6 @@ static conf_object_t* new_leon2_uart(char* obj_name)
 	/*  Clear the UART register   */
 	leon2_uart->obj = new_conf_object(obj_name, leon2_uart);
 
-	/*  Enable the transmitter and receiver by default  */
-	leon2_uart->regs.control.flag.transmitter_enable = 1;
-	leon2_uart->regs.control.flag.receiver_enable = 1;
-
-	/*  Indicate that the transmitter hold register is EMPTY    */
-	leon2_uart->regs.status.flag.transmitter_hold_register_empty = 1;
-	leon2_uart->regs.status.flag.transmitter_shift_register_empty = 1;
-
 	memory_space_intf* io_memory = skyeye_mm_zero(sizeof(memory_space_intf));
 	io_memory->conf_obj = leon2_uart->obj;
 	io_memory->read = leon2_uart_read;
@@ -170,12 +162,28 @@ static conf_object_t* new_leon2_uart(char* obj_name)
 	return leon2_uart->obj;
 }
 
+static exception_t reset_leon2_uart(conf_object_t* opaque, const char* args)
+{
+	leon2_uart_dev *dev = opaque->obj;
+	memset(&(dev->regs), 0, sizeof(dev->regs));
+	/*  Enable the transmitter and receiver by default  */
+	dev->regs.control.flag.transmitter_enable = 1;
+	dev->regs.control.flag.receiver_enable = 1;
+
+	/*  Indicate that the transmitter hold register is EMPTY    */
+	dev->regs.status.flag.transmitter_hold_register_empty = 1;
+	dev->regs.status.flag.transmitter_shift_register_empty = 1;
+
+	return No_exp;
+}
+
 void init_leon2_uart(){
 	static skyeye_class_t class_data = {
 		.class_name = "leon2_uart",
 		.class_desc = "leon2 uart",
 		.new_instance = new_leon2_uart,
-//		.free_instance = free_leon2_uart,
+		.reset_instance = reset_leon2_uart,
+		.free_instance = NULL,
 		.get_attr = NULL,
 		.set_attr = NULL
 	};
