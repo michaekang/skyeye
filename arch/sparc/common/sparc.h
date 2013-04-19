@@ -87,6 +87,7 @@ typedef struct _i
 typedef struct _iu_config
 {
     void (*iu_init_state)(void);
+    void (*iu_reset_state)(void);
     int (*iu_cycle_step)(void);     /*  returns the number of cycles consumed   */
     void (*iu_error_state)(void);
     int (*iu_trap_cycle)(void);

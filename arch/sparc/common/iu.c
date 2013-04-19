@@ -31,6 +31,7 @@
 #include "skyeye_config.h"
 
 static void iu_init_state(void);
+static void iu_reset_state(void);
 static int  iu_cycle_step(void);
 static void iu_error_state(void);
 static sparc_instruction_t *iu_get_instr(uint32 instr);
@@ -58,6 +59,7 @@ static struct _i_set *i_set[FORMAT_TYPES];
 
 static iu_config_t iu_config = {
    iu_init_state,
+   iu_reset_state,
    iu_cycle_step,
    iu_error_state,
    iu_trap_cycle,
@@ -210,8 +212,8 @@ int init_sparc_iu(void)
  */
 static void iu_init_state(void)
 {
+#if 0
     int i;
-    sparc_state_t *state = &sparc_state;
 
     DBG("%s(): IU initialization\n", __func__);
 
@@ -242,7 +244,6 @@ static void iu_init_state(void)
 	printf("fp and sp should be initialized here.\n");
 	REG(FP) = (0x40000000 + 0x040000) & 0xFFFFFFF0;
 	REG(SP) = REG(FP) - 0x180;
-#if 0
     for(i = 0; i < mem_bank_list.num_banks; ++i)
     {
         if (!strncmp ("ram", mem_bank_list.mb[i].bank_name, strlen ("ram")))
@@ -255,15 +256,48 @@ static void iu_init_state(void)
         }
     }
 #endif
-
-
-
+    int i;
+    for( i = 0; i < FORMAT_TYPES; ++i)
+        i_count[i] = 0;
+    sparc_state_t *state = &sparc_state;
     /*  Register the trap handling  */
     traps = &trap_handle;
     /*  initialize the trap handing. The processor state is needed  */
     traps->init(state);
 
     iu_isa_register();
+}
+
+static void iu_reset_state(void)
+{
+    sparc_state_t *state = &sparc_state;
+
+    state->irq_pending = 0;
+    state->cycle_counter = 0;
+    state->regwptr[0] = &state->global[0];
+    state->regwptr[1] = state->regbase + (0 * 16);  /*  we start in the cwp = 0 */
+    PSRREG = 0xf2000000;
+    WIMREG = 0x2;
+
+    /*  
+     *  Put the processor in supervisor mode, S=1 PS=1
+     *  Enable the traps
+     *  Enable the floating point unit
+     */
+    set_bit(PSRREG, PSR_S);
+    set_bit(PSRREG, PSR_PS);
+    set_bit(PSRREG, PSR_ET);
+    set_bit(PSRREG, PSR_EF);
+    
+
+    /*  initialize the %sp and %fp pointers to the end of the RAM to allow
+     *  execution from RAM space.
+     *  Some operating systems (RTEMS) assumes %sp to point before the end of
+     *  the RAM. So we initialize the %fp to the end_of_RAM and the %sp to
+     *  the end_of_RAM - 16 bytes   */
+	printf("fp and sp should be initialized here.\n");
+	REG(FP) = (0x40000000 + 0x040000) & 0xFFFFFFF0;
+	REG(SP) = REG(FP) - 0x180;
 }
 
 static inline int iu_trap_cycle(void)

@@ -131,16 +131,17 @@ void sparc_init_state(void)
 void sparc_reset_state(void)
 {
     //  I/O initialization
-#if 0
-    if( skyeye_config.mach->mach_io_reset )
-        skyeye_config.mach->mach_io_reset(skyeye_config.mach);
+    skyeye_config_t* config = get_current_config();
+#if 1
+    if( config->mach->mach_io_reset )
+        config->mach->mach_io_reset(config->mach);
     else
     {
         SKYEYE_ERR("mach_io_reset is NULL.\n");
         skyeye_exit(-1);
     }
 #endif
-	DBG("In %s, the above code not finished porting.\n", __FUNCTION__);
+    iu->iu_reset_state();
 }
 
 /* 
