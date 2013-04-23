@@ -394,6 +394,18 @@ int com_load_conf(char* arg){
 	return 0;
 }
 
+
+int com_reset(char* arg){
+	generic_arch_t* arch_instance = get_arch_instance("");
+	skyeye_config_t* config = get_current_config();
+	/* reset current arch_instanc */
+	arch_instance->reset();
+	/* reset all the values of mach */
+	config->mach->mach_io_reset(config->mach);
+
+	return 0;
+}
+
 int com_set_all(char* arg)
 {
 	char* info_target[] = {"reg", "addr"};

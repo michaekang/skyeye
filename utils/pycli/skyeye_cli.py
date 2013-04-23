@@ -345,6 +345,10 @@ class SkyEyeCli(cmd.Cmd):
 #        print "outline x"
         libcommon.com_x(arg)
 
+    def do_reset(self, arg):
+#        print "outline reset"
+        libcommon.com_reset(arg)
+
     def do_pmon(self, arg):
 #        print "outline pmon"
         libpmon.com_pmon(arg)
