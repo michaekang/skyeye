@@ -130,9 +130,9 @@ void sparc_init_state(void)
  */
 void sparc_reset_state(void)
 {
+#if 0
     //  I/O initialization
     skyeye_config_t* config = get_current_config();
-#if 1
     if( config->mach->mach_io_reset )
         config->mach->mach_io_reset(config->mach);
     else

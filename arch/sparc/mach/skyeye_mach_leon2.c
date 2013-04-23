@@ -36,17 +36,17 @@
 /*-----------------------------------------------------------------------------
  *  PUBLIC INTERFACE
  *-----------------------------------------------------------------------------*/
-exception_t leon2_dev_init(void)
+exception_t leon2_dev_init(machine_config_t * mach)
 {
 	exception_t ret;
 	DBG_leon2("In %s, Line %d init leon2 deivce\n", __func__, __LINE__);
 	/* The whole address space */
-	addr_space_t* phys_mem = new_addr_space("leon2_mach_space");
+	mach->phys_mem= new_addr_space("leon2_mach_space");
 	conf_object_t* uart_term0 = pre_conf_obj("uart_term_0", "uart_term");
 
 	conf_object_t* uart0 = pre_conf_obj("leon2_uart_0", "leon2_uart");
 	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
-	ret = add_map(phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
+	ret = add_map(mach->phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
 	/* register interface for uart */
 	SKY_set_interface(uart_term0, uart0, SKYEYE_UART_INTF);
 
@@ -61,7 +61,7 @@ exception_t leon2_dev_init(void)
 	value = make_new_attr(Val_Object, image0);
 	ret = set_conf_attr(ram0, "image", value);
 	memory_space_intf* ram0_io_memory = (memory_space_intf*)SKY_get_interface(ram0, MEMORY_SPACE_INTF_NAME);
-	ret = add_map(phys_mem, 0x00000000, 0x80000000, 0x0, ram0_io_memory, 1, 1);
+	ret = add_map(mach->phys_mem, 0x00000000, 0x80000000, 0x0, ram0_io_memory, 1, 1);
 
 	conf_object_t* image1 = pre_conf_obj("image1", "image");
 	value = make_new_attr(Val_UInteger, 0x2fffffff);
@@ -71,7 +71,7 @@ exception_t leon2_dev_init(void)
 	value = make_new_attr(Val_Object, image1);
 	ret = set_conf_attr(ram1, "image", value);
 	memory_space_intf* ram1_io_memory = (memory_space_intf*)SKY_get_interface(ram1, MEMORY_SPACE_INTF_NAME);
-	ret = add_map(phys_mem, 0xd0000000, 0x2fffffff, 0x0, ram1_io_memory, 1, 1);
+	ret = add_map(mach->phys_mem, 0xd0000000, 0x2fffffff, 0x0, ram1_io_memory, 1, 1);
 	return No_exp;
 }
 
@@ -115,5 +115,5 @@ void leon2_mach_init(void * arch_instance, machine_config_t * mach)
 	this_mach->mach_io_do_cycle = leon2_io_do_cycle;
 	this_mach->mach_io_reset = leon2_io_reset;
 	this_mach->mach_set_intr = leon2_set_int;
-	leon2_dev_init();
+	leon2_dev_init(this_mach);
 }

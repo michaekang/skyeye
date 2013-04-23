@@ -17,6 +17,7 @@
 #include <skyeye_addr_space.h>
 #include <skyeye_mm.h>
 #include "skyeye_obj.h"
+#include "skyeye_class.h"
 
 
 exception_t add_map(addr_space_t* space, generic_address_t base_addr, generic_address_t length, generic_address_t start, memory_space_intf* memory_space, int priority, int swap_endian){
@@ -72,6 +73,28 @@ static exception_t space_write(conf_object_t* addr_space, generic_address_t addr
 	return Not_found_exp;
 }
 
+exception_t space_obj_reset(addr_space_t* addr_space, const char* obj_name){
+	conf_object_t* obj = NULL;	/* device object */
+	conf_object_t* class_obj = NULL;
+	skyeye_class_t* class_data = NULL;
+	if(obj_name != NULL){
+		//reset obj_name;
+		return No_exp;
+	}
+	// reset all object;
+	int i = 0;
+	for(; i < MAX_MAP; i++){
+		map_info_t* iterator = addr_space->map_array[i];
+		if(iterator == NULL)
+			continue;
+		obj =iterator->memory_space->conf_obj;
+		class_obj = get_conf_obj(obj->class_name);
+		class_data = class_obj->obj;
+		if(class_data->reset_instance)
+			class_data->reset_instance(obj, NULL);
+	}
+	return No_exp;
+}
 /**
 * @brief new instance for addr_space_t, Note that the instance is put to conf_obj hash table.
 *
