@@ -26,6 +26,7 @@
 
 #include "skyeye_addr_space.h"
 #include "skyeye_mach.h"
+#include "skyeye_config.h"
 #include "../common/types.h"
 #include "../common/bits.h"
 #include "../common/sparc.h"
@@ -463,7 +464,8 @@ exception_t leon2_io_write_long (void * state, uint32 addr, uint32 data)
  */
 void leon2_io_reset(void *state)
 {
-	addr_space_t* addr_space = ((machine_config_t*)state)->phys_mem;
+	skyeye_config_t* config = get_current_config();
+	addr_space_t* addr_space = config->mach->phys_mem;
 	space_obj_reset(addr_space, NULL);
 #if 0
     io_devices = 0;

@@ -398,10 +398,15 @@ int com_load_conf(char* arg){
 int com_reset(char* arg){
 	generic_arch_t* arch_instance = get_arch_instance("");
 	skyeye_config_t* config = get_current_config();
+	/* get the current preference for simulator */
+	sky_pref_t *pref = get_skyeye_pref();
 	/* reset current arch_instanc */
 	arch_instance->reset();
 	/* reset all the values of mach */
-	config->mach->mach_io_reset(config->mach);
+	config->mach->mach_io_reset(arch_instance);
+	generic_address_t pc = (config->start_address & pref->exec_load_mask)|pref->exec_load_base;
+	skyeye_log(Info_log, __FUNCTION__, "Set PC to the address 0x%x\n", pc);
+	arch_instance->set_pc(pc);
 
 	return 0;
 }

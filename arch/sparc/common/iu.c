@@ -271,6 +271,7 @@ static void iu_init_state(void)
 static void iu_reset_state(void)
 {
     sparc_state_t *state = &sparc_state;
+    memset(state, 0, sizeof(sparc_state_t));
 
     state->irq_pending = 0;
     state->cycle_counter = 0;
