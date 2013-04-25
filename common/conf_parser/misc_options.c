@@ -30,6 +30,8 @@
 #include "skyeye_types.h"
 #include "skyeye_callback.h"
 #include "skyeye_loader.h"
+#include "skyeye_types.h"
+#include "skyeye_mm.h"
 #ifdef DBCT_TEST_SPEED
 int
 do_dbct_test_speed_sec(struct skyeye_option_t *this_opion, int num_params, const char *params[])
@@ -50,6 +52,8 @@ error_out:
 }
 #endif	//DBCT_TEST_SPEED
 //AJ2D--------------------------------------------------------------------------
+//collect the param from args and save the value into result
+int get_parameter(char* result, char* args, const char* param);
 
 /* set values for some register */
 int
@@ -196,5 +200,38 @@ do_load_file_option (skyeye_option_t * this_option, int num_params,
 	/* FIXME, we should update load_base and load_mask to preference of SkyEye */
 	load_files_list.load_file_num ++;
 	//printf("Your elf file will be load to: base address=0x%x,mask=0x%x\n", load_base, load_mask);
+	return 0;
+}
+
+/**
+* @brief load elf into memory
+*
+* @param this_option
+* @param num_params
+* @param params[]
+*
+* @return 
+*/
+int
+do_load_elf_option (skyeye_option_t * this_option, int num_params,
+		const char *params[])
+{
+	char result[64];
+	exception_t ret;
+	if(num_params != 1)
+	{
+		printf("In %s, Line %d parameter error!\n", __func__, __LINE__);
+		return -1;
+	}
+	sky_pref_t *pref = get_skyeye_pref();
+	generic_arch_t *arch_instance = get_arch_instance("");
+	if (!strncmp (params[num_params - 1], "filename", strlen ("filename"))) {
+		get_parameter(result, params[num_params - 1], "filename");
+		pref->exec_file = skyeye_strdup(result);
+	}else{
+		printf("In %s, Line %d parameter error!\n", __func__, __LINE__);
+		return -1;
+	}
+	
 	return 0;
 }

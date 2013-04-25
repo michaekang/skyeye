@@ -234,6 +234,12 @@ void SIM_start(void){
 			ret = SKY_load_elf(pref->exec_file, Virt_addr);
 		else
 			ret = SKY_load_elf(pref->exec_file, Phys_addr);
+		if(ret == No_exp){
+			printf("load elf %s succeed\n", pref->exec_file);
+		}else{
+			printf("load elf %s fault\n", pref->exec_file);
+			return;
+		}
 	}
 #ifndef __WIN32__
 	init_symbol_table(pref->exec_file, arch_instance->arch_name);
