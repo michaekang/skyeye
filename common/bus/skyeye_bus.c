@@ -26,6 +26,7 @@
 #include "skyeye_config.h"
 #include "skyeye_options.h"
 #include "skyeye_log.h"
+#include "skyeye_mm.h"
 #include "bank_defs.h"
 #include "io.h"
 #include "skyeye_ram.h"
@@ -42,6 +43,7 @@
 */
 static int 
 parse_mem(int num_params, const char* params[]);
+int get_parameter(char* result, char* args, const char* param);
 
 /**
 * @brief the handler of memory bank option
@@ -61,11 +63,57 @@ do_bus_bank_option (skyeye_option_t * this_option, int num_params,
 
 static void insert_bank(mem_bank_t* bank);
 
+char *ram_params[] = {"name", "type", "map", "addr", "size"};
+static int do_ram_option (skyeye_option_t * this_option,
+	       	int num_params, const char *params[])
+{
+	skyeye_config_t* config = get_current_config();
+	int32_t bank_num = config->mach->mem.bank_num;
+	char result[64];
+	int i, j;
+	for(i = 0; i < 5; i++){
+		for(j = 0; j < num_params; j++){
+			if(!strncmp(params[j], ram_params[i], strlen(ram_params[i]))){
+				switch(i){
+					case 0:
+						//name
+						get_parameter(result, params[j], "name");
+						config->mach->mem.mem_banks[bank_num].objname = skyeye_strdup(result);
+						break;
+					case 1:
+						//type
+						break;
+					case 2:
+						//map
+						break;
+					case 3:
+						//addr
+						get_parameter(result, params[j], "addr");
+						config->mach->mem.mem_banks[bank_num].addr = strtoul(result, NULL, 0);
+						break;
+					case 4:
+						//size
+						get_parameter(result, params[j], "size");
+						config->mach->mem.mem_banks[bank_num].len = strtoul(result, NULL, 0);
+						break;
+					default:
+						break;
+				}
+				break;
+			}
+		}
+	}
+	config->mach->mem.bank_num++;
+
+	return 0;
+}
+
 /**
 * @brief initiliztion the memory bank
 */
 void init_bus(){
 	register_option("mem_bank", do_mem_bank_option, "");
+	register_option("ram", do_ram_option, "instance ram class in skyeye.conf");
 	mem_config_t *mc = get_global_memmap();
 	memset(mc, 0, sizeof(mem_config_t));
 	//register_option("mem_bank", do_bus_bank_option, "");
@@ -182,13 +230,13 @@ parse_mem(int num_params, const char* params[])
 		}
 		else if (!strncmp ("file", name, strlen (name))) {
 			strncpy (mb.filename, value, strlen (value) + 1);
-		}
-		else if (!strncmp ("boot", name, strlen (name))) {
+		}else if (!strncmp ("name", name, strlen (name))) {
+			/* the name is for sparc project */
+		}else if (!strncmp ("boot", name, strlen (name))) {
 			/*this must be the last parameter. */
 			if (!strncmp ("yes", value, strlen (value)))
 				config->start_address = mb.addr;
-		}
-		else {
+		}else {
 			SKYEYE_ERR
 				("Error: mem_bank %d has unknow parameter \"%s\".\n",
 				 i, name);

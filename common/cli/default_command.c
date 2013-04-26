@@ -11,6 +11,7 @@
 #include "skyeye_pref.h"
 #include "skyeye_arch.h"
 #include "bank_defs.h"
+#include "skyeye_mm.h"
 #include "default_command.h"
 //#include "arm_regformat.h"
 /*
@@ -382,6 +383,7 @@ int com_info(char* arg){
 
 int com_load_conf(char* arg){
 	exception_t ret;
+	sky_pref_t *pref = get_skyeye_pref();
 	if ((ret = skyeye_read_config(arg)) != No_exp){
 		if(ret == Conf_format_exp){
 			printf("Can not parse the config file  %s correctly.\n ", arg);
@@ -391,6 +393,8 @@ int com_load_conf(char* arg){
 		else
 			printf("Unknown error when read config from the file %s\n", arg);
 	}
+	pref->conf_filename = NULL;
+
 	return 0;
 }
 

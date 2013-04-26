@@ -23,6 +23,7 @@
 #define __SKYEYE_MACH_H__
 #include "skyeye_types.h"
 #include "skyeye_signal.h"
+#include "bank_defs.h"
 #include "skyeye_addr_space.h"
 
 #ifdef __cplusplus
@@ -84,6 +85,7 @@ typedef struct machine_config
 
 	conf_object_t* cpu_data;			/* The pointer to cpu data */
 	addr_space_t* phys_mem;
+	mem_config_t mem;			/* A machine's rams */
 } machine_config_t;
  
 typedef	void (*mach_init_t) (void * state, struct machine_config * this_mach);	/*should be called when machine initialization */
