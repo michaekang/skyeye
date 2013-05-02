@@ -131,6 +131,14 @@ if test "x${ENABLE_TARGETS}" = "xdefault_arch" ; then
     DEFAULT_TARGET_1="arm"
     DEFAULT_TARGET_2="ppc"
 fi
+#check compile target
+SYSTEMC_DIR="none"
+SYSTEMC_ENABLE=NONE
+AC_ARG_WITH([systemc],
+        AC_HELP_STRING([--with-systemc=DIR],[Build with systemc]),
+    [SYSTEMC_DIR="${withval}"])
+AC_SUBST(SYSTEMC_DIR)
+AM_CONDITIONAL([SYSTEMC_ENABLE], [test "${SYSTEMC_DIR}" != "none"])
 
 # check LCD
 LCD_CFLAGS=

@@ -39,8 +39,8 @@ SUBDIRS += arch/x86
 endif
 
 if BUILD_DEFAULT
-SUBDIRS += arch/ppc arch/arm soc/arm arch/sparc
-default_targets=arm, ppc, sparc
+SUBDIRS += arch/ppc arch/arm soc/arm
+default_targets=arm, ppc
 endif
 
 if BUILD_ALL
@@ -80,6 +80,15 @@ ACLOCAL_AMFLAGS=-I m4
 
 bin_PROGRAMS += skyeye
 skyeye_SOURCES = utils/main/skyeye.c
+
+if SYSTEMC_ENABLE
+INCLUDES += -Iarch/arm/common/systemc/ -Iarch/arm/common -I$(SYSTEMC_DIR)/include/
+DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+bin_PROGRAMS += skyeye_systemc
+skyeye_systemc_SOURCES = utils/main/skyeye_systemc.cpp
+skyeye_systemc_LDFLAGS = -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc -L$(top_builddir)/common -lcommon
+endif
+
 if WIN32
 uart_instance_SOURCES =
 mknandflashdump_SOURCES =
