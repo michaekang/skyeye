@@ -130,6 +130,7 @@ AM_CONDITIONAL([BUILD_DEFAULT], [test "${ENABLE_TARGETS}" = "default_arch"])
 if test "x${ENABLE_TARGETS}" = "xdefault_arch" ; then
     DEFAULT_TARGET_1="arm"
     DEFAULT_TARGET_2="ppc"
+    DEFAULT_TARGET_3="sparc"
 fi
 
 # check LCD
@@ -346,6 +347,7 @@ else
     if test "x${ENABLE_TARGETS}" = "xdefault_arch" ; then
         AC_CONFIG_FILES(arch/${DEFAULT_TARGET_1}/Makefile)
         AC_CONFIG_FILES(arch/${DEFAULT_TARGET_2}/Makefile)
+        AC_CONFIG_FILES(arch/${DEFAULT_TARGET_3}/Makefile)
         #AC_MSG_ERROR([???? value ${ENABLE_TARGETS} for --enable-targets])
         #AC_MSG_WARN([???? value ${DEFAULT_TARGET_1} for --enable-targets])
     else
