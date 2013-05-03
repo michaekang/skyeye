@@ -95,6 +95,27 @@ exception_t space_obj_reset(addr_space_t* addr_space, const char* obj_name){
 	}
 	return No_exp;
 }
+
+exception_t space_obj_free(addr_space_t* addr_space){
+	conf_object_t* obj = NULL;	/* device object */
+	conf_object_t* class_obj = NULL;
+	skyeye_class_t* class_data = NULL;
+	// free all object;
+	int i = 0;
+	for(; i < MAX_MAP; i++){
+		map_info_t* iterator = addr_space->map_array[i];
+		if(iterator == NULL)
+			continue;
+		obj =iterator->memory_space->conf_obj;
+		if(obj == NULL)
+			continue;
+		class_obj = get_conf_obj(obj->class_name);
+		class_data = class_obj->obj;
+		if(class_data->free_instance)
+			class_data->free_instance(obj);
+	}
+	return No_exp;
+}
 /**
 * @brief new instance for addr_space_t, Note that the instance is put to conf_obj hash table.
 *

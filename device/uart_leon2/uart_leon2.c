@@ -177,13 +177,18 @@ static exception_t reset_leon2_uart(conf_object_t* opaque, const char* args)
 	return No_exp;
 }
 
+static void free_leon2_uart(conf_object_t* dev)
+{
+	printf("In %s Line %d\n", __func__, __LINE__);
+}
+
 void init_leon2_uart(){
 	static skyeye_class_t class_data = {
 		.class_name = "leon2_uart",
 		.class_desc = "leon2 uart",
 		.new_instance = new_leon2_uart,
 		.reset_instance = reset_leon2_uart,
-		.free_instance = NULL,
+		.free_instance = free_leon2_uart,
 		.get_attr = NULL,
 		.set_attr = NULL
 	};

@@ -414,6 +414,13 @@ int com_reset(char* arg){
 
 	return 0;
 }
+exception_t space_obj_free(addr_space_t* addr_space);
+
+int com_restart(char* arg){
+	skyeye_config_t* config = get_current_config();
+	space_obj_free(config->mach->phys_mem);
+	return 0;
+}
 
 int com_set_all(char* arg)
 {
