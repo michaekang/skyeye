@@ -104,8 +104,6 @@ int default_bus_read(short size, generic_address_t addr, uint32_t * value){
 		return -1;
 		//skyeye_exit(-1);
 	}
-	bus_snoop(SIM_access_read, size ,addr, *value, After_act);
-	exec_callback(Bus_read_callback, arch_instance);
 	return 0;	
 }
 
@@ -140,8 +138,6 @@ int default_bus_write(short size, generic_address_t addr, uint32_t value){
 		return 0;
 	}
 	
-	bus_snoop(SIM_access_write, size ,addr, value, Before_act);
-	exec_callback(Bus_write_callback, arch_instance);
         if(bank = bank_ptr(addr))
                 bank->bank_write(size, addr, value);
         else{
