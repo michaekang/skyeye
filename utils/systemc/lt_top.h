@@ -10,7 +10,7 @@ class Lt_top
 public:
 	//Lt_top();
 	Lt_top(sc_core::sc_module_name module_name);
-	~Lt_top();
+	~Lt_top(){};
 
 	Lt_target mem_target;
 	sc_skyeye_arm arm_initiator;

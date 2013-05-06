@@ -13,6 +13,7 @@ Lt_top::Lt_top(sc_core::sc_module_name module_name)
 ("arm_initiator"
 )
 {
+	printf("In %s\n", __FUNCTION__);
 	arm_initiator.trans_ptr->initiator_socket.bind(mem_target.memop_socket);
 };
 #endif
