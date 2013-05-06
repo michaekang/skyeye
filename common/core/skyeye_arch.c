@@ -47,6 +47,12 @@ static generic_arch_t* running_arch_list;
 */
 static char *default_arch_name = "arm";
 
+void
+reset_arch(void)
+{
+	memset(skyeye_archs, 0, sizeof(skyeye_archs));
+	return;
+}
 /**
 * @brief used to register a supported architecture to skyeye
 *

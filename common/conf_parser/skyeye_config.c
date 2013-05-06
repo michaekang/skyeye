@@ -54,6 +54,17 @@ skyeye_config_t* get_current_config(){
 }
 
 /**
+* @brief reset the skyeye config
+*
+* @return 
+*/
+void reset_skyeye_config(void){
+	memset(&skyeye_config, 0, sizeof(skyeye_config));
+	return;
+}
+
+
+/**
 * @brief used to parse the unformatted line in config file
 *
 * @param line

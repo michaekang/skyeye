@@ -81,6 +81,24 @@ static void cell_running(conf_object_t* argp){
 }
 
 /**
+* @brief free all cells in cell list
+*
+* @param cell
+*/
+void del_from_cell(void){
+	struct skyeye_exec_s *iterator;
+	if(default_cell == NULL)
+		return;
+	skyeye_cell_t* cell = default_cell;
+	assert(cell != NULL);
+	generic_arch_t *arch_instance = get_arch_instance(NULL);
+	LIST_FOREACH(iterator, &cell->exec_head,list_entry){
+		LIST_REMOVE(iterator, list_entry);
+	}
+}
+
+
+/**
 * @brief create a new cell with its thread
 *
 * @param cell
@@ -115,6 +133,7 @@ skyeye_cell_t* get_default_cell(){
 * @param exec
 */
 void add_to_default_cell(skyeye_exec_t* exec){
+	printf("In %s Line %d \n", __func__, __LINE__);
 	add_to_cell(exec, get_default_cell());
 }
 /**
