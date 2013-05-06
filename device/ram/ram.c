@@ -220,8 +220,21 @@ static conf_object_t* new_ram(char* obj_name)
 	return dev->obj;
 }
 
-static void free_ram(conf_object_t* dev){
-	
+static void free_ram(conf_object_t* conf_obj){
+	printf("In %s, Line %d\n", __func__, __LINE__);
+	ram_device_t* dev = conf_obj->obj;
+	conf_object_t* conf_image = dev->image->conf_obj;
+	if(conf_image == NULL)
+		return;
+	conf_object_t* class_obj = get_conf_obj(conf_image->class_name);
+	skyeye_class_t* class_data = class_obj->obj;
+	/* free ram's attrabute : image */
+	if(class_data->free_instance)
+		class_data->free_instance(conf_image);
+	/* free image's interface */
+	skyeye_free(dev->image);
+	skyeye_free(dev->obj);
+	skyeye_free(dev);
 }
 
 static exception_t reset_ram(conf_object_t* opaque, const char* args)

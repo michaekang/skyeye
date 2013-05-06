@@ -136,8 +136,16 @@ static conf_object_t* new_image(char* obj_name)
 	return dev->obj;
 }
 
-static void free_image(conf_object_t* dev){
-	
+static void free_image(conf_object_t* conf_obj){
+        printf("In %s, Line %d\n", __func__, __LINE__);
+	int index = 0;
+	image_module_t* dev = conf_obj->obj;
+	for(index = 0; index < 256; index++)
+		if(dev->image_ptr[index])
+			skyeye_free(dev->image_ptr[index]);
+	skyeye_free(dev->image_ptr);
+	skyeye_free(dev->obj);
+	skyeye_free(dev);
 }
 
 static exception_t reset_image(conf_object_t* opaque, const char* args)

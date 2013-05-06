@@ -109,6 +109,7 @@ exception_t space_obj_free(addr_space_t* addr_space){
 		obj =iterator->memory_space->conf_obj;
 		if(obj == NULL)
 			continue;
+		printf("free object %s\n", obj->objname);
 		class_obj = get_conf_obj(obj->class_name);
 		class_data = class_obj->obj;
 		if(class_data->free_instance)

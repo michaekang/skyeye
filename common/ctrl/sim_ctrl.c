@@ -364,6 +364,30 @@ void SIM_fini(){
 	return;
 	//exit(0);
 }
+exception_t space_obj_free(addr_space_t* addr_space);
+void SIM_restart(void){
+	sky_pref_t *pref = get_skyeye_pref();
+	skyeye_config_t* config = get_current_config();
+	space_obj_free(config->mach->phys_mem);
+	//pthread_cancel();
+	generic_arch_t* arch_instance = get_arch_instance("");
+	SIM_stop(arch_instance);
+	/* Call SIM_exit callback */
+	exec_callback(SIM_exit_callback, arch_instance);
+	printf("Destroy threads.\n");
+	destroy_threads();
+	/* free the memory */
+#ifndef __MINGW32__
+	skyeye_erase_map();
+#endif
+
+#ifndef __MINGW32__
+	/* restore the environment */
+	tcsetattr(0, TCSANOW, &pref->saved_term);
+#else
+	tcsetattr(0, TCSAFLUSH, &pref->saved_term);
+#endif
+}
 #if 1
 void register_cli(cli_func_t cli){
 	global_cli = cli;
