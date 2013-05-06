@@ -52,5 +52,7 @@ void io_do_cycle (void * state);
 typedef int(*bus_read_t)(short size, generic_address_t addr, uint32_t * value);
 typedef int(*bus_write_t)(short size, generic_address_t addr, uint32_t value);
 
+int default_bus_read(short size, generic_address_t addr, uint32_t * value);
+int default_bus_write(short size, generic_address_t addr, uint32_t value);
 void register_bus_operation(bus_read_t, bus_write_t);
 #endif

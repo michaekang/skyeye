@@ -79,7 +79,7 @@ get_bank_size (uint32_t addr)
 *
 * @return 
 */
-static int default_bus_read(short size, generic_address_t addr, uint32_t * value){
+int default_bus_read(short size, generic_address_t addr, uint32_t * value){
 	mem_bank_t * bank;
 	generic_arch_t* arch_instance = get_arch_instance("");
 
@@ -122,7 +122,7 @@ static int default_bus_read(short size, generic_address_t addr, uint32_t * value
 *
 * @return 
 */
-static int default_bus_write(short size, generic_address_t addr, uint32_t value){
+int default_bus_write(short size, generic_address_t addr, uint32_t value){
 	mem_bank_t * bank;
 	generic_arch_t* arch_instance = get_arch_instance("");
 
