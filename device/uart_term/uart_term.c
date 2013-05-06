@@ -133,7 +133,7 @@ static exception_t uart_term_write(conf_object_t *opaque, void* buf, size_t coun
 	}
 	return No_exp;
 }
-#define DBG_XTERM
+//#define DBG_XTERM
 static int create_term(uart_term_device* dev_uart, int port){
 	pid_t pid;
 	char port_str[32];
@@ -384,13 +384,7 @@ static conf_object_t* new_uart_term(char* obj_name){
 	uart_method->conf_obj = dev_uart->obj;
 	uart_method->read = uart_term_read;
 	uart_method->write = uart_term_write;
-
-	skyeye_intf_t* skyeye_uart = skyeye_mm_zero(sizeof(skyeye_intf_t));
-	skyeye_uart->intf_name = SKYEYE_UART_INTF;
-	skyeye_uart->class_name = "uart_term";
-	skyeye_uart->registered = 1;
-	skyeye_uart->obj = (void*)uart_method;
-	SKY_register_interface(skyeye_uart, obj_name, SKYEYE_UART_INTF);
+	SKY_register_interface(uart_method, obj_name, SKYEYE_UART_INTF);
 
 	dev_uart->attached = 0;
 	dev_uart->socket = -1;
@@ -403,7 +397,11 @@ static conf_object_t* new_uart_term(char* obj_name){
 }
 
 void free_uart_term(conf_object_t* dev){
-
+	uart_term_device* dev_uart = dev->obj;
+	skyeye_free(dev_uart->receive);
+	skyeye_free(dev_uart->obj);
+	skyeye_free(dev_uart);
+	return;
 }
 
 void init_uart_term(){

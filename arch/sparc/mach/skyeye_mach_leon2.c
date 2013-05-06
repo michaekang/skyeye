@@ -76,17 +76,18 @@ static exception_t parse_ram(machine_config_t * mach)
 exception_t leon2_dev_init(machine_config_t * mach)
 {
 	exception_t ret;
+	attr_value_t* value;
 	DBG_leon2("In %s, Line %d init leon2 deivce\n", __func__, __LINE__);
 	/* The whole address space */
 	mach->phys_mem= new_addr_space("leon2_mach_space");
 	/* register interface for uart */
 	conf_object_t* uart_term0 = pre_conf_obj("uart_term_0", "uart_term");
-
 	conf_object_t* uart0 = pre_conf_obj("leon2_uart_0", "leon2_uart");
+	value = make_new_attr(Val_Object, uart_term0);
+	ret = set_conf_attr(uart0, "term", value);
+
 	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
 	ret = add_map(mach->phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
-	/* register interface for uart */
-	SKY_set_interface(uart_term0, uart0, SKYEYE_UART_INTF);
 
 	if(ret != No_exp){
 		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");

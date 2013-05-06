@@ -30,6 +30,26 @@
 
 #include "uart_leon2.h"
 
+static char* leon2_uart_attr[] = {"term"};
+static exception_t leon2_uart_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t* value)
+{
+	leon2_uart_dev *dev = opaque->obj;
+	int index;
+	//parse the parameter
+	for(index = 0; index < 3; index++){
+		if(!strncmp(attr_name, leon2_uart_attr[index], strlen(leon2_uart_attr[index])))
+			break;
+	}
+	switch(index){
+		case 0:
+			dev->term = (skyeye_uart_intf*)SKY_get_interface(value->u.object, SKYEYE_UART_INTF);
+			break;
+		default:
+			printf("parameter error\n");
+			return Invarg_exp;
+	}
+	return No_exp;
+}
 /*
  * ===  FUNCTION  ======================================================================
  *         Name:  leon2_uart_cycle
@@ -83,7 +103,7 @@ void leon2_uart_cycle(conf_object_t *opaque)
 static exception_t leon2_uart_write(conf_object_t *opaque, generic_address_t offset, uint32_t* buf, size_t count)
 {
 	leon2_uart_dev *dev = opaque->obj;
-	skyeye_uart_intf* skyeye_uart = dev->skyeye_uart->conf_obj;
+	skyeye_uart_intf* skyeye_uart = dev->term;
 	DBG_LEON2_UART("write %s offset %d : 0x%x\n", dev->obj->objname, offset, *buf);
 
 	switch(offset)
@@ -149,13 +169,6 @@ static conf_object_t* new_leon2_uart(char* obj_name)
 	io_memory->write = leon2_uart_write;
 	SKY_register_interface((void*)io_memory, obj_name, MEMORY_SPACE_INTF_NAME);
 	/* register skyeye_uart interface */
-	skyeye_intf_t* skyeye_uart = skyeye_mm_zero(sizeof(skyeye_intf_t));
-	skyeye_uart->intf_name = SKYEYE_UART_INTF;
-	skyeye_uart->class_name = "leon2_uart";
-	skyeye_uart->registered = 0;
-	skyeye_uart->obj = NULL;
-	SKY_register_interface(skyeye_uart, obj_name, SKYEYE_UART_INTF);
-	leon2_uart->skyeye_uart = skyeye_uart;
 
 	DBG_LEON2_UART("In %s, Line %d, create leon2 uart\n", __func__, __LINE__);
 
@@ -177,9 +190,20 @@ static exception_t reset_leon2_uart(conf_object_t* opaque, const char* args)
 	return No_exp;
 }
 
-static void free_leon2_uart(conf_object_t* dev)
+static void free_leon2_uart(conf_object_t* conf_obj)
 {
-	printf("In %s Line %d\n", __func__, __LINE__);
+	leon2_uart_dev* dev = conf_obj->obj;
+	conf_object_t* conf_term = dev->term->conf_obj;
+	if(conf_term == NULL)
+		return;
+	conf_object_t* class_obj = get_conf_obj(conf_term->class_name);
+	skyeye_class_t* class_data = class_obj->obj;
+	/* free ram's attrabute : image */
+	if(class_data->free_instance)
+		class_data->free_instance(conf_term);
+	skyeye_free(dev->term);
+	skyeye_free(dev->obj);
+	skyeye_free(dev);
 }
 
 void init_leon2_uart(){
@@ -190,9 +214,8 @@ void init_leon2_uart(){
 		.reset_instance = reset_leon2_uart,
 		.free_instance = free_leon2_uart,
 		.get_attr = NULL,
-		.set_attr = NULL
+		.set_attr = leon2_uart_set_attr
 	};
 
 	SKY_register_class(class_data.class_name, &class_data);
 }
-
