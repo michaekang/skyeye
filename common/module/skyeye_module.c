@@ -305,6 +305,7 @@ void SKY_unload_all_modules(){
 		skyeye_free(node);	
         }
 	skyeye_modules->list = NULL;	
+	skyeye_modules = NULL;
         return;
 }
 #if 0
