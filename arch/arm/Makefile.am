@@ -1,5 +1,6 @@
 arm_comm = common/arm_arch_interface.c common/armcopro.c common/armemu.c common/arminit.c common/armmmu.c common/armos.c common/armsupp.c common/armvirt.c common/thumbemu.c common/arm_module.c common/arm11_core.c common/skyeye_ram.c common/cortex_a9_core.c
-arm_systemc = common/systemc/lt_target.cpp common/systemc/lt_top.cpp common/systemc/lt_transform.cpp common/systemc/sc_skyeye_arm.cpp common/systemc/sc_init.cpp
+#arm_systemc = common/systemc/lt_target.cpp common/systemc/lt_top.cpp common/systemc/lt_transform.cpp common/systemc/sc_skyeye_arm.cpp common/systemc/sc_init.cpp
+arm_systemc = common/systemc/lt_target.cpp common/systemc/lt_transform.cpp common/systemc/sc_skyeye_arm.cpp common/systemc/sc_init.cpp
 arm_mmu = common/mmu/arm7100_mmu.c common/mmu/arm920t_mmu.c common/mmu/arm926ejs_mmu.c  common/mmu/arm1176jzf_s_mmu.c common/mmu/cache.c common/mmu/maverick.c common/mmu/rb.c common/mmu/sa_mmu.c common/mmu/tlb.c common/mmu/wb.c common/mmu/xscale_copro.c common/mmu/cortex_a9_mmu.c
 arm_dbct = dbct/arm2x86.c dbct/arm2x86_coproc.c dbct/arm2x86_dp.c dbct/arm2x86_mem.c dbct/arm2x86_movl.c dbct/arm2x86_mul.c dbct/arm2x86_other.c dbct/arm2x86_psr.c dbct/arm2x86_shift.c dbct/arm2x86_test.c dbct/tb.c 
 arm_mach = \
@@ -32,9 +33,10 @@ INCLUDES = -I$(top_srcdir)/arch/arm/common -I$(top_srcdir)/arch/arm/mach/ -I$(to
 
 # Add systemc support
 if SYSTEMC_ENABLE
-libarm_la_SOURCES+= $(arm_systemc)
-INCLUDES += -I$(SYSTEMC_DIR)/include
-DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+#libarm_la_SOURCES += $(arm_systemc)
+#libarm_la_LDFLAGS += -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
+#INCLUDES += -I$(SYSTEMC_DIR)/include
+#DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
 endif
 armemu32.lo:common/armemu.c armemu.lo
 	$(LIBTOOL) --tag=CC --mode=compile $(CC) -DMODE32 $(DEFS) $(INCLUDES) -g -O2 -MT armemu32.lo -MD -MP -MF .deps/armemu32.Tpo -c -o armemu32.lo `test -f '$(srcdir)/common/armemu.c' || echo `$(srcdir)/common/armemu.c

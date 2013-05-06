@@ -331,13 +331,13 @@ arm_reset_state ()
 	}
 }
 
-#include "systemc/sc_init.h"
+//#include "systemc/sc_init.h"
 static void
 arm_init_state ()
 {
 	ARMul_EmulateInit ();
 	arm_cpu_init();
-	init_systemc_class();
+	//init_systemc_class();
 }
 
 void

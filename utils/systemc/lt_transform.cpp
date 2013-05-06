@@ -11,9 +11,9 @@ Lt_transform::~Lt_transform()
 }
 
 
-fault_t Lt_transform::sc_a71_mmu_read(ARMul_State * state, ARMword virt_addr, ARMword * data, ARMword datatype)
+int sc_a71_bus_read (short size, generic_address_t addr, uint32_t * value)
 {
-#if 1 
+#if 0 
 	tlb_entry_t *tlb;
 	ARMword phys_addr;
 	ARMword temp, offset;
@@ -151,109 +151,13 @@ fault_t Lt_transform::sc_a71_mmu_read(ARMul_State * state, ARMword virt_addr, AR
 		initiator_thread( gp_ptr );
 		return NO_FAULT;
 	}
+	#endif
+	return 0;
 }
 
-fault_t Lt_transform::sc_a71_mmu_write(ARMul_State * state, ARMword virt_addr, ARMword* data, ARMword datatype)
+int sc_a71_bus_write(short size, generic_address_t addr, uint32_t value)
 {
-       tlb_entry_t *tlb;
-	ARMword phys_addr;
-	fault_t fault;
-	ARMword temp, offset;
-	ARMword data_size;
-
-	gp_ptr->set_command(tlm::TLM_WRITE_COMMAND);
-	gp_ptr->set_data_ptr((unsigned char*)data);
-	
-	if (!(state->mmu.control & CONTROL_MMU)) {
-		if (datatype == ARM_BYTE_TYPE)
-			data_size = 8;
-
-		else if (datatype == ARM_HALFWORD_TYPE)
-			data_size = 16;
-
-		else if (datatype == ARM_WORD_TYPE)
-			data_size = 32;
-
-		else {
-			printf ("SKYEYE:1 a71_mmu_write error: unknown data type %d\n", datatype);
-			skyeye_exit (-1);
-		}
-
-		gp_ptr->set_address(virt_addr);
-		gp_ptr->set_data_length(data_size);
-		gp_ptr->set_streaming_width(data_size);
-		gp_ptr->set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-
-		initiator_thread( gp_ptr );
-		return NO_FAULT;
-	}
-
-//      if ((virt_addr & 3) && (state->mmu.control & CONTROL_ALIGN_FAULT)) {
-	if ((virt_addr & 3) && (datatype == ARM_WORD_TYPE)
-	    && (state->mmu.control & CONTROL_ALIGN_FAULT) || (virt_addr & 1)
-	    && (datatype == ARM_HALFWORD_TYPE)
-	    && (state->mmu.control & CONTROL_ALIGN_FAULT)) {
-		fprintf (stderr, "SKYEYE, a71_mmu_write ALIGNMENT_FAULT\n");
-		return ALIGNMENT_FAULT;
-	}
-	if (state->mmu.control & CONTROL_CACHE) {
-		cache_line_t *cache;
-		cache = mmu_cache_search (state, CACHE (), virt_addr);
-		if (cache) {
-			if (datatype == ARM_WORD_TYPE)
-				cache->data[(virt_addr >> 2) & 3] = *data;
-
-			else if (datatype == ARM_HALFWORD_TYPE) {
-				temp = cache->data[(virt_addr >> 2) & 3];
-				offset = (((ARMword) state->bigendSig * 2) ^ (virt_addr & 2)) << 3;	/* bit offset into the word */
-				cache->data[(virt_addr >> 2) & 3] =
-					(temp & ~(0xffffL << offset)) |
-					(((*data) & 0xffffL) << offset);
-			}
-			else if (datatype == ARM_BYTE_TYPE) {
-				temp = cache->data[(virt_addr >> 2) & 3];
-				offset = (((ARMword) state->bigendSig * 3) ^ (virt_addr & 3)) << 3;	/* bit offset into the word */
-				cache->data[(virt_addr >> 2) & 3] =
-					(temp & ~(0xffL << offset)) |
-					(((*data) & 0xffL) << offset);
-			}
-		}
-	}
-	fault = translate (state, virt_addr, TLB (), &tlb);
-	if (fault) {
-		return fault;
-	}
-	fault = check_access (state, virt_addr, tlb, 0);
-	if (fault) {
-		return fault;
-	}
-	phys_addr = (tlb->phys_addr & tlb_masks[tlb->mapping]) |
-		(virt_addr & ~tlb_masks[tlb->mapping]);
-	if (datatype == ARM_BYTE_TYPE)
-		//bus_write (8, phys_addr, data);
-		data_size = 8;
-
-	else if (datatype == ARM_HALFWORD_TYPE)
-		//bus_write (16, phys_addr, data);
-		data_size = 16;
-
-	else if (datatype == ARM_WORD_TYPE)
-		//bus_write (32, phys_addr, data);
-		data_size = 32;
-
-	else {
-		printf ("SKYEYE:2  a71_mmu_write error: unknown data type %d \n", datatype);
-		skyeye_exit (-1);
-	}
-
-	gp_ptr->set_address(phys_addr);
-	gp_ptr->set_data_length(data_size);
-	gp_ptr->set_streaming_width(data_size);
-	gp_ptr->set_response_status(tlm::TLM_INCOMPLETE_RESPONSE);
-
-	initiator_thread( gp_ptr );
-#endif
-	return NO_FAULT;
+	return 0;
 }
 
 void Lt_transform::initiator_thread( tlm::tlm_generic_payload * transaction_ptr)

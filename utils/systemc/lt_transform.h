@@ -2,8 +2,8 @@
 #define __LT_TRANSFORM_H__
 
 #include "bank_defs.h"
-#include "armdefs.h"
-#include "armmmu.h"
+//#include "armdefs.h"
+//#include "armmmu.h"
 #include "systemc.h"
 #include "tlm.h"
 #include "tlm_utils/simple_initiator_socket.h"
@@ -19,11 +19,9 @@ public:
 
 	void initiator_thread(tlm::tlm_generic_payload *transaction_ptr);
 
-	fault_t sc_a71_mmu_read (ARMul_State * state, ARMword virt_addr, ARMword * data,
-	      ARMword datatype);
+	int sc_a71_bus_read (short size, generic_address_t addr, uint32_t * value);
 
-	fault_t sc_a71_mmu_write(ARMul_State * state, ARMword virt_addr, ARMword *data, 
-		ARMword datatype);
+	int sc_a71_bus_write(short size, generic_address_t addr, uint32_t value);
 	
 	tlm::tlm_generic_payload *gp_ptr;     //generic payload
 	tlm_utils::simple_initiator_socket<Lt_transform> initiator_socket;
