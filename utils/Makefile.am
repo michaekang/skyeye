@@ -7,7 +7,7 @@ utils_code_cov = code_cov/code_cov.c code_cov/code_cov_module.c
 
 utils_log = log/log.c log/log_module.c
 
-utils_bus_log = bus_log/bus_log.c bus_log/bus_log_module.c
+utils_bus_log = bus_log/bus_log.c bus_log/bus_log_module.c bus_log/bus_ops.c
 
 utils_pmon = perf_monitor/pmon.c perf_monitor/pmon_module.c
 
@@ -17,7 +17,7 @@ utils_os = os_supp/os_module.c  os_supp/skyeye_os.c
 
 utils_pycli = pycli/pycli.c
 
-utils_systemc = systemc/lt_target.cpp systemc/lt_transform.cpp systemc/sc_skyeye_arm.cpp systemc/sc_init.cpp
+utils_systemc = systemc/lt_target.cpp systemc/lt_transform.cpp systemc/sc_skyeye_arm.cpp systemc/sc_init.cpp systemc/systemc_module.c
 libgdbserver_la_SOURCES = $(utils_debugger)
 libgdbserver_la_LDFLAGS = -module
 
@@ -70,5 +70,5 @@ if SYSTEMC_ENABLE
 #libarm_la_LDFLAGS += -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
 INCLUDES += -I$(SYSTEMC_DIR)/include
 DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+pkglib_LTLIBRARIES += libsystemc.la
 endif
-
