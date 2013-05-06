@@ -48,4 +48,9 @@ void bus_snoop(access_t rw, short size, int addr, uint32_t value, before_after_t
 /* get the bus access information */
 bus_recorder_t* get_last_bus_access();
 void io_do_cycle (void * state);
+/* register one bus */
+typedef int(*bus_read_t)(short size, generic_address_t addr, uint32_t * value);
+typedef int(*bus_write_t)(short size, generic_address_t addr, uint32_t value);
+
+void register_bus_operation(bus_read_t, bus_write_t);
 #endif

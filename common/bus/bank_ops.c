@@ -79,7 +79,7 @@ get_bank_size (uint32_t addr)
 *
 * @return 
 */
-int bus_read(short size, generic_address_t addr, uint32_t * value){
+static int default_bus_read(short size, generic_address_t addr, uint32_t * value){
 	mem_bank_t * bank;
 	generic_arch_t* arch_instance = get_arch_instance("");
 
@@ -122,7 +122,7 @@ int bus_read(short size, generic_address_t addr, uint32_t * value){
 *
 * @return 
 */
-int bus_write(short size, generic_address_t addr, uint32_t value){
+static int default_bus_write(short size, generic_address_t addr, uint32_t value){
 	mem_bank_t * bank;
 	generic_arch_t* arch_instance = get_arch_instance("");
 
@@ -165,4 +165,22 @@ void reset_global_memmap(){
 */
 mem_config_t * get_global_memmap(){
 	return &global_memmap;
+}
+
+
+static bus_read_t bus_read_ops = default_bus_read;
+
+static bus_write_t bus_write_ops = default_bus_write;
+
+int bus_read(short size, generic_address_t addr, uint32_t * value){
+	return bus_read_ops(size, addr, value);
+}
+int bus_write(short size, generic_address_t addr, uint32_t value){
+	return bus_write_ops(size,addr, value);
+}
+
+void register_bus_operation(bus_read_t read, bus_write_t write){
+	bus_read_ops = read;
+	bus_write_ops = write;
+	return;
 }
