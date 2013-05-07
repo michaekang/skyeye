@@ -25,6 +25,7 @@
 
 #include "sc_skyeye_arm.h"
 
+#define QUTA 1000 * 1000
 void sc_skyeye_arm::machine_start()
 {
 	int insn_num = 0;
@@ -32,9 +33,9 @@ void sc_skyeye_arm::machine_start()
 		//printf("In %s\n", __FUNCTION__);
 		//wait(10, SC_NS);
 		//wait();
-		skyeye_stepi(1000);
-		insn_num += 1000;
-		printf("In %s, total insn number is %d\n", __FUNCTION__, insn_num);
+		skyeye_stepi(QUTA);
+		insn_num += QUTA;
+		//printf("In %s, total insn number is %d\n", __FUNCTION__, insn_num);
 		
 	}
 }
