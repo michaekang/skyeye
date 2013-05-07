@@ -9,12 +9,12 @@ SC_MODULE(sc_skyeye_arm)
 {
 	//Lt_transform *trans_ptr;
 
-	SC_HAS_PROCESS(sc_skyeye_arm);
+	//SC_HAS_PROCESS(sc_skyeye_arm);
 
 	void machine_start();
 
-	sc_skyeye_arm(sc_core::sc_module_name module_name):
-	sc_module  (module_name)
+	//sc_skyeye_arm(sc_core::sc_module_name module_name):
+	SC_CTOR(sc_skyeye_arm)
 	{
 
 		//trans_ptr = new Lt_transform("lt_transform");
