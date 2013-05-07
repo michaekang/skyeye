@@ -27,19 +27,24 @@
 #include "sc_init.h"
 #include <skyeye_bus.h>
 
+Lt_top *top_ptr;
 static int sc_bus_read(short size, generic_address_t addr, uint32_t * value){
 	int ret;
-	ret = default_bus_read(size, addr, value);
+	//ret = default_bus_read(size, addr, value);
+	//printf("In %s, size=0x%x, addr=0x%x, value=0x%x\n", __FUNCTION__, size, addr, value);
+	ret = top_ptr->initiator.sc_a71_bus_read(size, addr, value);
 	return ret;
 }
 static int sc_bus_write(short size, generic_address_t addr, uint32_t value){
 	int ret;
-	ret = default_bus_write(size, addr, value);
+	//ret = default_bus_write(size, addr, value);
+	//printf("In %s, size=0x%x, addr=0x%x, value=0x%x\n", __FUNCTION__, size, addr, value);
+	ret = top_ptr->initiator.sc_a71_bus_write(size, addr, value);
 	return ret;
 }
 
 void init_systemc_class(){
 	register_bus_operation(sc_bus_read, sc_bus_write);
-	Lt_top("lt_top");
+	top_ptr = new Lt_top("lt_top");
 	return;
 }
