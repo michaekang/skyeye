@@ -2,5 +2,6 @@
 
 void sc_skyeye_arm::machine_start()
 {
-	SIM_init();
+	printf("In %s\n", __FUNCTION__);
+	//SIM_init();
 }
