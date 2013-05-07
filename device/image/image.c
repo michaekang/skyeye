@@ -51,7 +51,6 @@ static exception_t image_set_attr(conf_object_t* opaque, const char* attr_name, 
 	switch(index){
 		case 0:
 			dev->size = value->u.uinteger;
-			printf("size 0x%x\n", value->u.uinteger);
 			break;
 		case 1:
 			break;
@@ -137,7 +136,6 @@ static conf_object_t* new_image(char* obj_name)
 }
 
 static void free_image(conf_object_t* conf_obj){
-        printf("In %s, Line %d\n", __func__, __LINE__);
 	int index = 0;
 	image_module_t* dev = conf_obj->obj;
 	for(index = 0; index < 256; index++)

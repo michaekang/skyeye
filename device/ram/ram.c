@@ -221,7 +221,6 @@ static conf_object_t* new_ram(char* obj_name)
 }
 
 static void free_ram(conf_object_t* conf_obj){
-	printf("In %s, Line %d\n", __func__, __LINE__);
 	ram_device_t* dev = conf_obj->obj;
 	conf_object_t* conf_image = dev->image->conf_obj;
 	if(conf_image == NULL)
