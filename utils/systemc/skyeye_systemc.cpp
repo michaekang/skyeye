@@ -380,6 +380,9 @@ sc_main (int argc, char **argv)
 	assert(pref != NULL);	
 	/* initialization of options from command line */
 	ret = init_option(argc, argv, pref);
+
+	pref->interactive_mode = False;;
+        pref->autoboot = False;
 	/* set the current preference for skyeye */
 	//update_skyeye_pref(pref);
 	/* return non-zero represent not run skyeye */
