@@ -30,7 +30,7 @@ Lt_target::Lt_target(sc_core:: sc_module_name module_name)
 :sc_module   (module_name)
 {
 	/*register the custom_b_transport as the real blocking transport function*/
-	memop_socket.register_b_transport(this, &Lt_target::custom_b_transport);
+	target_socket.register_b_transport(this, &Lt_target::custom_b_transport);
 }
 
 Lt_target::~Lt_target()
