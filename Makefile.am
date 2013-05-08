@@ -82,10 +82,10 @@ bin_PROGRAMS += skyeye
 skyeye_SOURCES = utils/main/skyeye.c
 
 if SYSTEMC_ENABLE
-INCLUDES += -Iutils/systemc/ -I$(SYSTEMC_DIR)/include/
+INCLUDES += -Iutils/systemc/ -Iutils/systemc/bus -Iutils/systemc/device -I$(SYSTEMC_DIR)/include/
 DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
 bin_PROGRAMS += skyeye_systemc
-skyeye_systemc_SOURCES = utils/systemc/skyeye_systemc.cpp utils/systemc/lt_target.cpp utils/systemc/lt_transform.cpp utils/systemc/sc_skyeye_arm.cpp utils/systemc/sc_init.cpp  utils/systemc/lt_top.cpp
+skyeye_systemc_SOURCES = utils/systemc/skyeye_systemc.cpp utils/systemc/bus/lt_bus_target.cpp utils/systemc/bus/lt_bus_initiator.cpp utils/systemc/device/lt_core_initiator.cpp utils/systemc/device/lt_mem_target.cpp utils/systemc/device/lt_uart_target.cpp  utils/systemc/sc_skyeye_arm.cpp utils/systemc/sc_init.cpp  utils/systemc/lt_top.cpp
 skyeye_systemc_LDFLAGS = -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc -L$(top_builddir)/common -lcommon
 endif
 
