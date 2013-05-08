@@ -43,7 +43,15 @@ void Lt_uart_target::custom_b_transport( tlm:: tlm_generic_payload & payload, sc
 	tlm::tlm_command  command = payload.get_command();
 	unsigned char               *data        = payload.get_data_ptr();
 	short                     size         = payload.get_data_length();
-	//bus_dispatch();
+	if((tlm::TLM_READ_COMMAND) == command){
+		bus_read(size, address, (uint32_t *)data);
+	}
+	else if(tlm::TLM_WRITE_COMMAND == command){
+		bus_write(size, address, (unsigned long)data);
+	}
+	else{
+		// something wrong
+	}
 	payload.set_response_status(tlm::TLM_OK_RESPONSE);
 }
 

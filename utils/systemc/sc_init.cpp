@@ -54,15 +54,28 @@ void bus_dispatch(tlm:: tlm_generic_payload & payload, sc_core :: sc_time & dela
 	tlm::tlm_command  command = payload.get_command();
 	unsigned char               *data        = payload.get_data_ptr();
 	short                     size         = payload.get_data_length();
-	#if 0
-	if(address >){
+	
+	if((address & 0xfffff000) == 0xfffd0000){
 		/* transport from uart_initiator to uart_target*/
-		top_ptr->uart_initiator.sc_write(size, addr, value);
+		if((tlm::TLM_READ_COMMAND) == command){
+			top_ptr->uart_initiator.bus_read(size, address, (uint32_t *)data);
+		}
+		else if(tlm::TLM_WRITE_COMMAND == command){
+			top_ptr->uart_initiator.bus_write(size, address, (unsigned long)data);
+		}
+		else{}
 	}
-	else if(address >){
-		top_ptr->uart_initiator.sc_write(size, addr, value);
+	else if(address >= 0x01000000 && address < (0x01000000 + 0x00400000)){
+		if((tlm::TLM_READ_COMMAND) == command){
+			top_ptr->mem_initiator.bus_read(size, address, (uint32_t *)data);
+		}
+		else if(tlm::TLM_WRITE_COMMAND == command){
+			top_ptr->mem_initiator.bus_write(size, address, (unsigned long)data);
+		}
 	}
-	#endif
+	else{
+		//something wrong
+	}
 	return;
 }
 void init_systemc_class(){
