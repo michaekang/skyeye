@@ -1,3 +1,4 @@
+
 /* Copyright (C) 
 * 2013 - Michael.Kang blackfin.kang@gmail.com
 * This program is free software; you can redistribute it and/or
@@ -16,34 +17,37 @@
 * 
 */
 /**
-* @file lt_top.cpp
-* @brief the binding of target and initiator
+* @file lt_bus_initiator.h
+* @brief 
 * @author Michael.Kang blackfin.kang@gmail.com
 * @version 7849
 * @date 2013-05-08
 */
 
-#include "lt_top.h"
-#if 1 
-Lt_top::Lt_top(sc_core::sc_module_name module_name)
-:sc_module    
-(module_name
-)
-,core_initiator("core_initiator")
-,core_target("core_target")
-,mem_initiator("mem_initiator")
-,mem_target("mem_target")
-,uart_initiator("uart_initiator")
-,uart_target("uart_target")
-,arm_initiator
-("arm_initiator"
-)
-{
-	//printf("In %s\n", __FUNCTION__);
-	//arm_initiator.trans_ptr->initiator_socket.bind(mem_target.memop_socket);
-	core_initiator.initiator_socket(core_target.target_socket);
-	mem_initiator.initiator_socket(mem_target.target_socket);
-	uart_initiator.initiator_socket(uart_target.target_socket);
+#ifndef __LT_BUS_INITIATOR_H__
+#define __LT_BUS_INITIATOR_H__
+
+#include "bank_defs.h"
+//#include "armdefs.h"
+//#include "armmmu.h"
+#include "systemc.h"
+#include "tlm.h"
+#include "tlm_utils/simple_initiator_socket.h"
+
+class Lt_bus_initiator:public sc_core::sc_module{
+public:
+	Lt_bus_initiator(sc_core::sc_module_name module_name);
+	~Lt_bus_initiator();
+
+	void initiator_thread(tlm::tlm_generic_payload *transaction_ptr);
+
+	int bus_read (short size, generic_address_t addr, uint32_t * value);
+
+	int bus_write(short size, generic_address_t addr, uint32_t value);
+	
+	tlm::tlm_generic_payload *gp_ptr;     //generic payload
+	tlm_utils::simple_initiator_socket<Lt_bus_initiator> initiator_socket;
+	
 };
+
 #endif
-//Lt_top::Lt_top(){};

@@ -1,10 +1,9 @@
 #ifndef __SC_SKYEYE_ARM_H__
 #define __SC_SKYEYE_ARM_H__
 
-#include "lt_transform.h"
+#include <systemc.h>
 #include "sim_control.h"
 
-extern Lt_transform *transform_ptr;
 SC_MODULE(sc_skyeye_arm)
 {
 	//Lt_transform *trans_ptr;
