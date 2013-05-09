@@ -407,9 +407,8 @@ void SIM_restart(void){
 	/* free exec from cell */
 	del_from_cell();
 	/* free the memory */
-#ifndef __MINGW32__
 	skyeye_erase_map();
-#endif
+
 	if(!pref->module_search_dir)
 		pref->module_search_dir = skyeye_strdup(default_lib_dir);
 	SKY_load_all_modules(pref->module_search_dir, NULL);

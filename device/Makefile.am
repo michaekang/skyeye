@@ -133,6 +133,8 @@ WIN32_LD_DEVICE = -no-undefined -shared -module -Xlinker -L../common/.libs/  -Xl
 libuart_la_LDFLAGS += $(WIN32_LD_DEVICE)
 libuart_16550_la_LDFLAGS += $(WIN32_LD_DEVICE)
 liblcd_s3c6410_la_LDFLAGS += $(WIN32_LD_DEVICE)
+libram_la_LDFLAGS += $(WIN32_LD_DEVICE)
+libimage_la_LDFLAGS += $(WIN32_LD_DEVICE)
 if GTK_LCD
 libgtk_lcd_la_LDFLAGS += $(WIN32_LD_DEVICE)
 endif

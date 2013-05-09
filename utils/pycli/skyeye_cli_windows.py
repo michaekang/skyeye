@@ -328,8 +328,16 @@ class SkyEyeCliWindows(cmd.Cmd):
         libcommon.com_si(arg)
 
     def do_start(self, arg):
-        print "outline start"
-        libcommon.com_start(arg)
+#        print "outline start"
+	libcommon.com_start(arg)
+
+    def do_reset(self, arg):
+#	 print "outline start"
+        libcommon.com_reset(arg)
+
+    def do_restart(self, arg):
+#        print "outline start"
+        libcommon.com_restart(arg)
 
     def do_info(self, arg):
 #        print "outline info"

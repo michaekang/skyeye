@@ -61,7 +61,8 @@ typedef struct skyeye_modules_s{
 /**
 * @brief the module list
 */
-static skyeye_modules_t* skyeye_modules;
+//static skyeye_modules_t* skyeye_modules;
+static skyeye_module_t* skyeye_modules;
 
 /**
 * @brief set the module list
@@ -304,7 +305,7 @@ void SKY_unload_all_modules(){
 			skyeye_free(node->filename);
 		skyeye_free(node);	
         }
-	skyeye_modules->list = NULL;	
+//	skyeye_modules->list = NULL;	
 	skyeye_modules = NULL;
         return;
 }
