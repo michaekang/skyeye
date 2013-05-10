@@ -142,9 +142,15 @@ build_lib:
 	cd $(top_builddir)third-party/opcodes/ && $(MAKE);
 	cd $(top_builddir)/libltdl/ && make;
 install_lib:
+if WIN32
+	cp $(top_builddir)/third-party/bfd/.libs/libbfd.dll.a  $(prefix)/lib/skyeye/
+	cp $(top_builddir)/third-party/bfd/.libs/libbfd.la $(prefix)/lib/skyeye/
+	cp $(top_builddir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll  $(prefix)/lib/skyeye/
+else
 	cd $(top_builddir)/third-party/libiberty && $(MAKE) install
 	cd $(top_builddir)/third-party/bfd/ && $(MAKE) install
 	cd $(top_builddir)/third-party/opcodes/ && $(MAKE) install
+endif
 
 clean_lib:
 	cd $(top_builddir)/third-party/libiberty && make distclean
