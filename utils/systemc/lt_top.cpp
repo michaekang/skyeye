@@ -37,16 +37,17 @@ Lt_top::Lt_top(sc_core::sc_module_name module_name)
 {
 	//printf("In %s\n", __FUNCTION__);
 	//arm_initiator.trans_ptr->initiator_socket.bind(mem_target.memop_socket);
-	core_initiator.initiator_socket(m_bus.target_bus[0].target_socket);
+	//core_initiator.initiator_socket(m_bus.bus_target_ptr[0]->target_socket);
+	core_initiator.initiator_socket(m_bus.target_socket[0]);
 	//mem_initiator.initiator_socket(mem_target.target_socket);
 	/* add the memory device */
 	m_bus.addDevice(0x00000000, 0xfffffff0);
-	m_bus.bus_initiator[0].initiator_socket(mem_target.target_socket);
+	m_bus.initiator_socket[0](mem_target.target_socket);
 
 	/* add uart device */
 	//uart_initiator.initiator_socket(uart_target.target_socket);
 	m_bus.addDevice(0x00000000, 0xfffffff0);
-	m_bus.bus_initiator[1].initiator_socket(uart_target.target_socket);
+	m_bus.initiator_socket[1](uart_target.target_socket);
 };
 #endif
 //Lt_top::Lt_top(){};

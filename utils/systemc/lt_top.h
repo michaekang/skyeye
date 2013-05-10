@@ -4,6 +4,7 @@
 #include <systemc.h>
 #include <tlm.h>
 #include "sc_skyeye_arm.h"
+#include "simpleBusLT.h"
 #include "bus/lt_bus_target.h"
 #include "bus/lt_bus_initiator.h"
 #include "device/lt_core_initiator.h"
@@ -18,7 +19,7 @@ public:
 	Lt_top(sc_core::sc_module_name module_name);
 	~Lt_top(){};
 
-	SimpleBusLT<2,1>  m_bus; /* core, memory and uart */
+	SimpleBusLT<1,2>  m_bus; /* core, memory and uart */
 	Lt_core_initiator core_initiator; /* core side */
 	//Lt_bus_target core_target; /* bus side */
 
