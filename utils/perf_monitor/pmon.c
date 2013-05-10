@@ -25,7 +25,7 @@ static void pmon_count_start(conf_object_t* argp){
 	int seconds = 0;
 	uint32 steps = 0;
 	uint32 last_steps = 0;
-	generic_arch_t* arch_instance = (generic_arch_t*)(argp->obj);
+	generic_arch_t* arch_instance = (generic_arch_t*)argp;
 	/* Test if skyeye is in running state. */
 	while(!SIM_is_running())
 		;
@@ -56,11 +56,6 @@ exception_t com_pmon(char *arg) {
 	pthread_t id;
 	generic_arch_t* arch_instance = get_arch_instance("");
 	create_thread(pmon_count_start, arch_instance, &id);
-	skyeye_exec_t* exec = create_exec();
-	exec->priv_data = get_conf_obj_by_cast(arch_instance, "generic_arch_t");
-	exec->run = pmon_count_start;
-	exec->stop = com_count_stop;
-	add_to_default_cell(exec);
 
 	return No_exp;
 }
