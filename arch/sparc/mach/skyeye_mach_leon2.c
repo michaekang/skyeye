@@ -87,11 +87,21 @@ exception_t leon2_dev_init(machine_config_t * mach)
 	ret = set_conf_attr(uart0, "term", value);
 
 	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
-	ret = add_map(mach->phys_mem, 0x80000070, 50, 0x0, uart0_io_memory, 1, 1);
-
+	ret = add_map(mach->phys_mem, 0x80000070, 0x10, 0x0, uart0_io_memory, 1, 1);
 	if(ret != No_exp){
-		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");
+		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for uart0 controller\n");
 	}
+
+	conf_object_t* uart_term1 = pre_conf_obj("uart_term_1", "uart_term");
+	conf_object_t* uart1 = pre_conf_obj("leon2_uart_1", "leon2_uart");
+	value = make_new_attr(Val_Object, uart_term1);
+	ret = set_conf_attr(uart1, "term", value);
+	memory_space_intf* uart1_io_memory = (memory_space_intf*)SKY_get_interface(uart1, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->phys_mem, 0x80000070, 0x10, 0x0, uart1_io_memory, 1, 1);
+	if(ret != No_exp){
+		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for uart1 controller\n");
+	}
+
 #if 0	
 	conf_object_t* image0 = pre_conf_obj("image0", "image");
 	attr_value_t* value = make_new_attr(Val_UInteger, 0x80000000);

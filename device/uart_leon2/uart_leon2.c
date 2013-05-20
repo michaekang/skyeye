@@ -112,14 +112,21 @@ static exception_t leon2_uart_write(conf_object_t *opaque, generic_address_t off
 
 			/*  Write the information in the DATA register  */
 			dev->regs.data = *buf;
-
 			/*  Indicate that the transmitter hold register is NOT empty    */
-			dev->regs.status.flag.transmitter_hold_register_empty = 0;
-			skyeye_uart->write(skyeye_uart->conf_obj, buf, 1);
-
+			if(dev->regs.control.flag.transmitter_enable == 1){
+				skyeye_uart->write(skyeye_uart->conf_obj, buf, 1);
+				dev->regs.status.flag.transmitter_hold_register_empty = 1;
+			}else{
+				printf("Don't enable the uart transmitter!\n");
+			}
 			break;
 		case UART_STATUS_REGISTER:
 			// do nothing
+			break;
+		case UART_CONTROL_REGISTER:
+			dev->regs.control.value = *buf;
+			break;
+		case UART_SCALER_REGISTER:
 			break;
 		default:
 			printf("write %s error offset %d : 0x%x\n",
@@ -141,9 +148,25 @@ static exception_t leon2_uart_read(conf_object_t *opaque, generic_address_t offs
 
 	//*buf = ((uint32 *)(&(dev->regs)))[offset];
 
-	if(offset == UART_DATA_REGISTER)
-		dev->regs.status.flag.data_ready = 0;
-
+	switch(offset)
+	{
+		case UART_DATA_REGISTER:
+			// do nothing
+			break;
+		case UART_STATUS_REGISTER:
+			*(uint32*)buf =dev->regs.status.value;
+			break;
+		case UART_CONTROL_REGISTER:
+			*(uint32*)buf =dev->regs.control.value;
+			break;
+		case UART_SCALER_REGISTER:
+			*(uint32*)buf =dev->regs.scaler;
+			break;
+		default:
+			printf("write %s error offset %d : 0x%x\n",
+					dev->obj->objname, offset, *(uint32*)buf);
+			break;
+	}
 	DBG_LEON2_UART("read leon2 uart %s offset %d : 0x%x\n", dev->obj->objname, offset, *(uint32*)buf);
 
 	return No_exp;
@@ -180,8 +203,8 @@ static exception_t reset_leon2_uart(conf_object_t* opaque, const char* args)
 	leon2_uart_dev *dev = opaque->obj;
 	memset(&(dev->regs), 0, sizeof(dev->regs));
 	/*  Enable the transmitter and receiver by default  */
-	dev->regs.control.flag.transmitter_enable = 1;
-	dev->regs.control.flag.receiver_enable = 1;
+	dev->regs.control.flag.transmitter_enable = 0;
+	dev->regs.control.flag.receiver_enable = 0;
 
 	/*  Indicate that the transmitter hold register is EMPTY    */
 	dev->regs.status.flag.transmitter_hold_register_empty = 1;
