@@ -1,7 +1,13 @@
-import cmd, sys, time
+import cmd, sys, time, platform
 #import skyeye_lib_path
 #from skyeye_module import *
-from skyeye_common_module import *
+os_info = platform.system()
+if cmp(os_info, "Linux"):
+    print "In Windows OS"
+    from skyeye_common_windows_module import *
+else:
+    print "In Linux OS"
+    from skyeye_common_module import *
 
 def help_info_open():
     print "help info:"
@@ -350,7 +356,7 @@ class SkyEyeCli(cmd.Cmd):
         libcommon.com_reset(arg)
 
     def do_restart(self, arg):
-#        print "outline reset"
+#        print "outline restart"
         libcommon.com_restart(arg)
 
     def do_pmon(self, arg):
@@ -427,7 +433,7 @@ class SkyEyeCli(cmd.Cmd):
         print "restart : restart simulator." 
         help_info_close()
 
-    def help_restart(self):
+    def help_reset(self):
         help_info_open()
         print "reset: reset simulator." 
         help_info_close()

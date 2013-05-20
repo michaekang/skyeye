@@ -31,11 +31,7 @@ cli(const char* prompt)
 	//printf("new_path=%s\n", new_path);
 	PyRun_SimpleString("import sys\n");
 	PyRun_SimpleString(new_path);
-#ifndef __MINGW32__
 	PyRun_SimpleString("from skyeye_cli import *\nSkyEyeCli().cmdloop()\n");
-#else
-	PyRun_SimpleString("from skyeye_cli_windows import *\nSkyEyeCliWindows().cmdloop()\n");
-#endif
 	Py_Finalize();
 	return 0;
 }
