@@ -422,6 +422,16 @@ class SkyEyeCli(cmd.Cmd):
         print "start : start simulator." 
         help_info_close()
 
+    def help_restart(self):
+        help_info_open()
+        print "restart : restart simulator." 
+        help_info_close()
+
+    def help_restart(self):
+        help_info_open()
+        print "reset: reset simulator." 
+        help_info_close()
+
     def help_info(self):
         help_info_open()
 	print "info : show information for various objects.\nparameter : registers "
