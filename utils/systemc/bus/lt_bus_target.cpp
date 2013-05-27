@@ -24,6 +24,7 @@
 */
 
 #include "lt_bus_target.h"
+#include "sc_init.h"
 #include <skyeye_bus.h>
 
 Lt_bus_target::Lt_bus_target(sc_core:: sc_module_name module_name)
@@ -43,7 +44,7 @@ void Lt_bus_target::custom_b_transport( tlm:: tlm_generic_payload & payload, sc_
 	tlm::tlm_command  command = payload.get_command();
 	unsigned char               *data        = payload.get_data_ptr();
 	short                     size         = payload.get_data_length();
-	//bus_dispatch(payload, delay_time);
+	#if 0
 	if((tlm::TLM_READ_COMMAND) == command){
 		bus_read(size, address, (uint32_t *)data);
 	}
@@ -53,7 +54,9 @@ void Lt_bus_target::custom_b_transport( tlm:: tlm_generic_payload & payload, sc_
 	else{
 		// something wrong
 	}
-
+	#else
+	bus_dispatch(payload, delay_time);
+	#endif
 	payload.set_response_status(tlm::TLM_OK_RESPONSE);
 	return;
 }
