@@ -17,6 +17,7 @@ utils_os = os_supp/os_module.c  os_supp/skyeye_os.c
 
 utils_pycli = pycli/pycli.c
 
+utils_systemc = systemc/lt_target.cpp systemc/lt_transform.cpp systemc/sc_skyeye_arm.cpp systemc/sc_init.cpp
 libgdbserver_la_SOURCES = $(utils_debugger)
 libgdbserver_la_LDFLAGS = -module
 
@@ -44,6 +45,8 @@ libos_supp_la_LDFLAGS = -module
 libpycli_la_SOURCES = $(utils_pycli) 
 libpycli_la_LDFLAGS = -module `python-config --libs`
 
+libsystemc_la_SOURCES = $(utils_systemc)
+
 if WIN32
 WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib -Xlinker -lcommon -Xlinker --export-all-symbol
 libgdbserver_la_LDFLAGS += $(WIN32_LD_COMMON)
@@ -67,3 +70,10 @@ skyeye_bin = \"$(prefix)/bin/\"
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -DSKYEYE_BIN=$(skyeye_bin) @COMMON_CFLAGS@
 
 INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common @COMMON_INCLUDES@ `python-config --cflags`
+
+if SYSTEMC_ENABLE
+#libarm_la_LDFLAGS += -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
+INCLUDES += -I$(SYSTEMC_DIR)/include
+DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+endif
+

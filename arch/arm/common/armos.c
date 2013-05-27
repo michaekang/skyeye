@@ -85,7 +85,7 @@ extern int _fisatty (FILE *);
 #include "armdefs.h"
 #include "armos.h"
 #include "armemu.h"
-#include "skyeye_swapendian.h"
+//#include "skyeye_swapendian.h"
 #include "skyeye_command.h"
 #ifndef NOOS
 #ifndef VALIDATE
