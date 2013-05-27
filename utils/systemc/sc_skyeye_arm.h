@@ -7,7 +7,7 @@
 extern Lt_transform *transform_ptr;
 SC_MODULE(sc_skyeye_arm)
 {
-	Lt_transform *trans_ptr;
+	//Lt_transform *trans_ptr;
 
 	SC_HAS_PROCESS(sc_skyeye_arm);
 
@@ -17,7 +17,7 @@ SC_MODULE(sc_skyeye_arm)
 	sc_module  (module_name)
 	{
 
-		trans_ptr = new Lt_transform("lt_transform");
+		//trans_ptr = new Lt_transform("lt_transform");
 		//transform_ptr = trans_ptr;
 
 		SC_THREAD(machine_start);

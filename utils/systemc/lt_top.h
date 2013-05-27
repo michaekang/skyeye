@@ -13,6 +13,7 @@ public:
 	~Lt_top(){};
 
 	Lt_target mem_target;
+	Lt_transform initiator;
 	sc_skyeye_arm arm_initiator;
 };
 #endif
