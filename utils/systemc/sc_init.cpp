@@ -32,19 +32,43 @@ static int sc_core_read(short size, generic_address_t addr, uint32_t * value){
 	int ret;
 	//ret = default_bus_read(size, addr, value);
 	//printf("In %s, size=0x%x, addr=0x%x, value=0x%x\n", __FUNCTION__, size, addr, value);
-	ret = top_ptr->core_initiator.sc_a71_bus_read(size, addr, value);
+	ret = top_ptr->core_initiator.bus_read(size, addr, value);
 	return ret;
 }
 static int sc_core_write(short size, generic_address_t addr, uint32_t value){
 	int ret;
 	//ret = default_bus_write(size, addr, value);
 	//printf("In %s, size=0x%x, addr=0x%x, value=0x%x\n", __FUNCTION__, size, addr, value);
-	ret = top_ptr->core_initiator.sc_a71_bus_write(size, addr, value);
+	ret = top_ptr->core_initiator.bus_write(size, addr, value);
 	return ret;
 }
 
+/**
+* @brief select different initiator to dispatch access
+*
+* @param payload
+* @param delay_time
+*/
+void bus_dispatch(tlm:: tlm_generic_payload & payload, sc_core :: sc_time & delay_time){
+	generic_address_t   address = payload.get_address();
+	tlm::tlm_command  command = payload.get_command();
+	unsigned char               *data        = payload.get_data_ptr();
+	short                     size         = payload.get_data_length();
+	#if 0
+	if(address >){
+		/* transport from uart_initiator to uart_target*/
+		top_ptr->uart_initiator.sc_write(size, addr, value);
+	}
+	else if(address >){
+		top_ptr->uart_initiator.sc_write(size, addr, value);
+	}
+	#endif
+	return;
+}
 void init_systemc_class(){
 	register_bus_operation(sc_core_read, sc_core_write);
 	top_ptr = new Lt_top("lt_top");
+	//new uart_device()
+	//map_uart_device();
 	return;
 }

@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lt_top.h"
+#include <systemc.h>
 #include "sc_init.h"
 
 // Anthony Lee 2006-08-22 : for Win32API

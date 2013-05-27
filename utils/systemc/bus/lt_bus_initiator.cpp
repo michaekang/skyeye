@@ -16,27 +16,27 @@
 * 
 */
 /**
-* @file lt_transform.cpp
-* @brief The initiator transport
+* @file lt_bus_initiator.cpp
+* @brief The bus initiator transport
 * @author Michael.Kang blackfin.kang@gmail.com
 * @version 7849
 * @date 2013-05-07
 */
 
-#include "lt_transform.h"
+#include "lt_bus_initiator.h"
 
-Lt_transform::Lt_transform(sc_core::sc_module_name module_name)
+Lt_bus_initiator::Lt_bus_initiator(sc_core::sc_module_name module_name)
 :sc_module   (module_name)
 ,initiator_socket("initiator_socket")
 {
 	gp_ptr = new tlm::tlm_generic_payload();
 }
-Lt_transform::~Lt_transform()
+Lt_bus_initiator::~Lt_bus_initiator()
 {
 }
 
 
-int Lt_transform::sc_a71_bus_read (short size, generic_address_t addr, uint32_t * value)
+int Lt_bus_initiator::bus_read (short size, generic_address_t addr, uint32_t * value)
 {
 	gp_ptr->set_command(tlm::TLM_READ_COMMAND);
 	gp_ptr->set_data_ptr((unsigned char*)value);
@@ -48,7 +48,7 @@ int Lt_transform::sc_a71_bus_read (short size, generic_address_t addr, uint32_t 
 	return 0;
 }
 
-int Lt_transform::sc_a71_bus_write(short size, generic_address_t addr, uint32_t value)
+int Lt_bus_initiator::bus_write(short size, generic_address_t addr, uint32_t value)
 {
 	gp_ptr->set_command(tlm::TLM_WRITE_COMMAND);
 	gp_ptr->set_data_ptr((unsigned char*)value);
@@ -60,7 +60,7 @@ int Lt_transform::sc_a71_bus_write(short size, generic_address_t addr, uint32_t 
 	return 0;
 }
 
-void Lt_transform::initiator_thread( tlm::tlm_generic_payload * transaction_ptr)
+void Lt_bus_initiator::initiator_thread( tlm::tlm_generic_payload * transaction_ptr)
 {
 	sc_time delay = SC_ZERO_TIME;
 	tlm::tlm_response_status gp_status;
