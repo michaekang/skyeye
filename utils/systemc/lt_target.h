@@ -22,7 +22,7 @@ public:
 	int sc_bus_write(short size, generic_address_t addr, uint32_t value);
 	
 	typedef tlm::tlm_generic_payload *gp_ptr;
-	tlm_utils::simple_target_socket<Lt_target> memop_socket;
+	tlm_utils::simple_target_socket<Lt_target> target_socket;
 #endif	
 };
 

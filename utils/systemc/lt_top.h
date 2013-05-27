@@ -12,8 +12,15 @@ public:
 	Lt_top(sc_core::sc_module_name module_name);
 	~Lt_top(){};
 
+	Lt_transform core_initiator;
+	Lt_target core_target;
+
+	Lt_transform mem_initiator;
 	Lt_target mem_target;
-	Lt_transform initiator;
+
+	Lt_transform uart_initiator;
+	Lt_target uart_target;
+
 	sc_skyeye_arm arm_initiator;
 };
 #endif
