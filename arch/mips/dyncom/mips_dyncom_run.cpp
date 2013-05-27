@@ -113,6 +113,7 @@ arch_mips_get_reg(cpu_t *cpu, void *reg, unsigned reg_no, uint64_t *value)
 }
 
 arch_func_t arch_func_mips = {
+#if 0
 	arch_mips_init,
 	arch_mips_done,
 	arch_mips_get_pc,
@@ -127,6 +128,7 @@ arch_func_t arch_func_mips = {
 	arch_mips_get_psr,
 	arch_mips_get_reg,
 	NULL
+#endif
 };
 
 static uint32_t mips_debug_func(cpu_t* cpu)
