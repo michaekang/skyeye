@@ -17,7 +17,7 @@ utils_os = os_supp/os_module.c  os_supp/skyeye_os.c
 
 utils_pycli = pycli/pycli.c
 
-utils_systemc = systemc/lt_target.cpp systemc/lt_transform.cpp systemc/sc_skyeye_arm.cpp systemc/sc_init.cpp systemc/systemc_module.c
+utils_systemc = systemc/lt_target.cpp systemc/lt_transform.cpp systemc/sc_skyeye_arm.cpp systemc/sc_init.cpp systemc/systemc_module.c systemc/lt_top.cpp
 libgdbserver_la_SOURCES = $(utils_debugger)
 libgdbserver_la_LDFLAGS = -module
 
@@ -45,7 +45,7 @@ libos_supp_la_LDFLAGS = -module
 libpycli_la_SOURCES = $(utils_pycli) 
 libpycli_la_LDFLAGS = -module `python-config --libs`
 
-libsystemc_la_SOURCES = $(utils_systemc)
+#libsystemc_la_SOURCES = $(utils_systemc)
 
 if WIN32
 WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib -Xlinker -lcommon -Xlinker --export-all-symbol
@@ -73,7 +73,8 @@ INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd
 
 if SYSTEMC_ENABLE
 #libarm_la_LDFLAGS += -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
-INCLUDES += -I$(SYSTEMC_DIR)/include
-DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
-pkglib_LTLIBRARIES += libsystemc.la
+#libsystemc_la_LDFLAGS = -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
+#INCLUDES += -I$(SYSTEMC_DIR)/include
+#DEFS += -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+#pkglib_LTLIBRARIES += libsystemc.la
 endif

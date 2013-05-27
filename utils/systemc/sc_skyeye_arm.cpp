@@ -2,5 +2,5 @@
 
 void sc_skyeye_arm::machine_start()
 {
-	//SIM_init();
+	SIM_init();
 }
