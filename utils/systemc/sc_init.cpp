@@ -50,13 +50,14 @@ static int sc_core_write(short size, generic_address_t addr, uint32_t value){
 * @param delay_time
 */
 void bus_dispatch(tlm:: tlm_generic_payload & payload, sc_core :: sc_time & delay_time){
+#if 0
 	generic_address_t   address = payload.get_address();
 	tlm::tlm_command  command = payload.get_command();
 	unsigned char               *data        = payload.get_data_ptr();
 	short                     size         = payload.get_data_length();
 
 	int id = top_ptr->m_bus.getPortId(address);
-	top_ptr->m_bus.bus_initiator[id].bus_read(size, address, (uint32_t *)data);
+	top_ptr->m_bus.bus_initiator_ptr[id]->bus_read(size, address, (uint32_t *)data);
 	#if 0
 	if((address & 0xfffff000) == 0xfffd0000){
 		/* transport from uart_initiator to uart_target*/
@@ -80,6 +81,7 @@ void bus_dispatch(tlm:: tlm_generic_payload & payload, sc_core :: sc_time & dela
 		//something wrong
 	}
 	#endif
+#endif
 	return;
 }
 void init_systemc_class(){
