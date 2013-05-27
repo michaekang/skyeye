@@ -392,7 +392,10 @@ sc_main (int argc, char **argv)
 	else
 		SIM_init();
 	*/
+	SIM_init();
+	SIM_start();
 	init_systemc_class();
+	//sc_start(100, SC_NS);
 	sc_start();
 	/* Do anything you want to do , or just deadloop here. */
 	while(1)
