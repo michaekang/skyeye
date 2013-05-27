@@ -18,13 +18,14 @@ public:
 	Lt_top(sc_core::sc_module_name module_name);
 	~Lt_top(){};
 
+	SimpleBusLT<2,1>  m_bus; /* core, memory and uart */
 	Lt_core_initiator core_initiator; /* core side */
-	Lt_bus_target core_target; /* bus side */
+	//Lt_bus_target core_target; /* bus side */
 
-	Lt_bus_initiator mem_initiator; /* bus side */
+	//Lt_bus_initiator mem_initiator; /* bus side */
 	Lt_mem_target mem_target; /* device side */
 
-	Lt_bus_initiator uart_initiator; /* bus side */
+	//Lt_bus_initiator uart_initiator; /* bus side */
 	Lt_uart_target uart_target; /* device side */
 
 	sc_skyeye_arm arm_initiator;
