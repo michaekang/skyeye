@@ -18,7 +18,7 @@ SC_MODULE(sc_skyeye_arm)
 	{
 
 		trans_ptr = new Lt_transform("lt_transform");
-		transform_ptr = trans_ptr;
+		//transform_ptr = trans_ptr;
 
 		SC_THREAD(machine_start);
 	}
