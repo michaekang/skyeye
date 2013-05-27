@@ -31,7 +31,7 @@ extern int fcntl(int fd, int cmd, ...);
 extern int setitimer(int which, const struct itimerval *new_value,
 				struct itimerval *old_value);
 _CRTIMP int __cdecl __MINGW_NOTHROW _fstat64 (int, struct __stat64*);
-#define sleep(seconds)  _sleep(seconds)
+#define sleep(seconds)  _sleep(seconds * 1000)
 #define fstat64(fd, buf) _fstat64(fd, buf)
 /**********************************************************************/
 #define hcreate_r(max_conf_obj, conf_tab)
