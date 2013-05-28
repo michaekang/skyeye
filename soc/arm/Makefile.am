@@ -98,27 +98,43 @@ libgoldfish_timer_la_SOURCES = $(goldfish_timer)
 libgoldfish_timer_la_LDFLAGS = -module
 
 libgoldfish_nand_la_SOURCES = $(goldfish_nand)
+
+if BUILD_ANDROID
 if WIN32
 libgoldfish_nand_la_LDFLAGS = -module -Xlinker -L$(top_builddir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common
 else
 libgoldfish_nand_la_LDFLAGS = -module -L$(top_builddir)/android/objs/emulator_common -lemulator_common
+endif
+else
+libgoldfish_nand_la_LDFLAGS = -module
 endif
 
 libgoldfish_tty_la_SOURCES = $(goldfish_tty)
 libgoldfish_tty_la_LDFLAGS = -module
 
 libgoldfish_fb_la_SOURCES = $(goldfish_fb)
+if BUILD_ANDROID
 if WIN32
 libgoldfish_fb_la_LDFLAGS = -module -Xlinker -L$(top_builddir)/android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui
 else
 libgoldfish_fb_la_LDFLAGS = -module -L$(top_builddir)/android/objs/emulator_libui -lemulator_libui
 endif
+else
+libgoldfish_fb_la_LDFLAGS = -module
+endif
 
 libgoldfish_events_la_SOURCES = $(goldfish_events)
+
+
+if BUILD_ANDROID
 if WIN32
 libgoldfish_events_la_LDFLAGS = -module -Xlinker -L$(top_builddir)/android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui -L$(top_builddir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common
 else
 libgoldfish_events_la_LDFLAGS = -module -L$(top_builddir)/android/objs/emulator_libui -lemulator_libui
+endif
+
+else
+libgoldfish_events_la_LDFLAGS = -module
 endif
 
 libgoldfish_bus_la_SOURCES = $(goldfish_bus)

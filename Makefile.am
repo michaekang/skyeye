@@ -1,7 +1,11 @@
 
 #SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/
 SUBDIRS =  common/
+bin_PROGRAMS = 
+
+if BUILD_ANDROID
 include Makefile.android
+endif
 
 SUBDIRS +=  device/ utils/
 if BUILD_ARM
@@ -153,8 +157,10 @@ if WIN32
 	mkdir -p $(prefix)/testsuite/arm_hello && mkdir -p $(prefix)/bin
 	cp -a $(top_builddir)/common/.libs/libcommon-0.dll $(prefix)/lib/skyeye/
 	cp -a $(top_builddir)/common/.libs/libcommon-0.dll $(prefix)/bin/
+if BUILD_ANDROID
 	cp -a $(top_builddir)/android/objs/emulator_common/.libs/libemulator_common-0.dll $(prefix)/bin/
 	cp -a $(top_builddir)/android/objs/emulator_libui/.libs/libemulator_libui-0.dll $(prefix)/bin/
+endif
 endif
 	cp -a $(top_srcdir)/testsuite/arm_hello $(prefix)/testsuite/arm_hello/
 	cp -a $(top_srcdir)/testsuite/sparc_hello $(prefix)/testsuite/sparc_hello/

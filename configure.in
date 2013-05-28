@@ -98,7 +98,17 @@ AC_ARG_ENABLE([dyncom],
 		*)AC_MSG_ERROR(bad value ${ENABLE_DYNCOM} for --enable-dyncom);;
 		esac],
 		ENABLE_DYNCOM=yes)
-
+# enable android support
+ENABLE_ANDROID=
+AC_ARG_ENABLE([android],
+		AC_HELP_STRING([--enable-android],[Build skyeye with android support(default=no)]),
+		[case "${enableval}" in
+		no)ENABLE_ANDROID=no;;
+		yes)ENABLE_ANDROID=yes;;
+		*)AC_MSG_ERROR(bad value ${ENABLE_ANDROID} for --enable-android);;
+		esac],
+		ENABLE_ANDROID=no)
+AM_CONDITIONAL([BUILD_ANDROID], [test "${ENABLE_ANDROID}" = "yes"])
 #check compile target
 ENABLE_TARGETS=
 AC_ARG_ENABLE([targets],
