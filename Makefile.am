@@ -76,7 +76,7 @@ if LLVM_EXIST
 #skyeye_LDFLAGS += `llvm-config --libs ` -lrt -L`llvm-config --libdir`
 endif
 
-INCLUDES = @COMMON_INCLUDES@ -Ithird-party/bfd/
+INCLUDES = @COMMON_INCLUDES@ -Ithird-party/bfd/ -Iutils/code_cov/
 
 DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 @COMMON_CFLAGS@ 
 AM_CFLAGS = -W -Wall -Wstrict-prototypes -Wmissing-prototypes 
@@ -94,10 +94,10 @@ skyeye_systemc_LDFLAGS = -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc -L$(top_builddir
 endif
 
 if WIN32
-bin_PROGRAMS += uart_instance
+bin_PROGRAMS += uart_instance prof_convert
 uart_instance_SOURCES = utils/uart_console/uart_console.c
 mknandflashdump_SOURCES =
-prof_convert_SOURCES =
+prof_convert_SOURCES = utils/code_cov/prof_convert.c
 uart_instance_LDADD = -lgw32c
 else
 bin_PROGRAMS += uart_instance mknandflashdump prof_convert
