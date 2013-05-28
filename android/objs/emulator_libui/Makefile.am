@@ -173,9 +173,9 @@ main_dir = \
 #
 libemulator_libui_la_SOURCES = $(emulator_libui) $(main_dir)
 if WIN32
-libemulator_libui_la_LDFLAGS = -no-undefined -shared -module  -Xlinker --enable-auto-import -Xlinker -L$(top_srcdir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_srcdir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -L/MinGW/GnuWin32/bin -Xlinker -llibiconv2 -Xlinker -lgdi32  -Xlinker -lgw32c -Xlinker --export-all-symbol
+libemulator_libui_la_LDFLAGS = -no-undefined -shared -module  -Xlinker --enable-auto-import -Xlinker -L$(top_builddir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_builddir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -L/MinGW/GnuWin32/bin -Xlinker -llibiconv2 -Xlinker -lgdi32  -Xlinker -lgw32c -Xlinker --export-all-symbol
 else
-libemulator_libui_la_LDFLAGS = -module -L$(top_srcdir)/common -lcommon -L$(top_srcdir)/android/objs/emulator_common/ -lemulator_common  -L/usr/local/lib -liconv
+libemulator_libui_la_LDFLAGS = -module -L$(top_builddir)/common -lcommon -L$(top_builddir)/android/objs/emulator_common/ -lemulator_common  -L/usr/local/lib -liconv
 endif
 
 
@@ -184,6 +184,7 @@ pkglib_LTLIBRARIES = libemulator_libui.la
 INCLUDES += -I$(top_srcdir)/common/include/
 INCLUDES += -I$(top_srcdir)/android/skyeye/
 INCLUDES += -I$(top_srcdir)/android/
+INCLUDES += -I$(top_srcdir)
 INCLUDES += -I$(top_srcdir)/android/utils/
 INCLUDES += -I$(top_srcdir)/third-party/distrib/libpng-1.2.19/
 INCLUDES += -I$(top_srcdir)/third-party/distrib/zlib-1.2.3/
