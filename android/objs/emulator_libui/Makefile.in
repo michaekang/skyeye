@@ -485,7 +485,7 @@ INCLUDES = -I$(top_srcdir)/third-party/distrib/libpng-1.2.19/ \
 	-I$(top_srcdir)/third-party/distrib/sdl-1.2.12/include/ \
 	$(am__append_9) -I$(top_srcdir)/common/include/ \
 	-I$(top_srcdir)/android/skyeye/ -I$(top_srcdir)/android/ \
-	-I$(top_srcdir)/android/utils/ \
+	-I$(top_srcdir) -I$(top_srcdir)/android/utils/ \
 	-I$(top_srcdir)/third-party/distrib/libpng-1.2.19/ \
 	-I$(top_srcdir)/third-party/distrib/zlib-1.2.3/ \
 	-I$(top_srcdir)/soc/arm/goldfish/ $(am__append_10) \
@@ -577,8 +577,8 @@ main_dir = \
 
 #
 libemulator_libui_la_SOURCES = $(emulator_libui) $(main_dir)
-@WIN32_FALSE@libemulator_libui_la_LDFLAGS = -module -L$(top_srcdir)/common -lcommon -L$(top_srcdir)/android/objs/emulator_common/ -lemulator_common  -L/usr/local/lib -liconv
-@WIN32_TRUE@libemulator_libui_la_LDFLAGS = -no-undefined -shared -module  -Xlinker --enable-auto-import -Xlinker -L$(top_srcdir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_srcdir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -L/MinGW/GnuWin32/bin -Xlinker -llibiconv2 -Xlinker -lgdi32  -Xlinker -lgw32c -Xlinker --export-all-symbol
+@WIN32_FALSE@libemulator_libui_la_LDFLAGS = -module -L$(top_builddir)/common -lcommon -L$(top_builddir)/android/objs/emulator_common/ -lemulator_common  -L/usr/local/lib -liconv
+@WIN32_TRUE@libemulator_libui_la_LDFLAGS = -no-undefined -shared -module  -Xlinker --enable-auto-import -Xlinker -L$(top_builddir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_builddir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -L/MinGW/GnuWin32/bin -Xlinker -llibiconv2 -Xlinker -lgdi32  -Xlinker -lgw32c -Xlinker --export-all-symbol
 pkglib_LTLIBRARIES = libemulator_libui.la
 all: all-am
 

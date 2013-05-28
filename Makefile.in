@@ -35,6 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+bin_PROGRAMS = $(am__EXEEXT_1) skyeye$(EXEEXT) $(am__EXEEXT_2) \
+	$(am__EXEEXT_3) $(am__EXEEXT_4)
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.android $(srcdir)/Makefile.in \
 	$(srcdir)/bochs_config.h.in $(srcdir)/config.h.in \
@@ -45,22 +47,27 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	libltdl/config/depcomp libltdl/config/install-sh \
 	libltdl/config/ltmain.sh libltdl/config/missing ltmain.sh \
 	missing
-bin_PROGRAMS = emulator$(EXEEXT) skyeye$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_3)
-@BUILD_ARM_TRUE@am__append_1 = arch/arm soc/arm
-@BUILD_BFIN_TRUE@am__append_2 = arch/bfin
-@BUILD_COLDFIRE_TRUE@am__append_3 = arch/coldfire
-@BUILD_MIPS_TRUE@am__append_4 = arch/mips
-@BUILD_SPARC_TRUE@am__append_5 = arch/sparc
-@BUILD_PPC_TRUE@am__append_6 = arch/ppc
-@BUILD_X86_TRUE@am__append_7 = arch/x86
-@BUILD_DEFAULT_TRUE@am__append_8 = arch/ppc arch/arm soc/arm arch/sparc
-@BUILD_ALL_TRUE@am__append_9 = arch/arm/ soc/arm arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ arch/sparc
-@SYSTEMC_ENABLE_TRUE@am__append_10 = -Iutils/systemc/ -Iutils/systemc/bus -Iutils/systemc/device -I$(SYSTEMC_DIR)/include/
-@SYSTEMC_ENABLE_TRUE@am__append_11 = -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
-@SYSTEMC_ENABLE_TRUE@am__append_12 = skyeye_systemc
-@WIN32_TRUE@am__append_13 = uart_instance
-@WIN32_FALSE@am__append_14 = uart_instance mknandflashdump prof_convert
+#SUBDIRS += android/objs/emulator_libqemu
+@BUILD_ANDROID_TRUE@am__append_1 = android/objs/emulator_common \
+@BUILD_ANDROID_TRUE@	android/objs/emulator_libui \
+@BUILD_ANDROID_TRUE@	android/objs/android
+#SUBDIRS += android/objs/android_common
+#SUBDIRS += android/objs/setup
+@BUILD_ANDROID_TRUE@am__append_2 = emulator
+@BUILD_ARM_TRUE@am__append_3 = arch/arm soc/arm
+@BUILD_BFIN_TRUE@am__append_4 = arch/bfin
+@BUILD_COLDFIRE_TRUE@am__append_5 = arch/coldfire
+@BUILD_MIPS_TRUE@am__append_6 = arch/mips
+@BUILD_SPARC_TRUE@am__append_7 = arch/sparc
+@BUILD_PPC_TRUE@am__append_8 = arch/ppc
+@BUILD_X86_TRUE@am__append_9 = arch/x86
+@BUILD_DEFAULT_TRUE@am__append_10 = arch/ppc arch/arm soc/arm arch/sparc
+@BUILD_ALL_TRUE@am__append_11 = arch/arm/ soc/arm arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ arch/sparc
+@SYSTEMC_ENABLE_TRUE@am__append_12 = -Iutils/systemc/ -Iutils/systemc/bus -Iutils/systemc/device -I$(SYSTEMC_DIR)/include/
+@SYSTEMC_ENABLE_TRUE@am__append_13 = -DSC_INCLUDE_DYNAMIC_PROCESSES  -DSC_USE_PTHREADS -DSYSTEMC_ENABLE
+@SYSTEMC_ENABLE_TRUE@am__append_14 = skyeye_systemc
+@WIN32_TRUE@am__append_15 = uart_instance prof_convert
+@WIN32_FALSE@am__append_16 = uart_instance mknandflashdump prof_convert
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -75,13 +82,18 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h bochs_config.h ltdlconf.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@SYSTEMC_ENABLE_TRUE@am__EXEEXT_1 = skyeye_systemc$(EXEEXT)
-@WIN32_TRUE@am__EXEEXT_2 = uart_instance$(EXEEXT)
-@WIN32_FALSE@am__EXEEXT_3 = uart_instance$(EXEEXT) \
+@BUILD_ANDROID_TRUE@am__EXEEXT_1 = emulator$(EXEEXT)
+@SYSTEMC_ENABLE_TRUE@am__EXEEXT_2 = skyeye_systemc$(EXEEXT)
+@WIN32_TRUE@am__EXEEXT_3 = uart_instance$(EXEEXT) \
+@WIN32_TRUE@	prof_convert$(EXEEXT)
+@WIN32_FALSE@am__EXEEXT_4 = uart_instance$(EXEEXT) \
 @WIN32_FALSE@	mknandflashdump$(EXEEXT) prof_convert$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_emulator_OBJECTS = android_emulator.$(OBJEXT) setenv.$(OBJEXT)
+am__emulator_SOURCES_DIST = utils/main/android_emulator.c \
+	android/utils/setenv.c
+@BUILD_ANDROID_TRUE@am_emulator_OBJECTS = android_emulator.$(OBJEXT) \
+@BUILD_ANDROID_TRUE@	setenv.$(OBJEXT)
 emulator_OBJECTS = $(am_emulator_OBJECTS)
 emulator_DEPENDENCIES =
 am__mknandflashdump_SOURCES_DIST =  \
@@ -91,6 +103,7 @@ mknandflashdump_OBJECTS = $(am_mknandflashdump_OBJECTS)
 mknandflashdump_LDADD = $(LDADD)
 am__prof_convert_SOURCES_DIST = utils/code_cov/prof_convert.c
 @WIN32_FALSE@am_prof_convert_OBJECTS = prof_convert.$(OBJEXT)
+@WIN32_TRUE@am_prof_convert_OBJECTS = prof_convert.$(OBJEXT)
 prof_convert_OBJECTS = $(am_prof_convert_OBJECTS)
 prof_convert_LDADD = $(LDADD)
 am_skyeye_OBJECTS = skyeye.$(OBJEXT)
@@ -148,7 +161,8 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(emulator_SOURCES) $(mknandflashdump_SOURCES) \
 	$(prof_convert_SOURCES) $(skyeye_SOURCES) \
 	$(skyeye_systemc_SOURCES) $(uart_instance_SOURCES)
-DIST_SOURCES = $(emulator_SOURCES) $(am__mknandflashdump_SOURCES_DIST) \
+DIST_SOURCES = $(am__emulator_SOURCES_DIST) \
+	$(am__mknandflashdump_SOURCES_DIST) \
 	$(am__prof_convert_SOURCES_DIST) $(skyeye_SOURCES) \
 	$(am__skyeye_systemc_SOURCES_DIST) \
 	$(am__uart_instance_SOURCES_DIST)
@@ -222,7 +236,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE \
-	-DDEFAULT_INLINE=0 @COMMON_CFLAGS@ $(am__append_11)
+	-DDEFAULT_INLINE=0 @COMMON_CFLAGS@ $(am__append_13)
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -343,15 +357,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/
-#SUBDIRS += android/objs/emulator_libqemu
-SUBDIRS = common/ android/objs/emulator_common \
-	android/objs/emulator_libui android/objs/android device/ \
-	utils/ $(am__append_1) $(am__append_2) $(am__append_3) \
+SUBDIRS = common/ $(am__append_1) device/ utils/ $(am__append_3) \
 	$(am__append_4) $(am__append_5) $(am__append_6) \
-	$(am__append_7) $(am__append_8) $(am__append_9)
-emulator_SOURCES = utils/main/android_emulator.c \
-	android/utils/setenv.c
-emulator_LDADD = -L./common -lcommon
+	$(am__append_7) $(am__append_8) $(am__append_9) \
+	$(am__append_10) $(am__append_11)
+@BUILD_ANDROID_TRUE@emulator_SOURCES = utils/main/android_emulator.c \
+@BUILD_ANDROID_TRUE@	android/utils/setenv.c
+@BUILD_ANDROID_TRUE@emulator_LDADD = -L./common -lcommon
 @BUILD_DEFAULT_TRUE@default_targets = arm, ppc, sparc
 DIST_SUBDIRS = $(SUBDIRS)
 
@@ -373,7 +385,8 @@ skyeye_LDADD = -L./common -lcommon
 #skyeye_LDADD += 
 #skyeye_LDFLAGS = -L./common -lcommon
 #skyeye_LDFLAGS += `llvm-config --libs ` -lrt -L`llvm-config --libdir`
-INCLUDES = @COMMON_INCLUDES@ -Ithird-party/bfd/ $(am__append_10)
+INCLUDES = @COMMON_INCLUDES@ -Ithird-party/bfd/ -Iutils/code_cov/ \
+	$(am__append_12)
 AM_CFLAGS = -W -Wall -Wstrict-prototypes -Wmissing-prototypes 
 ACLOCAL_AMFLAGS = -I m4
 skyeye_SOURCES = utils/main/skyeye.c
@@ -384,7 +397,7 @@ skyeye_SOURCES = utils/main/skyeye.c
 @WIN32_FALSE@mknandflashdump_SOURCES = utils/nandflash_dump/mknandflashdump.c
 @WIN32_TRUE@mknandflashdump_SOURCES = 
 @WIN32_FALSE@prof_convert_SOURCES = utils/code_cov/prof_convert.c
-@WIN32_TRUE@prof_convert_SOURCES = 
+@WIN32_TRUE@prof_convert_SOURCES = utils/code_cov/prof_convert.c
 @WIN32_TRUE@uart_instance_LDADD = -lgw32c
 all: config.h bochs_config.h ltdlconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -1281,9 +1294,12 @@ build_lib:
 	cd $(top_builddir)third-party/opcodes/ && $(MAKE);
 	cd $(top_builddir)/libltdl/ && make;
 install_lib:
-	cd $(top_builddir)/third-party/libiberty && $(MAKE) install
-	cd $(top_builddir)/third-party/bfd/ && $(MAKE) install
-	cd $(top_builddir)/third-party/opcodes/ && $(MAKE) install
+@WIN32_TRUE@	cp $(top_builddir)/third-party/bfd/.libs/libbfd.dll.a  $(prefix)/lib/skyeye/
+@WIN32_TRUE@	cp $(top_builddir)/third-party/bfd/.libs/libbfd.la $(prefix)/lib/skyeye/
+@WIN32_TRUE@	cp $(top_builddir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll  $(prefix)/lib/skyeye/
+@WIN32_FALSE@	cd $(top_builddir)/third-party/libiberty && $(MAKE) install
+@WIN32_FALSE@	cd $(top_builddir)/third-party/bfd/ && $(MAKE) install
+@WIN32_FALSE@	cd $(top_builddir)/third-party/opcodes/ && $(MAKE) install
 
 clean_lib:
 	cd $(top_builddir)/third-party/libiberty && make distclean
@@ -1295,10 +1311,11 @@ install-data-hook:
 @WIN32_TRUE@	mkdir -p $(prefix)/testsuite/arm_hello && mkdir -p $(prefix)/bin
 @WIN32_TRUE@	cp -a $(top_builddir)/common/.libs/libcommon-0.dll $(prefix)/lib/skyeye/
 @WIN32_TRUE@	cp -a $(top_builddir)/common/.libs/libcommon-0.dll $(prefix)/bin/
-@WIN32_TRUE@	cp -a $(top_builddir)/android/objs/emulator_common/.libs/libemulator_common-0.dll $(prefix)/bin/
-@WIN32_TRUE@	cp -a $(top_builddir)/android/objs/emulator_libui/.libs/libemulator_libui-0.dll $(prefix)/bin/
-	cp -a $(top_srcdir)/testsuite/arm_hello $(prefix)/testsuite/arm_hello/
-	cp -a $(top_srcdir)/testsuite/sparc_hello $(prefix)/testsuite/sparc_hello/
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	cp -a $(top_builddir)/android/objs/emulator_common/.libs/libemulator_common-0.dll $(prefix)/bin/
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	cp -a $(top_builddir)/android/objs/emulator_libui/.libs/libemulator_libui-0.dll $(prefix)/bin/
+	cp -a $(top_srcdir)/testsuite/arm_hello $(prefix)/testsuite/
+	cp -a $(top_srcdir)/testsuite/sparc_hello $(prefix)/testsuite/
+
 	cp -a $(top_srcdir)/utils/pycli/*.py $(prefix)/bin/
 #	rm -f -r $(prefix)/conf && mkdir $(prefix)/conf
 #	cp -a $(top_srcdir)/conf/* $(prefix)/conf

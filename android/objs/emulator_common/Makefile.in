@@ -50,7 +50,7 @@ target_triplet = @target@
 @WIN32_TRUE@	$(top_srcdir)/android/skyeye/qemu_iothread.c
 
 @WIN32_TRUE@am__append_2 = -no-undefined -shared -module -Xlinker -L$(top_srcdir)/common/.libs/ -Xlinker -lcommon -Xlinker -lwinmm -Xlinker -lmsvcrt -Xlinker -lkernel32 -Xlinker -lole32 -Xlinker -lkernel32 -Xlinker -lgdi32 -Xlinker-luuid -Xlinker -luser32  -Xlinker -lshell32 -Xlinker -lws2_32 -Xlinker --export-all-symbol
-@WIN32_FALSE@am__append_3 = -module -L$(top_srcdir)/common -lcommon -lrt -L$(top_builddir)/third-party/libiberty/pic
+@WIN32_FALSE@am__append_3 = -module -L$(top_builddir)/common -lcommon -lrt -L$(top_builddir)/third-party/libiberty/pic
 subdir = android/objs/emulator_common
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -447,13 +447,13 @@ pkglib_LTLIBRARIES = libemulator_common.la
 @WIN32_FALSE@INCLUDES = -I$(top_srcdir)/android/config/linux-x86/ \
 @WIN32_FALSE@	-I$(top_srcdir)/common/include/ \
 @WIN32_FALSE@	-I$(top_srcdir)/android/skyeye/ \
-@WIN32_FALSE@	-I$(top_srcdir)/android/ \
+@WIN32_FALSE@	-I$(top_srcdir)/android/ -I$(top_srcdir) \
 @WIN32_FALSE@	-I$(top_srcdir)/android/utils/ \
 @WIN32_FALSE@	-I$(top_srcdir)/third-party/distrib/zlib-1.2.3/
 @WIN32_TRUE@INCLUDES = -I$(top_srcdir)/android/config/windows/ \
 @WIN32_TRUE@	-I$(top_srcdir)/common/include/ \
 @WIN32_TRUE@	-I$(top_srcdir)/android/skyeye/ \
-@WIN32_TRUE@	-I$(top_srcdir)/android/ \
+@WIN32_TRUE@	-I$(top_srcdir)/android/ -I$(top_srcdir) \
 @WIN32_TRUE@	-I$(top_srcdir)/android/utils/ \
 @WIN32_TRUE@	-I$(top_srcdir)/third-party/distrib/zlib-1.2.3/
 all: all-am

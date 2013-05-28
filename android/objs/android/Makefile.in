@@ -250,8 +250,8 @@ android_dir = \
 ###dyn
 #
 libandroid_la_SOURCES = $(android_dir)
-@WIN32_FALSE@libandroid_la_LDFLAGS = -module -L$(top_srcdir)/common -lcommon  -L$(top_srcdir)/android/objs/emulator_libui -lemulator_libui -L$(top_builddir)/third-party/libiberty/pic
-@WIN32_TRUE@libandroid_la_LDFLAGS = -no-undefined -shared -module -Xlinker -L$(top_srcdir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_srcdir)/android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui -Xlinker -L$(top_srcdir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -lmsvcrt -Xlinker -lkernel32 -Xlinker -lole32 -Xlinker -lkernel32 -Xlinker -lgdi32 -Xlinker -luuid -Xlinker -lshell32 -Xlinker --export-all-symbol
+@WIN32_FALSE@libandroid_la_LDFLAGS = -module -L$(top_builddir)/common -lcommon  -L$(top_builddir)/android/objs/emulator_libui -lemulator_libui -L$(top_builddir)/third-party/libiberty/pic
+@WIN32_TRUE@libandroid_la_LDFLAGS = -no-undefined -shared -module -Xlinker -L$(top_builddir)/common/.libs/ -Xlinker -lcommon -Xlinker -L$(top_builddir)/android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui -Xlinker -L$(top_builddir)/android/objs/emulator_common/.libs/ -Xlinker -lemulator_common -Xlinker -lmsvcrt -Xlinker -lkernel32 -Xlinker -lole32 -Xlinker -lkernel32 -Xlinker -lgdi32 -Xlinker -luuid -Xlinker -lshell32 -Xlinker --export-all-symbol
 pkglib_LTLIBRARIES = libandroid.la
 
 #libandroid_la_LDFLAGS = -module -L$(top_srcdir)/common -lcommon  -L$(top_srcdir)/android/objs/emulator_libui -lemulator_libui -L$(top_srcdir)/android/objs/emulator_libqemu/ -lemulator_libqemu  -L$(top_srcdir)/android/objs/emulator_common/ -lemulator_common -lrt  -liconv
@@ -263,7 +263,8 @@ pkglib_LTLIBRARIES = libandroid.la
 #noinst_LIBRARIES += libandroid.a 
 #libandroid_a_SOURCES = $(android_dir)
 #libandroid_a_LDFLAGS =  $(top_srcdir)/android/libemulator_common.a -L$(top_srcdir)/common -lcommon  -liconv
-INCLUDES = -I$(top_srcdir)/common/include/ -I$(top_srcdir)/android/
+INCLUDES = -I$(top_srcdir)/common/include/ -I$(top_srcdir)/android/ \
+	-I$(top_srcdir)
 all: all-am
 
 .SUFFIXES:

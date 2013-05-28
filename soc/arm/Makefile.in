@@ -61,7 +61,10 @@ target_triplet = @target@
 @WIN32_TRUE@am__append_24 = $(WIN32_LD_COMMON)
 @WIN32_TRUE@am__append_25 = $(WIN32_LD_COMMON)
 @WIN32_TRUE@am__append_26 = $(WIN32_LD_COMMON)
-@GTK_LCD_TRUE@am__append_27 = -DGTK_LCD
+@WIN32_TRUE@am__append_27 = $(WIN32_LD_COMMON)
+@WIN32_TRUE@am__append_28 = $(WIN32_LD_COMMON)
+@WIN32_TRUE@am__append_29 = $(WIN32_LD_COMMON)
+@GTK_LCD_TRUE@am__append_30 = -DGTK_LCD
 subdir = soc/arm
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -373,7 +376,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 \
-	@COMMON_CFLAGS@ $(am__append_27)
+	@COMMON_CFLAGS@ $(am__append_30)
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
@@ -568,26 +571,49 @@ libgoldfish_interrupt_la_LDFLAGS = -module $(am__append_23)
 libgoldfish_timer_la_SOURCES = $(goldfish_timer)
 libgoldfish_timer_la_LDFLAGS = -module $(am__append_24)
 libgoldfish_nand_la_SOURCES = $(goldfish_nand)
-@WIN32_FALSE@libgoldfish_nand_la_LDFLAGS = -module -L$(top_srcdir)/android/objs/emulator_common -lemulator_common
-@WIN32_TRUE@libgoldfish_nand_la_LDFLAGS = -module -Xlinker \
-@WIN32_TRUE@	-L$(top_srcdir)/android/objs/emulator_common/.libs/ \
-@WIN32_TRUE@	-Xlinker -lemulator_common $(WIN32_LD_COMMON)
+@BUILD_ANDROID_FALSE@libgoldfish_nand_la_LDFLAGS = -module \
+@BUILD_ANDROID_FALSE@	$(am__append_25)
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@libgoldfish_nand_la_LDFLAGS =  \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-module \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-L$(top_builddir)/android/objs/emulator_common \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-lemulator_common \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	$(am__append_25)
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@libgoldfish_nand_la_LDFLAGS = -module \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-L$(top_builddir)/android/objs/emulator_common/.libs/ \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker -lemulator_common \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	$(am__append_25)
 libgoldfish_tty_la_SOURCES = $(goldfish_tty)
-libgoldfish_tty_la_LDFLAGS = -module $(am__append_25)
+libgoldfish_tty_la_LDFLAGS = -module $(am__append_26)
 libgoldfish_fb_la_SOURCES = $(goldfish_fb)
-@WIN32_FALSE@libgoldfish_fb_la_LDFLAGS = -module -L$(top_srcdir)/android/objs/emulator_libui -lemulator_libui
-@WIN32_TRUE@libgoldfish_fb_la_LDFLAGS = -module -Xlinker \
-@WIN32_TRUE@	-L$(top_srcdir)/android/objs/emulator_libui/.libs/ \
-@WIN32_TRUE@	-Xlinker -lemulator_libui $(WIN32_LD_COMMON)
+@BUILD_ANDROID_FALSE@libgoldfish_fb_la_LDFLAGS = -module \
+@BUILD_ANDROID_FALSE@	$(am__append_27)
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@libgoldfish_fb_la_LDFLAGS = -module \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-L$(top_builddir)/android/objs/emulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-lemulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	$(am__append_27)
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@libgoldfish_fb_la_LDFLAGS = -module \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-L$(top_builddir)/android/objs/emulator_libui/.libs/ \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker -lemulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	$(am__append_27)
 libgoldfish_events_la_SOURCES = $(goldfish_events)
-@WIN32_FALSE@libgoldfish_events_la_LDFLAGS = -module -L$(top_srcdir)/android/objs/emulator_libui -lemulator_libui
-@WIN32_TRUE@libgoldfish_events_la_LDFLAGS = -module -Xlinker \
-@WIN32_TRUE@	-L$(top_srcdir)/android/objs/emulator_libui/.libs/ \
-@WIN32_TRUE@	-Xlinker -lemulator_libui \
-@WIN32_TRUE@	-L$(top_srcdir)/android/objs/emulator_common/.libs/ \
-@WIN32_TRUE@	-Xlinker -lemulator_common $(WIN32_LD_COMMON)
+@BUILD_ANDROID_FALSE@libgoldfish_events_la_LDFLAGS = -module \
+@BUILD_ANDROID_FALSE@	$(am__append_28)
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@libgoldfish_events_la_LDFLAGS =  \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-module \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-L$(top_builddir)/android/objs/emulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	-lemulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@	$(am__append_28)
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@libgoldfish_events_la_LDFLAGS =  \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-module -Xlinker \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-L$(top_builddir)/android/objs/emulator_libui/.libs/ \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker -lemulator_libui \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-L$(top_builddir)/android/objs/emulator_common/.libs/ \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	-Xlinker -lemulator_common \
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@	$(am__append_28)
 libgoldfish_bus_la_SOURCES = $(goldfish_bus)
-libgoldfish_bus_la_LDFLAGS = -module $(am__append_26)
+libgoldfish_bus_la_LDFLAGS = -module $(am__append_29)
 libomap4460_la_SOURCES = $(omap4460)
 libomap4460_la_LDFLAGS = -module $(am__append_21)
 @WIN32_TRUE@WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../../common/.libs/ -L/mingw/lib -Xlinker -lcommon -Xlinker --export-all-symbol
@@ -599,7 +625,7 @@ libgoldfish_tty.la libgoldfish_fb.la libgoldfish_bus.la libgoldfish_events.la li
 
 INCLUDES = -I$(top_srcdir)/arch/arm/mach -I$(top_srcdir)/common \
 	-I./goldfish/ -I$(top_srcdir)/device/uart_16550/ \
-	@COMMON_INCLUDES@ -I$(top_srcdir)/android/ \
+	@COMMON_INCLUDES@ -I$(top_srcdir)/android/ -I$(top_srcdir) \
 	-I$(top_srcdir)/android/skyeye/
 all: all-am
 

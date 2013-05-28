@@ -38,9 +38,9 @@ target_triplet = @target@
 @WIN32_TRUE@am__append_1 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_2 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_3 = $(WIN32_LD_DEVICE)
-@GTK_LCD_TRUE@@WIN32_TRUE@am__append_4 = $(WIN32_LD_DEVICE)
+@WIN32_TRUE@am__append_4 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_5 = $(WIN32_LD_DEVICE)
-@WIN32_TRUE@am__append_6 = $(WIN32_LD_DEVICE)
+@GTK_LCD_TRUE@@WIN32_TRUE@am__append_6 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_7 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_8 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_9 = $(WIN32_LD_DEVICE)
@@ -59,17 +59,19 @@ target_triplet = @target@
 @WIN32_TRUE@am__append_22 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_23 = $(WIN32_LD_DEVICE)
 @WIN32_TRUE@am__append_24 = $(WIN32_LD_DEVICE)
-@GTK_LCD_TRUE@am__append_25 = libgtk_lcd.la
-@WIN32_TRUE@am__append_26 = -I/mingw/gtk-2.0/include/gtk-2.0/ \
+@WIN32_TRUE@am__append_25 = $(WIN32_LD_DEVICE)
+@WIN32_TRUE@am__append_26 = $(WIN32_LD_DEVICE)
+@GTK_LCD_TRUE@am__append_27 = libgtk_lcd.la
+@WIN32_TRUE@am__append_28 = -I/mingw/gtk-2.0/include/gtk-2.0/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/include/glib-2.0/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/include/cairo/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/include/pango-1.0/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/include/atk-1.0/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/lib/gtk-2.0/include/ \
 @WIN32_TRUE@	-I/mingw/gtk-2.0/lib/glib-2.0/include/
-@WIN32_FALSE@am__append_27 = -I/usr/include/gtk-2.0/ -I/usr/include/glib-2.0/
-@GTK_LCD_TRUE@am__append_28 = lcd/skyeye_lcd_gtk.c
-@WIN32_LCD_TRUE@am__append_29 = lcd/skyeye_lcd_win32.c
+@WIN32_FALSE@am__append_29 = -I/usr/include/gtk-2.0/ -I/usr/include/glib-2.0/
+@GTK_LCD_TRUE@am__append_30 = lcd/skyeye_lcd_gtk.c
+@WIN32_LCD_TRUE@am__append_31 = lcd/skyeye_lcd_win32.c
 subdir = device
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -146,85 +148,99 @@ libgtk_lcd_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libgtk_lcd_la_LDFLAGS) $(LDFLAGS) -o $@
 @GTK_LCD_TRUE@am_libgtk_lcd_la_rpath = -rpath $(pkglibdir)
+libimage_la_LIBADD =
+am__objects_6 = image.lo image_module.lo
+am_libimage_la_OBJECTS = $(am__objects_6)
+libimage_la_OBJECTS = $(am_libimage_la_OBJECTS)
+libimage_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libimage_la_LDFLAGS) $(LDFLAGS) -o $@
 liblcd_la_LIBADD =
 am__liblcd_la_SOURCES_DIST = lcd/dev_lcd_au1100.c \
 	lcd/dev_lcd_s3c2410.c lcd/skyeye_lcd.c lcd/dev_lcd_ep7312.c \
 	lcd/dev_lcd_s3c44b0x.c lcd/dev_lcd_pxa.c lcd/lcd_module.c \
 	lcd/skyeye_lcd_gtk.c lcd/skyeye_lcd_win32.c
-am__objects_6 = dev_lcd_au1100.lo dev_lcd_s3c2410.lo skyeye_lcd.lo \
+am__objects_7 = dev_lcd_au1100.lo dev_lcd_s3c2410.lo skyeye_lcd.lo \
 	dev_lcd_ep7312.lo dev_lcd_s3c44b0x.lo dev_lcd_pxa.lo \
 	lcd_module.lo
-@GTK_LCD_TRUE@am__objects_7 = skyeye_lcd_gtk.lo
-@WIN32_LCD_TRUE@am__objects_8 = skyeye_lcd_win32.lo
-am_liblcd_la_OBJECTS = $(am__objects_6) $(am__objects_7) \
-	$(am__objects_8)
+@GTK_LCD_TRUE@am__objects_8 = skyeye_lcd_gtk.lo
+@WIN32_LCD_TRUE@am__objects_9 = skyeye_lcd_win32.lo
+am_liblcd_la_OBJECTS = $(am__objects_7) $(am__objects_8) \
+	$(am__objects_9)
 liblcd_la_OBJECTS = $(am_liblcd_la_OBJECTS)
 liblcd_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblcd_la_LDFLAGS) $(LDFLAGS) -o $@
 liblcd_s3c6410_la_LIBADD =
-am__objects_9 = lcd_s3c6410.lo lcd_s3c6410_module.lo
-am_liblcd_s3c6410_la_OBJECTS = $(am__objects_9)
+am__objects_10 = lcd_s3c6410.lo lcd_s3c6410_module.lo
+am_liblcd_s3c6410_la_OBJECTS = $(am__objects_10)
 liblcd_s3c6410_la_OBJECTS = $(am_liblcd_s3c6410_la_OBJECTS)
 liblcd_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(liblcd_s3c6410_la_LDFLAGS) $(LDFLAGS) -o $@
 libleon2_uart_la_LIBADD =
-am__objects_10 = uart_leon2.lo uart_leon2_module.lo
-am_libleon2_uart_la_OBJECTS = $(am__objects_10)
+am__objects_11 = uart_leon2.lo uart_leon2_module.lo
+am_libleon2_uart_la_OBJECTS = $(am__objects_11)
 libleon2_uart_la_OBJECTS = $(am_libleon2_uart_la_OBJECTS)
 libleon2_uart_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libleon2_uart_la_LDFLAGS) $(LDFLAGS) -o $@
 libmfc_s3c6410_la_LIBADD =
-am__objects_11 = mfc_s3c6410.lo mfc_s3c6410_module.lo
-am_libmfc_s3c6410_la_OBJECTS = $(am__objects_11)
+am__objects_12 = mfc_s3c6410.lo mfc_s3c6410_module.lo
+am_libmfc_s3c6410_la_OBJECTS = $(am__objects_12)
 libmfc_s3c6410_la_OBJECTS = $(am_libmfc_s3c6410_la_OBJECTS)
 libmfc_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmfc_s3c6410_la_LDFLAGS) $(LDFLAGS) -o $@
 libnandflash_la_LIBADD =
-am__objects_12 = dev_nandflash_s3c2410.lo nandflash_smallblock.lo \
+am__objects_13 = dev_nandflash_s3c2410.lo nandflash_smallblock.lo \
 	skyeye_nandflash.lo nandflash_module.lo \
 	dev_nandflash_s3c6410.lo K9G8G08.lo nandflash_K9G8G08.lo
-am_libnandflash_la_OBJECTS = $(am__objects_12)
+am_libnandflash_la_OBJECTS = $(am__objects_13)
 libnandflash_la_OBJECTS = $(am_libnandflash_la_OBJECTS)
 libnandflash_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libnandflash_la_LDFLAGS) $(LDFLAGS) -o $@
 libnet_la_LIBADD =
-am__objects_13 = dev_net_cs8900a.lo skyeye_net_tuntap.lo \
+am__objects_14 = dev_net_cs8900a.lo skyeye_net_tuntap.lo \
 	dev_net_rtl8019.lo skyeye_net_vhub.lo skyeye_net.lo \
 	skyeye_net_vnet.lo net_module.lo
-am_libnet_la_OBJECTS = $(am__objects_13)
+am_libnet_la_OBJECTS = $(am__objects_14)
 libnet_la_OBJECTS = $(am_libnet_la_OBJECTS)
 libnet_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libnet_la_LDFLAGS) $(LDFLAGS) -o $@
 libpci_la_LIBADD =
-am__objects_14 = pci.lo pci_module.lo
-am_libpci_la_OBJECTS = $(am__objects_14)
+am__objects_15 = pci.lo pci_module.lo
+am_libpci_la_OBJECTS = $(am__objects_15)
 libpci_la_OBJECTS = $(am_libpci_la_OBJECTS)
 libpci_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libpci_la_LDFLAGS) $(LDFLAGS) -o $@
+libram_la_LIBADD =
+am__objects_16 = ram.lo ram_module.lo
+am_libram_la_OBJECTS = $(am__objects_16)
+libram_la_OBJECTS = $(am_libram_la_OBJECTS)
+libram_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libram_la_LDFLAGS) $(LDFLAGS) -o $@
 librtc_s3c6410_la_LIBADD =
-am__objects_15 = rtc_s3c6410.lo rtc_s3c6410_module.lo
-am_librtc_s3c6410_la_OBJECTS = $(am__objects_15)
+am__objects_17 = rtc_s3c6410.lo rtc_s3c6410_module.lo
+am_librtc_s3c6410_la_OBJECTS = $(am__objects_17)
 librtc_s3c6410_la_OBJECTS = $(am_librtc_s3c6410_la_OBJECTS)
 librtc_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(librtc_s3c6410_la_LDFLAGS) $(LDFLAGS) -o $@
 libs3c6410_keypad_la_LIBADD =
-am__objects_16 = s3c6410_keypad.lo s3c6410_keypad_module.lo
-am_libs3c6410_keypad_la_OBJECTS = $(am__objects_16)
+am__objects_18 = s3c6410_keypad.lo s3c6410_keypad_module.lo
+am_libs3c6410_keypad_la_OBJECTS = $(am__objects_18)
 libs3c6410_keypad_la_OBJECTS = $(am_libs3c6410_keypad_la_OBJECTS)
 libs3c6410_keypad_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libs3c6410_keypad_la_LDFLAGS) $(LDFLAGS) -o $@
 libsdhci_s3c6410_la_LIBADD =
-am__objects_17 = sdhci_s3c6410.lo sdhci_s3c6410_module.lo
-am_libsdhci_s3c6410_la_OBJECTS = $(am__objects_17)
+am__objects_19 = sdhci_s3c6410.lo sdhci_s3c6410_module.lo
+am_libsdhci_s3c6410_la_OBJECTS = $(am__objects_19)
 libsdhci_s3c6410_la_OBJECTS = $(am_libsdhci_s3c6410_la_OBJECTS)
 libsdhci_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -234,38 +250,38 @@ am__libsdl_lcd_la_SOURCES_DIST = lcd_sdl/lcd_sdl_module.c \
 	lcd_sdl/lcd_sdl.c -no-undefined -shared -module -Xlinker \
 	-L../common/.libs/ -lcommon -L/mingw/lib -L/mingw/ \
 	--export-all-symbol
-am__objects_18 = lcd_sdl_module.lo lcd_sdl.lo
-am__objects_19 =
-@WIN32_TRUE@am__objects_20 = $(am__objects_19)
-am_libsdl_lcd_la_OBJECTS = $(am__objects_18) $(am__objects_20)
+am__objects_20 = lcd_sdl_module.lo lcd_sdl.lo
+am__objects_21 =
+@WIN32_TRUE@am__objects_22 = $(am__objects_21)
+am_libsdl_lcd_la_OBJECTS = $(am__objects_20) $(am__objects_22)
 libsdl_lcd_la_OBJECTS = $(am_libsdl_lcd_la_OBJECTS)
 libsdl_lcd_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libsdl_lcd_la_LDFLAGS) $(LDFLAGS) -o $@
 libsound_la_LIBADD =
-am__objects_21 = skyeye_sound.lo skyeye_sound_pcm.lo sound_module.lo
-am_libsound_la_OBJECTS = $(am__objects_21)
+am__objects_23 = skyeye_sound.lo skyeye_sound_pcm.lo sound_module.lo
+am_libsound_la_OBJECTS = $(am__objects_23)
 libsound_la_OBJECTS = $(am_libsound_la_OBJECTS)
 libsound_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libsound_la_LDFLAGS) $(LDFLAGS) -o $@
 libspi_s3c6410_la_LIBADD =
-am__objects_22 = spi_s3c6410.lo spi_s3c6410_module.lo
-am_libspi_s3c6410_la_OBJECTS = $(am__objects_22)
+am__objects_24 = spi_s3c6410.lo spi_s3c6410_module.lo
+am_libspi_s3c6410_la_OBJECTS = $(am__objects_24)
 libspi_s3c6410_la_OBJECTS = $(am_libspi_s3c6410_la_OBJECTS)
 libspi_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libspi_s3c6410_la_LDFLAGS) $(LDFLAGS) -o $@
 libsysctrl_s3c6410_la_LIBADD =
-am__objects_23 = sysctrl_s3c6410.lo sysctrl_s3c6410_module.lo
-am_libsysctrl_s3c6410_la_OBJECTS = $(am__objects_23)
+am__objects_25 = sysctrl_s3c6410.lo sysctrl_s3c6410_module.lo
+am_libsysctrl_s3c6410_la_OBJECTS = $(am__objects_25)
 libsysctrl_s3c6410_la_OBJECTS = $(am_libsysctrl_s3c6410_la_OBJECTS)
 libsysctrl_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libsysctrl_s3c6410_la_LDFLAGS) $(LDFLAGS) -o $@
 libtouchscreen_s3c6410_la_LIBADD =
-am__objects_24 = touchscreen_s3c6410.lo touchscreen_s3c6410_module.lo
-am_libtouchscreen_s3c6410_la_OBJECTS = $(am__objects_24)
+am__objects_26 = touchscreen_s3c6410.lo touchscreen_s3c6410_module.lo
+am_libtouchscreen_s3c6410_la_OBJECTS = $(am__objects_26)
 libtouchscreen_s3c6410_la_OBJECTS =  \
 	$(am_libtouchscreen_s3c6410_la_OBJECTS)
 libtouchscreen_s3c6410_la_LINK = $(LIBTOOL) --tag=CC \
@@ -273,39 +289,39 @@ libtouchscreen_s3c6410_la_LINK = $(LIBTOOL) --tag=CC \
 	$(AM_CFLAGS) $(CFLAGS) $(libtouchscreen_s3c6410_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
 libts_la_LIBADD =
-am__objects_25 = dev_touchscreen_skyeye.lo skyeye_touchscreen.lo \
+am__objects_27 = dev_touchscreen_skyeye.lo skyeye_touchscreen.lo \
 	ts_module.lo
-am_libts_la_OBJECTS = $(am__objects_25)
+am_libts_la_OBJECTS = $(am__objects_27)
 libts_la_OBJECTS = $(am_libts_la_OBJECTS)
 libts_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(libts_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
 libuart_la_LIBADD =
-am__objects_26 = skyeye_uart.lo skyeye_uart_net.lo \
+am__objects_28 = skyeye_uart.lo skyeye_uart_net.lo \
 	skyeye_uart_stdio.lo uart_module.lo skyeye_uart_pipe.lo \
 	skyeye_uart_term.lo
-am_libuart_la_OBJECTS = $(am__objects_26)
+am_libuart_la_OBJECTS = $(am__objects_28)
 libuart_la_OBJECTS = $(am_libuart_la_OBJECTS)
 libuart_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libuart_la_LDFLAGS) $(LDFLAGS) -o $@
 libuart_16550_la_LIBADD =
-am__objects_27 = uart_16550.lo uart_16550_module.lo
-am_libuart_16550_la_OBJECTS = $(am__objects_27)
+am__objects_29 = uart_16550.lo uart_16550_module.lo
+am_libuart_16550_la_OBJECTS = $(am__objects_29)
 libuart_16550_la_OBJECTS = $(am_libuart_16550_la_OBJECTS)
 libuart_16550_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libuart_16550_la_LDFLAGS) $(LDFLAGS) -o $@
 libuart_term_la_LIBADD =
-am__objects_28 = uart_term.lo uart_term_module.lo
-am_libuart_term_la_OBJECTS = $(am__objects_28)
+am__objects_30 = uart_term.lo uart_term_module.lo
+am_libuart_term_la_OBJECTS = $(am__objects_30)
 libuart_term_la_OBJECTS = $(am_libuart_term_la_OBJECTS)
 libuart_term_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libuart_term_la_LDFLAGS) $(LDFLAGS) -o $@
 libusbhost_s3c6410_la_LIBADD =
-am__objects_29 = usbhost_s3c6410.lo usbhost_s3c6410_module.lo
-am_libusbhost_s3c6410_la_OBJECTS = $(am__objects_29)
+am__objects_31 = usbhost_s3c6410.lo usbhost_s3c6410_module.lo
+am_libusbhost_s3c6410_la_OBJECTS = $(am__objects_31)
 libusbhost_s3c6410_la_OBJECTS = $(am_libusbhost_s3c6410_la_OBJECTS)
 libusbhost_s3c6410_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -325,10 +341,11 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libac97_s3c6410_la_SOURCES) $(libcamif_s3c6410_la_SOURCES) \
 	$(libflash_la_SOURCES) $(libgpio_s3c6410_la_SOURCES) \
-	$(libgtk_lcd_la_SOURCES) $(liblcd_la_SOURCES) \
-	$(liblcd_s3c6410_la_SOURCES) $(libleon2_uart_la_SOURCES) \
-	$(libmfc_s3c6410_la_SOURCES) $(libnandflash_la_SOURCES) \
-	$(libnet_la_SOURCES) $(libpci_la_SOURCES) \
+	$(libgtk_lcd_la_SOURCES) $(libimage_la_SOURCES) \
+	$(liblcd_la_SOURCES) $(liblcd_s3c6410_la_SOURCES) \
+	$(libleon2_uart_la_SOURCES) $(libmfc_s3c6410_la_SOURCES) \
+	$(libnandflash_la_SOURCES) $(libnet_la_SOURCES) \
+	$(libpci_la_SOURCES) $(libram_la_SOURCES) \
 	$(librtc_s3c6410_la_SOURCES) $(libs3c6410_keypad_la_SOURCES) \
 	$(libsdhci_s3c6410_la_SOURCES) $(libsdl_lcd_la_SOURCES) \
 	$(libsound_la_SOURCES) $(libspi_s3c6410_la_SOURCES) \
@@ -339,12 +356,13 @@ SOURCES = $(libac97_s3c6410_la_SOURCES) $(libcamif_s3c6410_la_SOURCES) \
 DIST_SOURCES = $(libac97_s3c6410_la_SOURCES) \
 	$(libcamif_s3c6410_la_SOURCES) $(libflash_la_SOURCES) \
 	$(libgpio_s3c6410_la_SOURCES) \
-	$(am__libgtk_lcd_la_SOURCES_DIST) \
+	$(am__libgtk_lcd_la_SOURCES_DIST) $(libimage_la_SOURCES) \
 	$(am__liblcd_la_SOURCES_DIST) $(liblcd_s3c6410_la_SOURCES) \
 	$(libleon2_uart_la_SOURCES) $(libmfc_s3c6410_la_SOURCES) \
 	$(libnandflash_la_SOURCES) $(libnet_la_SOURCES) \
-	$(libpci_la_SOURCES) $(librtc_s3c6410_la_SOURCES) \
-	$(libs3c6410_keypad_la_SOURCES) $(libsdhci_s3c6410_la_SOURCES) \
+	$(libpci_la_SOURCES) $(libram_la_SOURCES) \
+	$(librtc_s3c6410_la_SOURCES) $(libs3c6410_keypad_la_SOURCES) \
+	$(libsdhci_s3c6410_la_SOURCES) \
 	$(am__libsdl_lcd_la_SOURCES_DIST) $(libsound_la_SOURCES) \
 	$(libspi_s3c6410_la_SOURCES) $(libsysctrl_s3c6410_la_SOURCES) \
 	$(libtouchscreen_s3c6410_la_SOURCES) $(libts_la_SOURCES) \
@@ -509,6 +527,8 @@ dev_ac97_s3c6410 = ac97_s3c6410/ac97_s3c6410.c ac97_s3c6410/ac97_s3c6410_module.
 dev_mfc_s3c6410 = mfc_s3c6410/mfc_s3c6410.c mfc_s3c6410/mfc_s3c6410_module.c
 dev_rtc_s3c6410 = rtc_s3c6410/rtc_s3c6410.c rtc_s3c6410/rtc_s3c6410_module.c
 dev_camif_s3c6410 = camif_s3c6410/camif_s3c6410.c camif_s3c6410/camif_s3c6410_module.c
+dev_image = image/image.c image/image_module.c
+dev_ram = ram/ram.c ram/ram_module.c
 
 #dev_flash = flash/armflash.c  flash/dev_flash_sst39lvf160.c flash/flash_module.c\
 #flash/dev_flash_am29.c  flash/dev_flash_intel.c  flash/skyeye_flash.c
@@ -542,50 +562,54 @@ liblcd_s3c6410_la_SOURCES = $(dev_lcd_s3c6410)
 liblcd_s3c6410_la_LDFLAGS = -module $(am__append_3)
 @GTK_LCD_TRUE@libgtk_lcd_la_SOURCES = $(gtk_lcd) 
 @GTK_LCD_TRUE@libgtk_lcd_la_LDFLAGS = -module $(LCD_LIBS) \
-@GTK_LCD_TRUE@	$(am__append_4)
-libsdl_lcd_la_SOURCES = $(sdl_lcd) $(am__append_5)
-@WIN32_FALSE@libsdl_lcd_la_LDFLAGS = -module -L../android/objs/emulator_libui -lemulator_libui
-@WIN32_TRUE@libsdl_lcd_la_LDFLAGS = -module -Xlinker -L../android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui
+@GTK_LCD_TRUE@	$(am__append_6)
+libsdl_lcd_la_SOURCES = $(sdl_lcd) $(am__append_7)
+@BUILD_ANDROID_TRUE@@WIN32_FALSE@libsdl_lcd_la_LDFLAGS = -module -L$(top_builddir)/android/objs/emulator_libui -lemulator_libui
+@BUILD_ANDROID_TRUE@@WIN32_TRUE@libsdl_lcd_la_LDFLAGS = -module -Xlinker -L$(top_builddir)/android/objs/emulator_libui/.libs/ -Xlinker -lemulator_libui
 libsdhci_s3c6410_la_SOURCES = $(dev_sdhci_s3c6410)
-libsdhci_s3c6410_la_LDFLAGS = -module $(am__append_6)
+libsdhci_s3c6410_la_LDFLAGS = -module $(am__append_8)
 libtouchscreen_s3c6410_la_SOURCES = $(dev_touchscreen_s3c6410)
-libtouchscreen_s3c6410_la_LDFLAGS = -module $(am__append_7)
+libtouchscreen_s3c6410_la_LDFLAGS = -module $(am__append_9)
 libsysctrl_s3c6410_la_SOURCES = $(dev_sysctrl_s3c6410)
-libsysctrl_s3c6410_la_LDFLAGS = -module $(am__append_8)
+libsysctrl_s3c6410_la_LDFLAGS = -module $(am__append_10)
 libgpio_s3c6410_la_SOURCES = $(dev_gpio_s3c6410)
-libgpio_s3c6410_la_LDFLAGS = -module $(am__append_9)
+libgpio_s3c6410_la_LDFLAGS = -module $(am__append_11)
 libspi_s3c6410_la_SOURCES = $(dev_spi_s3c6410)
-libspi_s3c6410_la_LDFLAGS = -module $(am__append_10)
+libspi_s3c6410_la_LDFLAGS = -module $(am__append_12)
 libusbhost_s3c6410_la_SOURCES = $(dev_usbhost_s3c6410)
-libusbhost_s3c6410_la_LDFLAGS = -module $(am__append_11)
+libusbhost_s3c6410_la_LDFLAGS = -module $(am__append_13)
 libac97_s3c6410_la_SOURCES = $(dev_ac97_s3c6410)
-libac97_s3c6410_la_LDFLAGS = -module $(am__append_12)
+libac97_s3c6410_la_LDFLAGS = -module $(am__append_14)
 libmfc_s3c6410_la_SOURCES = $(dev_mfc_s3c6410)
-libmfc_s3c6410_la_LDFLAGS = -module $(am__append_13)
+libmfc_s3c6410_la_LDFLAGS = -module $(am__append_15)
 librtc_s3c6410_la_SOURCES = $(dev_rtc_s3c6410)
-librtc_s3c6410_la_LDFLAGS = -module $(am__append_14)
+librtc_s3c6410_la_LDFLAGS = -module $(am__append_16)
 libcamif_s3c6410_la_SOURCES = $(dev_camif_s3c6410)
-libcamif_s3c6410_la_LDFLAGS = -module $(am__append_15)
+libcamif_s3c6410_la_LDFLAGS = -module $(am__append_17)
+libimage_la_SOURCES = $(dev_image)
+libimage_la_LDFLAGS = -module $(am__append_5)
+libram_la_SOURCES = $(dev_ram)
+libram_la_LDFLAGS = -module $(am__append_4)
 libflash_la_SOURCES = $(dev_flash)
-libflash_la_LDFLAGS = -module $(am__append_16)
+libflash_la_LDFLAGS = -module $(am__append_18)
 libnandflash_la_SOURCES = $(dev_nandflash)
-libnandflash_la_LDFLAGS = -module $(am__append_17)
+libnandflash_la_LDFLAGS = -module $(am__append_19)
 libsound_la_SOURCES = $(dev_sound)
-libsound_la_LDFLAGS = -module $(am__append_18)
-liblcd_la_SOURCES = $(dev_lcd) $(am__append_28) $(am__append_29)
-liblcd_la_LDFLAGS = -module $(LCD_LIBS) $(am__append_19)
+libsound_la_LDFLAGS = -module $(am__append_20)
+liblcd_la_SOURCES = $(dev_lcd) $(am__append_30) $(am__append_31)
+liblcd_la_LDFLAGS = -module $(LCD_LIBS) $(am__append_21)
 libnet_la_SOURCES = $(dev_net)
-libnet_la_LDFLAGS = -module $(am__append_20)
+libnet_la_LDFLAGS = -module $(am__append_22)
 libts_la_SOURCES = $(dev_ts)
-libts_la_LDFLAGS = -module $(am__append_21)
+libts_la_LDFLAGS = -module $(am__append_23)
 libpci_la_SOURCES = $(dev_pci)
-libpci_la_LDFLAGS = -module $(am__append_22)
+libpci_la_LDFLAGS = -module $(am__append_24)
 dev_leon2_uart = uart_leon2/uart_leon2.c uart_leon2/uart_leon2_module.c
 libleon2_uart_la_SOURCES = $(dev_leon2_uart)
-libleon2_uart_la_LDFLAGS = -module $(am__append_23)
+libleon2_uart_la_LDFLAGS = -module $(am__append_25)
 dev_uart_term = uart_term/uart_term.c uart_term/uart_term_module.c
 libuart_term_la_SOURCES = $(dev_uart_term)
-libuart_term_la_LDFLAGS = -module $(am__append_24)
+libuart_term_la_LDFLAGS = -module $(am__append_26)
 @WIN32_TRUE@WIN32_LD_DEVICE = -no-undefined -shared -module -Xlinker -L../common/.libs/  -Xlinker -lcommon -L/mingw/lib  -Xlinker -L/mingw/ -Xlinker --export-all-symbol
 pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la \
 	libnandflash.la libsound.la liblcd.la libnet.la libts.la \
@@ -593,13 +617,13 @@ pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la \
 	libtouchscreen_s3c6410.la libsysctrl_s3c6410.la \
 	libgpio_s3c6410.la libspi_s3c6410.la libusbhost_s3c6410.la \
 	libac97_s3c6410.la libmfc_s3c6410.la libcamif_s3c6410.la \
-	librtc_s3c6410.la libleon2_uart.la libuart_term.la \
-	$(am__append_25) libsdl_lcd.la libs3c6410_keypad.la
+	librtc_s3c6410.la libleon2_uart.la libuart_term.la libimage.la \
+	libram.la $(am__append_27) libsdl_lcd.la libs3c6410_keypad.la
 skyeye_bin_dir = \"$(prefix)/bin/\"
 INCLUDES = -I./ @COMMON_INCLUDES@ -I./uart_16550 \
 	-DSKYEYE_BIN=$(skyeye_bin_dir) -I./nandflash @LCD_CFLAGS@ \
-	$(am__append_26) $(am__append_27) -I../android/ \
-	-I../android/skyeye/
+	$(am__append_28) $(am__append_29) -I$(top_srcdir)/android/ \
+	-I$(top_srcdir) -I$(top_srcdir)/android/skyeye/
 dev_s3c6410_keypad = s3c6410_keypad/s3c6410_keypad.c s3c6410_keypad/s3c6410_keypad_module.c
 libs3c6410_keypad_la_SOURCES = $(dev_s3c6410_keypad)
 libs3c6410_keypad_la_LDFLAGS = -module
@@ -678,6 +702,8 @@ libgpio_s3c6410.la: $(libgpio_s3c6410_la_OBJECTS) $(libgpio_s3c6410_la_DEPENDENC
 	$(libgpio_s3c6410_la_LINK) -rpath $(pkglibdir) $(libgpio_s3c6410_la_OBJECTS) $(libgpio_s3c6410_la_LIBADD) $(LIBS)
 libgtk_lcd.la: $(libgtk_lcd_la_OBJECTS) $(libgtk_lcd_la_DEPENDENCIES) 
 	$(libgtk_lcd_la_LINK) $(am_libgtk_lcd_la_rpath) $(libgtk_lcd_la_OBJECTS) $(libgtk_lcd_la_LIBADD) $(LIBS)
+libimage.la: $(libimage_la_OBJECTS) $(libimage_la_DEPENDENCIES) 
+	$(libimage_la_LINK) -rpath $(pkglibdir) $(libimage_la_OBJECTS) $(libimage_la_LIBADD) $(LIBS)
 liblcd.la: $(liblcd_la_OBJECTS) $(liblcd_la_DEPENDENCIES) 
 	$(liblcd_la_LINK) -rpath $(pkglibdir) $(liblcd_la_OBJECTS) $(liblcd_la_LIBADD) $(LIBS)
 liblcd_s3c6410.la: $(liblcd_s3c6410_la_OBJECTS) $(liblcd_s3c6410_la_DEPENDENCIES) 
@@ -692,6 +718,8 @@ libnet.la: $(libnet_la_OBJECTS) $(libnet_la_DEPENDENCIES)
 	$(libnet_la_LINK) -rpath $(pkglibdir) $(libnet_la_OBJECTS) $(libnet_la_LIBADD) $(LIBS)
 libpci.la: $(libpci_la_OBJECTS) $(libpci_la_DEPENDENCIES) 
 	$(libpci_la_LINK) -rpath $(pkglibdir) $(libpci_la_OBJECTS) $(libpci_la_LIBADD) $(LIBS)
+libram.la: $(libram_la_OBJECTS) $(libram_la_DEPENDENCIES) 
+	$(libram_la_LINK) -rpath $(pkglibdir) $(libram_la_OBJECTS) $(libram_la_LIBADD) $(LIBS)
 librtc_s3c6410.la: $(librtc_s3c6410_la_OBJECTS) $(librtc_s3c6410_la_DEPENDENCIES) 
 	$(librtc_s3c6410_la_LINK) -rpath $(pkglibdir) $(librtc_s3c6410_la_OBJECTS) $(librtc_s3c6410_la_LIBADD) $(LIBS)
 libs3c6410_keypad.la: $(libs3c6410_keypad_la_OBJECTS) $(libs3c6410_keypad_la_DEPENDENCIES) 
@@ -746,6 +774,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flash_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gpio_s3c6410.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gpio_s3c6410_module.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/image.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/image_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcd_gtk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcd_gtk_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lcd_module.Plo@am__quote@
@@ -761,6 +791,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pci.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pci_module.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ram.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ram_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtc_s3c6410.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtc_s3c6410_module.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/s3c6410_keypad.Plo@am__quote@
@@ -913,6 +945,20 @@ lcd_gtk.lo: lcd_gtk/lcd_gtk.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lcd_gtk/lcd_gtk.c' object='lcd_gtk.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lcd_gtk.lo `test -f 'lcd_gtk/lcd_gtk.c' || echo '$(srcdir)/'`lcd_gtk/lcd_gtk.c
+
+image.lo: image/image.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT image.lo -MD -MP -MF $(DEPDIR)/image.Tpo -c -o image.lo `test -f 'image/image.c' || echo '$(srcdir)/'`image/image.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/image.Tpo $(DEPDIR)/image.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='image/image.c' object='image.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o image.lo `test -f 'image/image.c' || echo '$(srcdir)/'`image/image.c
+
+image_module.lo: image/image_module.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT image_module.lo -MD -MP -MF $(DEPDIR)/image_module.Tpo -c -o image_module.lo `test -f 'image/image_module.c' || echo '$(srcdir)/'`image/image_module.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/image_module.Tpo $(DEPDIR)/image_module.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='image/image_module.c' object='image_module.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o image_module.lo `test -f 'image/image_module.c' || echo '$(srcdir)/'`image/image_module.c
 
 dev_lcd_au1100.lo: lcd/dev_lcd_au1100.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dev_lcd_au1100.lo -MD -MP -MF $(DEPDIR)/dev_lcd_au1100.Tpo -c -o dev_lcd_au1100.lo `test -f 'lcd/dev_lcd_au1100.c' || echo '$(srcdir)/'`lcd/dev_lcd_au1100.c
@@ -1130,6 +1176,20 @@ pci_module.lo: pci/pci_bus/pci_module.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pci/pci_bus/pci_module.c' object='pci_module.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pci_module.lo `test -f 'pci/pci_bus/pci_module.c' || echo '$(srcdir)/'`pci/pci_bus/pci_module.c
+
+ram.lo: ram/ram.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ram.lo -MD -MP -MF $(DEPDIR)/ram.Tpo -c -o ram.lo `test -f 'ram/ram.c' || echo '$(srcdir)/'`ram/ram.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ram.Tpo $(DEPDIR)/ram.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ram/ram.c' object='ram.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ram.lo `test -f 'ram/ram.c' || echo '$(srcdir)/'`ram/ram.c
+
+ram_module.lo: ram/ram_module.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ram_module.lo -MD -MP -MF $(DEPDIR)/ram_module.Tpo -c -o ram_module.lo `test -f 'ram/ram_module.c' || echo '$(srcdir)/'`ram/ram_module.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/ram_module.Tpo $(DEPDIR)/ram_module.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ram/ram_module.c' object='ram_module.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ram_module.lo `test -f 'ram/ram_module.c' || echo '$(srcdir)/'`ram/ram_module.c
 
 rtc_s3c6410.lo: rtc_s3c6410/rtc_s3c6410.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rtc_s3c6410.lo -MD -MP -MF $(DEPDIR)/rtc_s3c6410.Tpo -c -o rtc_s3c6410.lo `test -f 'rtc_s3c6410/rtc_s3c6410.c' || echo '$(srcdir)/'`rtc_s3c6410/rtc_s3c6410.c

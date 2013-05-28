@@ -686,6 +686,8 @@ BUILD_BFIN_FALSE
 BUILD_BFIN_TRUE
 BUILD_ARM_FALSE
 BUILD_ARM_TRUE
+BUILD_ANDROID_FALSE
+BUILD_ANDROID_TRUE
 DBCT_FALSE
 DBCT_TRUE
 LINUX_FALSE
@@ -793,6 +795,7 @@ ac_user_opts='
 enable_option_checking
 enable_dependency_tracking
 enable_dyncom
+enable_android
 enable_targets
 with_systemc
 enable_lcd
@@ -1452,6 +1455,7 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-dyncom         Build skyeye specific link llvm library(default=yes)
+  --enable-android        Build skyeye with android support(default=no)
   --enable-targets        Build specific host targets: all or
                           target1,target2,... Valid targets are:
                           arm,bfin,coldfire,mips,ppc,sparc,x86(default=all)
@@ -5184,6 +5188,26 @@ else
   ENABLE_DYNCOM=yes
 fi
 
+# enable android support
+ENABLE_ANDROID=
+# Check whether --enable-android was given.
+if test "${enable_android+set}" = set; then :
+  enableval=$enable_android; case "${enableval}" in
+		no)ENABLE_ANDROID=no;;
+		yes)ENABLE_ANDROID=yes;;
+		*)as_fn_error $? "bad value ${ENABLE_ANDROID} for --enable-android" "$LINENO" 5;;
+		esac
+else
+  ENABLE_ANDROID=no
+fi
+
+ if test "${ENABLE_ANDROID}" = "yes"; then
+  BUILD_ANDROID_TRUE=
+  BUILD_ANDROID_FALSE='#'
+else
+  BUILD_ANDROID_TRUE='#'
+  BUILD_ANDROID_FALSE=
+fi
 
 #check compile target
 ENABLE_TARGETS=
@@ -19296,6 +19320,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DBCT_TRUE}" && test -z "${DBCT_FALSE}"; then
   as_fn_error $? "conditional \"DBCT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_ANDROID_TRUE}" && test -z "${BUILD_ANDROID_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_ANDROID\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_ARM_TRUE}" && test -z "${BUILD_ARM_FALSE}"; then
