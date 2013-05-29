@@ -50,7 +50,8 @@ machine_config_t sparc_machines[] = {
 	{NULL,NULL,0,0,0}   /*  last element    */
 };
 
-
+exception_t sparc_mmu_read(short size, generic_address_t addr, uint32_t * value);
+exception_t sparc_mmu_write(short size, generic_address_t addr, uint32_t* value);
 /* 
  * ===  FUNCTION  ======================================================================
  *         Name:  sparc_init_state
@@ -68,6 +69,7 @@ int init_sparc_exec(void)
 	DBG("In %s(): Add iu_cycle_step into exec\n", __func__);        // Added by yukewei
 	add_to_default_cell(exec);
 
+	register_bus_operation(sparc_mmu_read, sparc_mmu_write);
 	return 0;
 }
 
@@ -582,9 +584,10 @@ void init_sparc_arch()
 	sparc_arch.get_regid_by_name= sparc_get_regid_by_name;
 	sparc_arch.get_step = sparc_get_step;
 	sparc_arch.get_regnum = sparc_get_regnum;
-	sparc_arch.mmu_read= sparc_mmu_read;
-	sparc_arch.mmu_write= sparc_mmu_write;
+	//sparc_arch.mmu_read= sparc_mmu_read;
+	//sparc_arch.mmu_write= sparc_mmu_write;
 
 	register_arch (&sparc_arch);
+
 }
 
