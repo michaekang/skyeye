@@ -72,9 +72,13 @@ write_phys (uint32 addr, uint8_t * buffer, int size)
 		*/
 		/* byte write */
 		//fault = mem_write (8, addr + i, buffer[i]);
+
+		/*
 		if(bank = bank_ptr(addr))
 	                bank->bank_write(8, addr + i, buffer[i]);
 		else{
+		*/
+		if(bus_write(8, addr + i, buffer[i]) != 0){
 			printf("SKYEYE: write physical address 0x%x error!!!\n", addr + i);
 			return;
 		}
