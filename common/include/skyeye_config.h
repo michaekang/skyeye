@@ -218,6 +218,7 @@ typedef struct
 	arch_config_t *arch;
 	//cpu_config_t *cpu;
 	machine_config_t *mach;
+	conf_object_t* cpu;
 	//mem_config_t mem;
 	os_config_t *os;
 //chy 2003-09-12, now support more io banks

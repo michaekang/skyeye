@@ -40,8 +40,16 @@ typedef struct ARM_CPU_State_s {
 
 static inline ARM_CPU_State* get_current_cpu(){
 	machine_config_t* mach = get_current_mach();
+	ARM_CPU_State* cpu = NULL;
 	/* Casting a conf_obj_t to ARM_CPU_State type */
-	ARM_CPU_State* cpu = (ARM_CPU_State*)get_cast_conf_obj(mach->cpu_data, "ARM_CPU_State");
+	if(mach == NULL){
+		/* didn't configure machine in skyeye.conf */
+		skyeye_config_t* config = get_current_config();
+		cpu = (ARM_CPU_State*)get_cast_conf_obj(config->cpu, "ARM_CPU_State");
+	}
+	else{
+		cpu = (ARM_CPU_State*)get_cast_conf_obj(mach->cpu_data, "ARM_CPU_State");
+	}
 
 	return cpu;
 }

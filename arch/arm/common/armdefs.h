@@ -444,6 +444,7 @@ So, if lateabtSig=1, then it means Late Abort Model(Base Updated Abort Model)
 	ARMword exclusive_access_state;
 
 	memory_space_intf space;	
+	addr_space_t* bus_space;
 	uint32 CurrInstr;
 	uint32 last_pc; /* the last pc executed */
 	uint32 last_instr; /* the last inst executed */

@@ -277,7 +277,14 @@ static void arm_cpu_init()
 {
 	ARM_CPU_State *cpu = skyeye_mm_zero(sizeof(ARM_CPU_State));
         machine_config_t *mach = get_current_mach();
-        mach->cpu_data = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
+	if(mach == NULL){
+		/* didn't configure machine in skyeye.conf */
+		skyeye_config_t* config = get_current_config();
+        	config->cpu = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
+	}
+	else{
+        	mach->cpu_data = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
+	}
 
 	cpu->core_num = 1;
 	if(!cpu->core_num){
@@ -298,9 +305,17 @@ static void arm_cpu_init()
 	int i;
 
 	cpu->boot_core_id = 0;
+	/* every core should have a bus_space,
+	 * Dcores should have the same bus_space,
+	 * all devices are mapped in it */
+	addr_space_t* bus_space = new_addr_space("bus_space");
+	put_conf_obj("arm_bus_space", bus_space);
 	for(i = 0; i < cpu->core_num; i++){
 		ARMul_State* core = &cpu->core[i];
+
 		arm_core_init(core, i);
+		/* set the bus_space */
+		core->bus_space = bus_space;
 		skyeye_exec_t* exec = create_exec();
 		exec->priv_data = get_conf_obj_by_cast(core, "arm_core_t");
 		//exec->priv_data = get_conf_obj_by_cast(core, "ARMul_State");

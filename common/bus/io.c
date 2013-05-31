@@ -63,6 +63,9 @@ io_do_cycle (void * state)
 #endif	//DBCT_TEST_SPEED
 #endif
 	skyeye_config_t* config = get_current_config();
+	/* If SkyEye can't configure machine */
+	if(config->mach == NULL)
+		return;
 	prescale--;
 	if (prescale < 0) {
 		prescale = DIVISOR;
