@@ -56,7 +56,7 @@ static skyeye_cell_t* default_cell = NULL;
 * @brief the flag of running or stop
 */
 static bool_t SIM_running = False;
-static bool_t SIM_status = False;
+static bool_t SIM_started = False;
 void SIM_init_command_line(void){
 }
 
@@ -194,7 +194,7 @@ void SIM_init(){
 * @brief launch the simlator
 */
 void SIM_start(void){
-	if(SIM_status){
+	if(SIM_started){
 		printf("SkyEye has been started\n");
 		return;
 	}
@@ -257,7 +257,7 @@ void SIM_start(void){
 
 	/* Call bootmach callback */
 	exec_callback(Bootmach_callback, arch_instance);	
-	SIM_status = True;
+	SIM_started = True;
 
 		
 	//create_thread(skyeye_loop, arch_instance, &id);
@@ -295,7 +295,7 @@ void SIM_cli(){
 */
 void SIM_run(){
 	//skyeye_start();
-	if(!SIM_status){
+	if(!SIM_started){
 		printf("You didn't input start!\n");
 		return;
 	}
@@ -379,7 +379,7 @@ void reset_arch(void);
 void del_from_cell(void);
 void reset_skyeye_config(void);
 void SIM_restart(void){
-	if(!SIM_status){
+	if(!SIM_started){
 		printf("SkyEye is very pure, you don't need to restart it!\n");
 		return;
 	}
@@ -419,7 +419,7 @@ void SIM_restart(void){
 #else
 	tcsetattr(0, TCSAFLUSH, &pref->saved_term);
 #endif
-	SIM_status = False;
+	SIM_started = False;
 }
 #if 1
 void register_cli(cli_func_t cli){
