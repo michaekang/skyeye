@@ -175,9 +175,9 @@ static int create_term(uart_term_device* dev_uart, int port){
 	}
 #else
 #ifdef DBG_XTERM
-	char cmdline[2048] = "C:/msys/1.0/bin/mintty.exe -h always -e ";
+	char cmdline[2048] = "C:/skyeye/1.0/bin/mintty.exe -h always -e ";
 #else
-	char cmdline[2048] = "C:/msys/1.0/bin/mintty.exe -e ";
+	char cmdline[2048] = "C:/skyeye/1.0/bin/mintty.exe -e ";
 #endif
 	strcat(cmdline, uart_instance_prog);
 	strcat(cmdline, " ");
