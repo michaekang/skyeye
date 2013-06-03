@@ -1,6 +1,5 @@
 
-#SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/
-SUBDIRS =  common/
+#SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/ SUBDIRS =  common/
 bin_PROGRAMS = 
 
 if BUILD_ANDROID
@@ -133,10 +132,13 @@ libltdl/.lib/libltdl.a:
 	mkdir -p libltdl/ && cd libltdl/ && ../$(top_srcdir)/libltdl/configure;$(MAKE);
 
 lib:
+if WIN32
+else
 	mkdir -p third-party/libiberty && cd third-party/libiberty && ./../../$(srcdir)/third-party/libiberty/configure --prefix=$(prefix) --enable-shared ;$(MAKE);
 	mkdir -p third-party/bfd/ && cd third-party/bfd/ && ./../../$(top_srcdir)/third-party/bfd/configure --prefix=$(prefix) --disable-werror --enable-shared --enable-targets=all;$(MAKE);
 	mkdir -p third-party/opcodes/ && cd third-party/opcodes/ && ./../../$(top_srcdir)/third-party/opcodes/configure --prefix=$(prefix) --disable-werror --enable-shared --enable-targets=all;$(MAKE);
 	mkdir -p libltdl/ && cd libltdl/ && ../$(top_srcdir)/libltdl/configure;$(MAKE);
+endif
 #cd $(top_srcdir)/third-party/bfd/ && ./configure --prefix=$(prefix) --disable-werror --enable-shared --enable-targets=all;make;
 #cd $(top_srcdir)/third-party/opcodes/ && ./configure --prefix=$(prefix) --disable-werror --enable-shared --enable-targets=all;make;
 #cd $(top_srcdir)/third-party/readline/ && ./configure --prefix=$(prefix) --enable-shared;make;
@@ -147,9 +149,9 @@ build_lib:
 	cd $(top_builddir)/libltdl/ && make;
 install_lib:
 if WIN32
-	cp $(top_builddir)/third-party/bfd/.libs/libbfd.dll.a  $(prefix)/lib/skyeye/
-	cp $(top_builddir)/third-party/bfd/.libs/libbfd.la $(prefix)/lib/skyeye/
-	cp $(top_builddir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll  $(prefix)/lib/skyeye/
+#	cp $(top_builddir)/third-party/bfd/.libs/libbfd.dll.a  $(prefix)/lib/skyeye/
+#	cp $(top_builddir)/third-party/bfd/.libs/libbfd.la $(prefix)/lib/skyeye/
+#	cp $(top_builddir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll  $(prefix)/lib/skyeye/
 else
 	cd $(top_builddir)/third-party/libiberty && $(MAKE) install
 	cd $(top_builddir)/third-party/bfd/ && $(MAKE) install

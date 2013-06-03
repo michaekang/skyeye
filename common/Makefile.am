@@ -45,7 +45,7 @@ endif
 
 libcommon_la_LDFLAGS =
 if WIN32
-libcommon_la_LDFLAGS += -no-undefined -shared -Xlinker $(top_srcdir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll -Xlinker $(top_srcdir)/libltdl/.libs/libltdlc.a -Xlinker $(top_srcdir)/third-party/libiberty/pic/libiberty.a -Xlinker --export-all-symbol
+libcommon_la_LDFLAGS += -no-undefined -shared -Xlinker /mingw/third-party-lib/libbfd-2-18-50-20070907.dll -Xlinker /mingw/third-party-lib/libltdlc.a -Xlinker /mingw/third-party-lib/libiberty.a -Xlinker --export-all-symbol
 else
 libcommon_la_LIBADD += -L$(top_builddir)/third-party/bfd/.libs/ -lbfd -L$(top_builddir)/third-party/libiberty/pic -liberty -L${top_builddir}/libltdl/.libs -lltdl
 libcommon_la_LDFLAGS += `python-config --libs`
@@ -58,7 +58,11 @@ skyeye_module_dir = \"$(prefix)/lib/skyeye\"
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -DSKYEYE_MODULE_DIR=$(skyeye_module_dir) @COMMON_CFLAGS@
 
 #INCLUDES =  @COMMON_INCLUDES@ -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/third-party @INCLTDL@
+if WIN32
+INCLUDES =  @COMMON_INCLUDES@ -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/third-party -I${top_srcdir}/libltdl  -I/third-party-lib/include/
+else
 INCLUDES =  @COMMON_INCLUDES@ -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/third-party -I${top_srcdir}/libltdl
+endif
 if LLVM_EXIST
 INCLUDES+= `llvm-config --cflags`
 if WIN32

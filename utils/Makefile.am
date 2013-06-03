@@ -48,10 +48,10 @@ libpycli_la_LDFLAGS = -module `python-config --libs`
 #libsystemc_la_SOURCES = $(utils_systemc)
 
 if WIN32
-WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib -Xlinker -lcommon -Xlinker --export-all-symbol
+WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib  -L/mingw/third-party-lib -Xlinker -lcommon -Xlinker --export-all-symbol
 libgdbserver_la_LDFLAGS += $(WIN32_LD_COMMON)
 libbus_log_la_LDFLAGS += $(WIN32_LD_COMMON)
-libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker $(top_srcdir)/third-party/opcodes/.libs/libopcodes.a -Xlinker $(top_srcdir)/third-party/bfd/.libs/libbfd-2-18-50-20070907.dll -Xlinker $(top_srcdir)/third-party/libiberty/pic/libiberty.a -Xlinker --export-all-symbol
+libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker /mingw/third-party-lib/libopcodes.a -Xlinker /mingw/third-party-lib/libbfd-2-18-50-20070907.dll -Xlinker /mingw/third-party-lib/libiberty.a -Xlinker --export-all-symbol
 libos_supp_la_LDFLAGS += $(WIN32_LD_COMMON)
 libpmon_la_LDFLAGS += $(WIN32_LD_COMMON)
 libshutdown_la_LDFLAGS += $(WIN32_LD_COMMON)
@@ -69,7 +69,11 @@ skyeye_bin = \"$(prefix)/bin/\"
 
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -DSKYEYE_BIN=$(skyeye_bin) @COMMON_CFLAGS@
 
+if WIN32
+INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common -I/mingw/third-party-lib/include/ @COMMON_INCLUDES@ `python-config --cflags`
+else
 INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common @COMMON_INCLUDES@ `python-config --cflags`
+endif
 
 if SYSTEMC_ENABLE
 #libarm_la_LDFLAGS += -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc
