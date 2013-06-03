@@ -211,10 +211,13 @@ exception_t arm_mmu_read(short size, generic_address_t addr, uint32_t * value)
 	state = &cpu->core[0];
 	switch(size){
 	case 8:
-		MMU_OPS.read_byte (state, addr, value);
+		mmu_read_byte(state, addr, value);
 		break;
 	case 16:
+		mmu_read_halfword(state, addr, value);
+		break;
 	case 32:
+		mmu_read_word(state, addr, value);
 		break;
 	default:
 		printf("In %s error size %d Line %d\n", __func__, size, __LINE__);
@@ -230,10 +233,13 @@ exception_t arm_mmu_write(short size, generic_address_t addr, uint32_t *value)
 		state = &cpu->core[0];
 	switch(size){
 	case 8:
-		MMU_OPS.write_byte (state, addr, value);
+		mmu_write_byte(state, addr, value);
 		break;
 	case 16:
+		mmu_write_halfword(state, addr, value);
+		break;
 	case 32:
+		mmu_write_word(state, addr, value);
 		break;
 	default:
 		printf("In %s error size %d Line %d\n", __func__, size, __LINE__);
