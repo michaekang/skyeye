@@ -50,6 +50,7 @@ typedef struct breakpoint_s{
 	breakpoint_kind_t address_type;
 	generic_address_t address;
 	uint32 hits;
+	uint64 last_bp_step;
 }breakpoint_t;
 
 /**
@@ -147,6 +148,7 @@ exception_t skyeye_insert_bp(access_t access_type, breakpoint_kind_t address_typ
 	if (breakpoint_mgt.bp_number == MAX_BP_NUMBER)
 		return Excess_range_exp;
 	
+	generic_arch_t *arch_instance = get_arch_instance(NULL);
 	/* we insert the new bp to the last position. And increase the bp_number */
 	bp = &breakpoint_mgt.breakpoint[breakpoint_mgt.bp_number];
 	bp->address = addr;
@@ -155,6 +157,8 @@ exception_t skyeye_insert_bp(access_t access_type, breakpoint_kind_t address_typ
 
 	breakpoint_mgt.bp_number++;
 	bp->id = breakpoint_mgt.bp_number;
+	bp->last_bp_step = arch_instance->get_step();
+
 	return No_exp;
 }
 
@@ -355,12 +359,16 @@ static void check_breakpoint(generic_arch_t* arch_instance){
 	
 	for (i = 0;i < breakpoint_mgt.bp_number;i++){
 		breakpoint_t* bp = &breakpoint_mgt.breakpoint[i];
+		uint64 current_steps = arch_instance->get_step();
 		/* if id is zero, we think the bp is disabled now. */
 		if(bp->id == 0)
 			continue;
 		/* return if any breakpoint at the address is hit */
-		if(bp->address == current_pc){
-			//arch_instance->stop();
+		/* This function always checks the current pc when you insert a bp,
+		 * you can't continue to execute next instruction when it stops at 
+		 * bp->address, So you should judge if SkyEye is stopped by the same step.*/
+		if((bp->address == current_pc) && (current_steps - bp->last_bp_step)){
+			bp->last_bp_step = current_steps;
 			bp->hits++;
 			printf("The %d# breakpoint at address 0x%x is hit.\n", bp->id, bp->address);
 			SIM_stop(arch_instance);
