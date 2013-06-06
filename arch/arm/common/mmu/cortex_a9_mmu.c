@@ -148,8 +148,8 @@ mmu_translate (ARMul_State *state, ARMword virt_addr, ARMword *phys_addr, int *a
 		}
 
 		/* l1desc = mem_read_word (state, l1addr); */
-		if(state->space.conf_obj != NULL)
-			state->space.read(state->space.conf_obj, l1addr, &l1desc, 4);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->read(state->bus_space->obj, l1addr, &l1desc, 4);
 		else
 			mem_read_raw(32, l1addr, &l1desc);
         #if 0
@@ -181,8 +181,8 @@ mmu_translate (ARMul_State *state, ARMword virt_addr, ARMword *phys_addr, int *a
 				l2addr = (l2addr |
 					  ((virt_addr & 0x000FF000) >> 10)) &
 					~3;
-				if(state->space.conf_obj != NULL)
-					state->space.read(state->space.conf_obj, l2addr, &l2desc, 4);
+				if(state->bus_space->obj != NULL)
+					state->bus_space->memory_space->read(state->bus_space->obj, l2addr, &l2desc, 4);
 				else
 					mem_read_raw(32, l2addr, &l2desc);
 				/* chy 2003-09-02 for xscale */
@@ -317,8 +317,8 @@ cortex_a9_mmu_load_instr (ARMul_State *state, ARMword va, ARMword *instr)
 //            sleep(1);
 		pa = va;
 	}
-	if(state->space.conf_obj == NULL)
-		state->space.read(state->space.conf_obj, pa, instr, 4);
+	if(state->bus_space->obj != NULL)
+		state->bus_space->memory_space->read(state->bus_space->obj, pa, instr, 4);
 	else
 		mem_read_raw(32, pa, instr);
 
@@ -371,20 +371,20 @@ cortex_a9_mmu_read (ARMul_State *state, ARMword va, ARMword *data,
 		/* *data = mem_read_word(state, va); */
 		if (datatype == ARM_BYTE_TYPE)
 			/* *data = mem_read_byte (state, va); */
-			if(state->space.conf_obj != NULL)
-				state->space.read(state->space.conf_obj, va, data, 1);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->read(state->bus_space->obj, va, data, 1);
 			else
 				mem_read_raw(8, va, data);
 		else if (datatype == ARM_HALFWORD_TYPE)
 			/* *data = mem_read_halfword (state, va); */
-			if(state->space.conf_obj != NULL)
-				state->space.read(state->space.conf_obj, va, data, 2);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->read(state->bus_space->obj, va, data, 2);
 			else
 				mem_read_raw(16, va, data);
 		else if (datatype == ARM_WORD_TYPE)
 			/* *data = mem_read_word (state, va); */
-			if(state->space.conf_obj != NULL)
-				state->space.read(state->space.conf_obj, va, data, 4);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->read(state->bus_space->obj, va, data, 4);
 			else
 				mem_read_raw(32, va, data);
 		else {
@@ -447,22 +447,22 @@ skip_translation:
 		/* *data = mem_read_word(state, pa); */
 	if (datatype == ARM_BYTE_TYPE) {
 		/* *data = mem_read_byte (state, pa | (real_va & 3)); */
-		if(state->space.conf_obj != NULL)
-			state->space.read(state->space.conf_obj, pa | (real_va & 3), data, 1);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->read(state->bus_space->obj,  pa | (real_va & 3), data, 1);
 		else
 			mem_read_raw(8, pa | (real_va & 3), data);
 		/* mem_read_raw(32, pa | (real_va & 3), data); */
 	} else if (datatype == ARM_HALFWORD_TYPE) {
 		/* *data = mem_read_halfword (state, pa | (real_va & 2)); */
-		if(state->space.conf_obj != NULL)
-			state->space.read(state->space.conf_obj, pa | (real_va & 3), data, 2);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->read(state->bus_space->obj,  pa | (real_va & 3), data, 2);
 		else
 			mem_read_raw(16, pa | (real_va & 3), data);
 		/* mem_read_raw(32, pa | (real_va & 2), data); */
 	} else if (datatype == ARM_WORD_TYPE)
 		/* *data = mem_read_word (state, pa); */
-		if(state->space.conf_obj != NULL)
-			state->space.read(state->space.conf_obj, pa , data, 4);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->read(state->bus_space->obj,  pa, data, 4);
 		else
 			mem_read_raw(32, pa, data);
 	else {
@@ -542,20 +542,20 @@ cortex_a9_mmu_write (ARMul_State *state, ARMword va, ARMword data,
 		/* mem_write_word(state, va, data); */
 		if (datatype == ARM_BYTE_TYPE)
 			/* mem_write_byte (state, va, data); */
-			if(state->space.conf_obj != NULL)
-				state->space.write(state->space.conf_obj, va, &data, 1);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->write(state->bus_space->obj, va, &data, 1);
 			else
 				mem_write_raw(8, va, data);
 		else if (datatype == ARM_HALFWORD_TYPE)
 			/* mem_write_halfword (state, va, data); */
-			if(state->space.conf_obj != NULL)
-				state->space.write(state->space.conf_obj, va, &data, 2);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->write(state->bus_space->obj, va, &data, 2);
 			else
 				mem_write_raw(16, va, data);
 		else if (datatype == ARM_WORD_TYPE)
 			/* mem_write_word (state, va, data); */
-			if(state->space.conf_obj != NULL)
-				state->space.write(state->space.conf_obj, va, &data, 4);
+			if(state->bus_space->obj != NULL)
+				state->bus_space->memory_space->write(state->bus_space->obj, va, &data, 4);
 			else
 				mem_write_raw(32, va, data);
 		else {
@@ -644,9 +644,9 @@ skip_translation:
 		/* mem_write_byte (state,
 				(pa | (real_va & 3)),
 				data);
-		*/
-		if(state->space.conf_obj != NULL)
-			state->space.write(state->space.conf_obj, (pa | (real_va & 3)), &data, 1);
+				*/
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->write(state->bus_space->obj, (pa | (real_va & 3)), &data, 1);
 		else
 			mem_write_raw(8, (pa | (real_va & 3)), data);
 
@@ -656,14 +656,14 @@ skip_translation:
 				     (real_va & 2)),
 				    data);
 		*/
-		if(state->space.conf_obj != NULL)
-			state->space.write(state->space.conf_obj, (pa | (real_va & 3)), &data, 2);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->write(state->bus_space->obj, (pa | (real_va & 3)), &data, 1);
 		else
 			mem_write_raw(16, (pa | (real_va & 3)), data);
 	else if (datatype == ARM_WORD_TYPE)
 		/* mem_write_word (state, pa, data); */
-		if(state->space.conf_obj != NULL)
-			state->space.write(state->space.conf_obj, pa, &data, 4);
+		if(state->bus_space->obj != NULL)
+			state->bus_space->memory_space->write(state->bus_space->obj, pa, &data, 4);
 		else
 			mem_write_raw(32, pa, data);
 #if 0

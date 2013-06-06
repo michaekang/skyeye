@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <skyeye_bus.h>
 #include "armdefs.h"
 /* two header for arm disassemble */
 #include "skyeye_arch.h"
@@ -78,6 +79,7 @@ mmu_init (ARMul_State * state)
 	case 0xc090:
 		SKYEYE_INFO ("SKYEYE: use cortex_a9 mmu ops\n");
 		state->mmu.ops = cortex_a9_mmu_ops;
+		register_bus_operation(arm_mmu_read, arm_mmu_write);
 		break;
 	default:
 		fprintf (stderr,

@@ -32,6 +32,7 @@
 #include <skyeye_addr_space.h>
 
 #include "am355x.h"
+exception_t set_conf_attr(conf_object_t* obj, char* attr_name, attr_value_t* value);
 
 static void am355x_update_intr(void* mach) {
 }
@@ -46,7 +47,19 @@ static void am355x_update_intr(void* mach) {
 static conf_object_t* new_am355x_mach(char* obj_name){
 	am355x_mach_t* mach = skyeye_mm_zero(sizeof(am355x_mach_t));
 	mach->obj = new_conf_object(obj_name, mach);
-	mach->space = new_addr_space("am355x_mach_space");
+	mach->space = (addr_space_t*)get_conf_obj("arm_bus_space");
+
+	/* instance a image class */
+	conf_object_t* image0 = pre_conf_obj("image0", "image");
+	attr_value_t* value = make_new_attr(Val_UInteger, 0x50000000);
+	int ret = set_conf_attr(image0, "size", value);
+	/* instance a ram class */
+	conf_object_t* ram0 = pre_conf_obj("ram0", "ram");
+	value = make_new_attr(Val_Object, image0);
+	ret = set_conf_attr(ram0, "image", value);
+
+	memory_space_intf* ram0_io_memory = (memory_space_intf*)SKY_get_interface(ram0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x50000000, 0x50000000, 0x0, ram0_io_memory, 1, 1);
 
 	return mach->obj;
 }
