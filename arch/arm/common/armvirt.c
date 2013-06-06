@@ -359,7 +359,7 @@ ARMul_LoadInstrN (ARMul_State * state, ARMword address, ARMword isize)
 ARMword
 ARMul_ReadWord (ARMul_State * state, ARMword address)
 {
-	ARMword data;
+	ARMword data = 0;
 	fault_t fault;
 
 #ifdef ABORTS
@@ -417,7 +417,7 @@ ARMul_LoadWordN (ARMul_State * state, ARMword address)
 ARMword
 ARMul_LoadHalfWord (ARMul_State * state, ARMword address)
 {
-	ARMword data;
+	ARMword data = 0;
 	fault_t fault;
 
 	state->NumNcycles++;
@@ -443,7 +443,7 @@ ARMul_LoadHalfWord (ARMul_State * state, ARMword address)
 \***************************************************************************/
 int ARMul_ICE_ReadByte(ARMul_State * state, ARMword address, ARMword *presult)
 {
- ARMword data;
+ ARMword data = 0;
  fault_t fault;
  fault = GetByte (state, address, &data);
  if (fault) {
@@ -457,7 +457,7 @@ int ARMul_ICE_ReadByte(ARMul_State * state, ARMword address, ARMword *presult)
 ARMword
 ARMul_ReadByte (ARMul_State * state, ARMword address)
 {
-	ARMword data;
+	ARMword data = 0;
 	fault_t fault;
 
 	fault = GetByte (state, address, &data);
