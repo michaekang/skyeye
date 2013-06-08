@@ -26,6 +26,7 @@
 #include "skyeye_class.h"
 #include "skyeye_log.h"
 #include "skyeye_mm.h"
+
 void SKY_register_class(const char* name, skyeye_class_t* skyeye_class){
 	skyeye_log(Debug_log, __FUNCTION__, "register the class %s\n", name);
 	new_conf_object(name, skyeye_class);
@@ -48,4 +49,14 @@ conf_object_t* pre_conf_obj(const char* objname, const char* class_name){
 
 	instance->class_name = skyeye_strdup(class_name);
 	return instance;
+}
+
+exception_t reset_conf_obj(conf_object_t* obj){
+	conf_object_t* class_obj = get_conf_obj(obj->class_name);
+	skyeye_class_t* class_data = class_obj->obj;
+	if(class_data->reset_instance)
+		return class_data->reset_instance(obj, NULL);
+
+	/* can't find the class 's reset function */
+	return Not_found_exp;
 }
