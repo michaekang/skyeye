@@ -27,6 +27,7 @@ typedef struct addr_space{
 	map_info_t* map_array[MAX_MAP];
 	memory_space_intf* memory_space;
 }addr_space_t;
+#define ADDR_SPACE_INTF_NAME	"addr_space_interface"
 
 addr_space_t* new_addr_space(char* obj_name);
 void free_addr_space(char* obj_name);

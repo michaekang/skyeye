@@ -29,6 +29,7 @@
 #include "skyeye_options.h"
 #include "skyeye_config.h"
 #include "skyeye_log.h"
+#include "skyeye_class.h"
 
 /**
 * @brief the supported machine list
@@ -57,8 +58,11 @@ do_mach_option (skyeye_option_t * this_option, int num_params,
 		ret = 0;
 	}
         else{
-                SKYEYE_ERR ("Error: Unknown mach name \"%s\"\n", params[0]);
-		ret = -1;
+		conf_object_t * conf_obj = pre_conf_obj("am355x", params[0]);
+		if(conf_obj == NULL){
+	                SKYEYE_ERR ("Error: Unknown mach name \"%s\"\n", params[0]);
+			ret = -1;
+		}
         }
         return ret;
 }

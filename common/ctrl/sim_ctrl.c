@@ -212,7 +212,6 @@ void SIM_start(void){
 	}
 	generic_arch_t *arch_instance = get_arch_instance(config->arch->arch_name);
 
-	pre_conf_obj("am355x", "am355x_mach");
 	if(config->mach != NULL){
 		/* reset all the memory */
 		mem_reset();
