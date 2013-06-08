@@ -47,12 +47,15 @@ static void am355x_update_intr(void* mach) {
 static conf_object_t* new_am355x_mach(char* obj_name){
 	am355x_mach_t* mach = skyeye_mm_zero(sizeof(am355x_mach_t));
 	mach->obj = new_conf_object(obj_name, mach);
-	mach->space = (addr_space_t*)get_conf_obj("arm_bus_space");
+
+	conf_object_t* arm_cpu = pre_conf_obj("arm_cpu0", "arm_cpu");
+	exception_t ret = reset_conf_obj(arm_cpu);
+	mach->space = (addr_space_t*)SKY_get_interface(arm_cpu, ADDR_SPACE_INTF_NAME);
 
 	/* instance a image class */
 	conf_object_t* image0 = pre_conf_obj("image0", "image");
 	attr_value_t* value = make_new_attr(Val_UInteger, 0x50000000);
-	int ret = set_conf_attr(image0, "size", value);
+	ret = set_conf_attr(image0, "size", value);
 	/* instance a ram class */
 	conf_object_t* ram0 = pre_conf_obj("ram0", "ram");
 	value = make_new_attr(Val_Object, image0);

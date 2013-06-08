@@ -1,3 +1,5 @@
+#include <skyeye_interface.h>
+#include <skyeye_class.h>
 #include "armdefs.h"
 #include "armcpu.h"
 #include "armemu.h"
@@ -273,18 +275,61 @@ static void register_arm_core_chp(ARMul_State* core, int num)
 	};
 }
 
+static conf_object_t* new_arm_cpu(char* obj_name)
+{
+	ARM_CPU_State *cpu = skyeye_mm_zero(sizeof(ARM_CPU_State));
+	skyeye_config_t* config = get_current_config();
+        config->cpu = get_conf_obj_by_cast(cpu, obj_name);
+	cpu->core_num = 1;
+	if(!cpu->core_num){
+		fprintf(stderr, "ERROR:you need to set numbers of core in mach_init.\n");
+		skyeye_exit(-1);
+	}
+	else
+		cpu->core = skyeye_mm_zero(sizeof(ARMul_State) * cpu->core_num);
+	/* TODO: zero the memory by malloc */
+	if(!cpu->core){
+		fprintf(stderr, "Can not allocate memory for arm core.\n");
+		skyeye_exit(-1);
+	}
+	else
+		printf("%d core is initialized.\n", cpu->core_num);
+
+	cpu->boot_core_id = 0;
+	/* every core should have a bus_space,
+	 * Dcores should have the same bus_space,
+	 * all devices are mapped in it */
+	addr_space_t* bus_space = new_addr_space("bus_space");
+	SKY_register_interface((void*)bus_space, obj_name, ADDR_SPACE_INTF_NAME);
+
+	int i;
+	for(i = 0; i < cpu->core_num; i++){
+		ARMul_State* core = &cpu->core[i];
+
+		arm_core_init(core, i);
+		/* set the bus_space */
+		core->bus_space = bus_space;
+		skyeye_exec_t* exec = create_exec();
+		exec->priv_data = get_conf_obj_by_cast(core, "arm_core_t");
+		//exec->priv_data = get_conf_obj_by_cast(core, "ARMul_State");
+		exec->run = per_cpu_step;
+		exec->stop = per_cpu_stop;
+		add_to_default_cell(exec);
+
+		register_arm_core_chp(core, i);
+	}
+	/* Set arm endianess is Little endian */
+	generic_arch_t *arch_instance = get_arch_instance(NULL);
+	arch_instance->endianess = Little_endian;
+
+	return config->cpu;
+}
+
 static void arm_cpu_init()
 {
 	ARM_CPU_State *cpu = skyeye_mm_zero(sizeof(ARM_CPU_State));
-        machine_config_t *mach = get_current_mach();
-	if(mach == NULL){
-		/* didn't configure machine in skyeye.conf */
-		skyeye_config_t* config = get_current_config();
-        	config->cpu = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
-	}
-	else{
-        	mach->cpu_data = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
-	}
+	machine_config_t *mach = get_current_mach();
+	mach->cpu_data = get_conf_obj_by_cast(cpu, "ARM_CPU_State");
 
 	cpu->core_num = 1;
 	if(!cpu->core_num){
@@ -305,17 +350,11 @@ static void arm_cpu_init()
 	int i;
 
 	cpu->boot_core_id = 0;
-	/* every core should have a bus_space,
-	 * Dcores should have the same bus_space,
-	 * all devices are mapped in it */
-	addr_space_t* bus_space = new_addr_space("bus_space");
-	put_conf_obj("arm_bus_space", bus_space);
+
 	for(i = 0; i < cpu->core_num; i++){
 		ARMul_State* core = &cpu->core[i];
 
 		arm_core_init(core, i);
-		/* set the bus_space */
-		core->bus_space = bus_space;
 		skyeye_exec_t* exec = create_exec();
 		exec->priv_data = get_conf_obj_by_cast(core, "arm_core_t");
 		//exec->priv_data = get_conf_obj_by_cast(core, "ARMul_State");
@@ -328,6 +367,25 @@ static void arm_cpu_init()
 	/* Set arm endianess is Little endian */
 	generic_arch_t *arch_instance = get_arch_instance(NULL);
 	arch_instance->endianess = Little_endian;
+}
+
+static exception_t reset_arm_cpu(conf_object_t* opaque, const char* args)
+{
+	int i;
+	ARMul_State *state = NULL;
+	ARM_CPU_State *cpu = (ARM_CPU_State*)opaque->obj;
+	ARMul_EmulateInit ();
+	for(i = 0; i < cpu->core_num; i++){
+		state = &cpu->core[i];
+		ARMul_Reset (state);
+		state->NextInstr = 0;
+		state->Emulate = 3;
+
+		/* set some register value */
+		if (preset_regfile[1])
+			state->Reg[1] = preset_regfile[1];
+	}
+	return No_exp;
 }
 
 static void
@@ -649,4 +707,16 @@ init_arm_arch ()
 	arm_arch.signal = arm_signal;
 
 	register_arch (&arm_arch);
+
+	static skyeye_class_t class_data = {
+		.class_name = "arm_cpu",
+		.class_desc = "ARM_CPU_State Class",
+		.new_instance = new_arm_cpu,
+		.free_instance = NULL,
+		.reset_instance = reset_arm_cpu,
+		.get_attr = NULL,
+		.set_attr = NULL
+	};
+
+	SKY_register_class(class_data.class_name, &class_data);
 }

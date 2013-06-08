@@ -39,6 +39,7 @@
 #include "skyeye_symbol.h"
 #include "skyeye_log.h"
 #include "skyeye_cli.h"
+#include "skyeye_class.h"
 #include "portable/portable.h"
 /* FIXME, we should get it from prefix varaible after ./configure */
 #ifndef SKYEYE_MODULE_DIR
@@ -211,21 +212,18 @@ void SIM_start(void){
 	}
 	generic_arch_t *arch_instance = get_arch_instance(config->arch->arch_name);
 
-	if(config->mach == NULL){
-		skyeye_log(Error_log, __FUNCTION__, "Should provide valid mach option in your config file.\n");
-		return;
-	}
+	pre_conf_obj("am355x", "am355x_mach");
+	if(config->mach != NULL){
+		/* reset all the memory */
+		mem_reset();
+		arch_instance->init();
 
-	
-	/* reset all the memory */
-	mem_reset();
-	arch_instance->init();
-	
-	config->mach->mach_init(arch_instance, config->mach);
-	/* reset current arch_instanc */
-	arch_instance->reset();
-	/* reset all the values of mach */
-	io_reset(arch_instance);
+		config->mach->mach_init(arch_instance, config->mach);
+		/* reset all the values of mach */
+		io_reset(arch_instance);
+		/* reset current arch_instance */
+		arch_instance->reset();
+	}
 
 	if(pref->exec_file){
 		exception_t ret;
