@@ -28,7 +28,7 @@ goldfish_bus = goldfish/goldfish_bus.c goldfish/goldfish_bus_module.c
 goldfish = goldfish/goldfish_module.c goldfish/skyeye_mach_goldfish.c
 
 omap4460 = omap4460x/omap4460x_module.c omap4460x/skyeye_mach_omap4460x.c  omap4460x/skyeye_mach_omap4460.c
-am355x= am355x/am355x_module.c am355x/skyeye_mach_am355x.c
+am335x= am335x/am335x_module.c am335x/skyeye_mach_am335x.c
 
 libs3c2410_la_SOURCES = $(s3c2410)
 libs3c2410_la_LDFLAGS = -module
@@ -145,8 +145,8 @@ libgoldfish_bus_la_LDFLAGS = -module
 libomap4460_la_SOURCES = $(omap4460)
 libomap4460_la_LDFLAGS = -module
 
-libam355x_la_SOURCES = $(am355x)
-libam355x_la_LDFLAGS = -module
+libam335x_la_SOURCES = $(am335x)
+libam335x_la_LDFLAGS = -module
 
 
 if WIN32
@@ -186,7 +186,7 @@ pkglib_LTLIBRARIES = libs3c6410.la libs3c2410.la libat91rm92.la libat91.la libcs
 libep9312.la libep7312.la libs3c2440.la libsa1100.la libpxa270.la libpxa250.la libs3c3410x.la \
 libns9750.la libsharp.la  libomap5912.la liblpc2210.la liblh79520.la libps7500.la libimx9238.la \
 libs3c4510b.la libgoldfish.la libgoldfish_interrupt.la libgoldfish_timer.la libgoldfish_nand.la \
-libgoldfish_tty.la libgoldfish_fb.la libgoldfish_bus.la libgoldfish_events.la libomap4460.la libam355x.la
+libgoldfish_tty.la libgoldfish_fb.la libgoldfish_bus.la libgoldfish_events.la libomap4460.la libam335x.la
 
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 @COMMON_CFLAGS@
 if GTK_LCD

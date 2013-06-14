@@ -1,5 +1,5 @@
 /*
- * skyeye_mach_am355x.c - define machine am355 for skyeye
+ * skyeye_mach_am335x.c - define machine am335 for skyeye
  *
  * Copyright (C) 2013 Kewei Yu <keweihk@gmail.com>
  * Skyeye Develop Group, for help please send mail to
@@ -31,10 +31,10 @@
 #include <skyeye_internal.h>
 #include <skyeye_addr_space.h>
 
-#include "am355x.h"
+#include "am335x.h"
 exception_t set_conf_attr(conf_object_t* obj, char* attr_name, attr_value_t* value);
 
-static void am355x_update_intr(void* mach) {
+static void am335x_update_intr(void* mach) {
 }
 
 /**
@@ -44,8 +44,8 @@ static void am355x_update_intr(void* mach) {
 *
 * @return 
 */
-static conf_object_t* new_am355x_mach(char* obj_name){
-	am355x_mach_t* mach = skyeye_mm_zero(sizeof(am355x_mach_t));
+static conf_object_t* new_am335x_mach(char* obj_name){
+	am335x_mach_t* mach = skyeye_mm_zero(sizeof(am335x_mach_t));
 	mach->obj = new_conf_object(obj_name, mach);
 
 	conf_object_t* arm_cpu = pre_conf_obj("arm_cpu0", "arm_cpu");
@@ -67,15 +67,15 @@ static conf_object_t* new_am355x_mach(char* obj_name){
 	return mach->obj;
 }
 
-static void free_am355x_mach(conf_object_t* mach){
+static void free_am335x_mach(conf_object_t* mach){
 }
 
-void init_am355x_mach(){
+void init_am335x_mach(){
 	static skyeye_class_t class_data = {
-		.class_name = "am355x_mach",
-		.class_desc = "am355x machine",
-		.new_instance = new_am355x_mach,
-		.free_instance = free_am355x_mach,
+		.class_name = "am335x_mach",
+		.class_desc = "am335x machine",
+		.new_instance = new_am335x_mach,
+		.free_instance = free_am335x_mach,
 		.get_attr = NULL,
 		.set_attr = NULL
 	};

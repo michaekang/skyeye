@@ -1,5 +1,5 @@
 /*
- * am355x_module.c - register omap4460x soc to common library
+ * am335x_module.c - register am335x soc to common library
  *
  * Copyright (C) 2013 Oubang Shen <shenoubang@gmail.com>
  * Skyeye Develop Group, for help please send mail to
@@ -24,13 +24,13 @@
 #include <skyeye_module.h>
 #include <skyeye_mach.h>
 
-#include "am355x.h"
+#include "am335x.h"
 
-void init_am355x_mach();
-const char* skyeye_module = "am355x";
+void init_am335x_mach();
+const char* skyeye_module = "am335x";
 
 void module_init() {
-	init_am355x_mach();
+	init_am335x_mach();
 }
 
 void module_fini() {

@@ -1,5 +1,5 @@
 /*
- * am355x.h - definitions of "am355x" machine  for skyeye
+ * am335x.h - definitions of "am355x" machine  for skyeye
  *
  * Copyright (C) 2012 Kewei Yu <keweihk@gmail.com>
  * Skyeye Develop Group, for help please send mail to
@@ -36,11 +36,11 @@
 #include <skyeye_arch.h>
 #include <skyeye_mm.h>
 #include <skyeye_core_intf.h>
-#include "am355x.h"
+#include "am335x.h"
 
-typedef struct am355x_mach{
+typedef struct am335x_mach{
 	conf_object_t* obj;
 	addr_space_t* space;
-}am355x_mach_t;
+}am335x_mach_t;
 
 #endif /* __OMAP4460X_H__ */
