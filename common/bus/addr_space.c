@@ -55,6 +55,7 @@ static exception_t space_read(conf_object_t* addr_space, generic_address_t addr,
 			return iterator->memory_space->read(iterator->memory_space->conf_obj, (addr - iterator->base_addr), buf, count);
 		}
 	}
+	printf("In %s, can't access the address 0x%x\n", __func__, addr);
 
 	return Not_found_exp;
 }
@@ -70,6 +71,7 @@ static exception_t space_write(conf_object_t* addr_space, generic_address_t addr
 			return iterator->memory_space->write(iterator->memory_space->conf_obj, (addr - iterator->base_addr), buf, count);
 		}
 	}
+	printf("In %s, can't access the address 0x%x\n", __func__, addr);
 	return Not_found_exp;
 }
 
