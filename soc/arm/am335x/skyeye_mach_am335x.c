@@ -64,6 +64,10 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	memory_space_intf* ram0_io_memory = (memory_space_intf*)SKY_get_interface(ram0, MEMORY_SPACE_INTF_NAME);
 	ret = add_map(mach->space, 0x50000000, 0x50000000, 0x0, ram0_io_memory, 1, 1);
 
+	conf_object_t* intc0 = pre_conf_obj("intc_am335x_0", "intc_am335x");
+	memory_space_intf* intc0_io_memory = (memory_space_intf*)SKY_get_interface(intc0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x48200000, 0xfff, 0x0, intc0_io_memory, 1, 1);
+
 	return mach->obj;
 }
 
