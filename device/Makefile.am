@@ -214,3 +214,7 @@ dev_s3c6410_keypad = s3c6410_keypad/s3c6410_keypad.c s3c6410_keypad/s3c6410_keyp
 libs3c6410_keypad_la_SOURCES = $(dev_s3c6410_keypad)
 libs3c6410_keypad_la_LDFLAGS = -module
 pkglib_LTLIBRARIES += libs3c6410_keypad.la
+dev_timer_am335x = timer_am335x/timer_am335x.c timer_am335x/timer_am335x_module.c
+libtimer_am335x_la_SOURCES = $(dev_timer_am335x)
+libtimer_am335x_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libtimer_am335x.la
