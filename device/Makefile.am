@@ -218,3 +218,7 @@ dev_timer_am335x = timer_am335x/timer_am335x.c timer_am335x/timer_am335x_module.
 libtimer_am335x_la_SOURCES = $(dev_timer_am335x)
 libtimer_am335x_la_LDFLAGS = -module
 pkglib_LTLIBRARIES += libtimer_am335x.la
+dev_prcm_am335x = prcm_am335x/prcm_am335x.c prcm_am335x/prcm_am335x_module.c
+libprcm_am335x_la_SOURCES = $(dev_prcm_am335x)
+libprcm_am335x_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libprcm_am335x.la
