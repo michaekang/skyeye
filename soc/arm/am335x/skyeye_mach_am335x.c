@@ -68,6 +68,15 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	memory_space_intf* intc0_io_memory = (memory_space_intf*)SKY_get_interface(intc0, MEMORY_SPACE_INTF_NAME);
 	ret = add_map(mach->space, 0x48200000, 0xfff, 0x0, intc0_io_memory, 1, 1);
 
+	conf_object_t* timer2 = pre_conf_obj("timer2_am335x", "timer_am335x");
+	memory_space_intf* timer2_io_memory = (memory_space_intf*)SKY_get_interface(timer2, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x48040000, 0x58, 0x0, timer2_io_memory, 1, 1);
+
+	conf_object_t* prcm0 = pre_conf_obj("prcm_am335x_0", "prcm_am335x");
+	memory_space_intf* prcm0_io_memory = (memory_space_intf*)SKY_get_interface(prcm0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x44e00000, 0xaff, 0x0, prcm0_io_memory, 1, 1);
+	ret = reset_conf_obj(prcm0);
+
 	return mach->obj;
 }
 

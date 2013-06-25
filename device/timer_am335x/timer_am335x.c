@@ -49,6 +49,12 @@ static exception_t timer_am335x_read(conf_object_t *opaque, generic_address_t of
 		case DMTIMER_TIOCP_CFG:
 			*(uint32_t*)buf = regs->tiocp_cfg;
 			break;
+		case DMTIMER_IRQSTATUS:
+			*(uint32_t*)buf = regs->irqstatus;
+			break;
+		case DMTIMER_IRQENABLE_CLR:
+			*(uint32_t*)buf = regs->irqenable_clr;
+			break;
 		case DMTIMER_TCLR:
 			*(uint32_t*)buf = regs->tclr;
 			break;
@@ -61,7 +67,6 @@ static exception_t timer_am335x_read(conf_object_t *opaque, generic_address_t of
 		case DMTIMER_TTGR:
 			*(uint32_t*)buf = regs->ttgr;
 			break;
-
 		default:
 			printf("Can not read the register at 0x%x in timer_am335x\n", offset);
 			return Invarg_exp;
@@ -122,6 +127,41 @@ static exception_t timer_am335x_write(conf_object_t *opaque, generic_address_t o
 				/* Compare mode is enabled */
 			}else{
 				/* Compare mode is disabled */
+			}
+			break;
+		case DMTIMER_IRQSTATUS:
+			if((*buf & DMTIMER_IRQSTATUS_MAT_IT_FLAG)
+					>> DMTIMER_IRQSTATUS_MAT_IT_FLAG_SHIFT ==
+					DMTIMER_IRQSTATUS_MAT_IT_FLAG_CLEAR){
+				/* Clear pending event */
+			}
+			if((*buf & DMTIMER_IRQSTATUS_OVF_IT_FLAG)
+					>> DMTIMER_IRQSTATUS_OVF_IT_FLAG_SHIFT ==
+					DMTIMER_IRQSTATUS_OVF_IT_FLAG_CLEAR){
+				/* Clear pending event */
+			}
+			if((*buf & DMTIMER_IRQSTATUS_TCAR_IT_FLAG)
+					>> DMTIMER_IRQSTATUS_TCAR_IT_FLAG_SHIFT ==
+					DMTIMER_IRQSTATUS_TCAR_IT_FLAG_CLEAR){
+				/* Clear pending event */
+			}
+			break;
+		case DMTIMER_IRQENABLE_CLR:
+			/* writes 1 to clear irq enable */
+			if((*buf & DMTIMER_IRQENABLE_CLR_MAT_EN_FLAG) 
+					>> DMTIMER_IRQENABLE_CLR_MAT_EN_FLAG_SHIFT ==
+				       	DMTIMER_IRQENABLE_CLR_MAT_EN_FLAG_DISABLE){
+				/* Clear IRQ enable */ 
+			}
+			if((*buf & DMTIMER_IRQENABLE_CLR_OVF_EN_FLAG) 
+					>> DMTIMER_IRQENABLE_CLR_OVF_EN_FLAG_SHIFT ==
+					DMTIMER_IRQENABLE_CLR_OVF_EN_FLAG_ENABLED){
+				/* Clear IRQ enable */ 
+			}
+			if((*buf & DMTIMER_IRQENABLE_CLR_TCAR_EN_FLAG)
+					>> DMTIMER_IRQENABLE_CLR_TCAR_EN_FLAG_SHIFT ==
+					DMTIMER_IRQENABLE_CLR_TCAR_EN_FLAG_DISABLE){
+				/* Clear IRQ enable */ 
 			}
 			break;
 		case DMTIMER_TCRR:
