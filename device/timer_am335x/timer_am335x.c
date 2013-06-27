@@ -38,6 +38,26 @@
 
 void reset_timer_am335x(conf_object_t *opaque, const char* parameters);
 
+static char* timer_attr[] = {"signal"};
+static exception_t timer_set_attr(conf_object_t* opaque, const char* attr_name, attr_value_t* value)
+{
+	struct timer_am335x_device *dev = opaque->obj;
+	int index;
+	for(index = 0; index < (sizeof(timer_attr)/sizeof(timer_attr[0])); index++){
+		if(!strncmp(attr_name, timer_attr[index], strlen(timer_attr[index])))
+			break;
+	}
+	switch(index){
+		case 0:
+			dev->signal = (general_signal_intf*)SKY_get_interface(value->u.object, GENERAL_SIGNAL_INTF_NAME);
+			break;
+		default:
+			printf("parameter error\n");
+			return Invarg_exp;
+	}
+	return No_exp;
+}
+
 static exception_t timer_am335x_read(conf_object_t *opaque, generic_address_t offset, void* buf, size_t count)
 {
 	struct timer_am335x_device *dev = opaque->obj;
@@ -217,7 +237,7 @@ void init_timer_am335x(){
 		.new_instance = new_timer_am335x,
 		.free_instance = free_timer_am335x,
 		.get_attr = NULL,
-		.set_attr = NULL
+		.set_attr = timer_set_attr
 	};
 
 	SKY_register_class(class_data.class_name, &class_data);
