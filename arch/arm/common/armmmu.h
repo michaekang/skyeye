@@ -62,6 +62,7 @@ typedef enum mmu_regnum_t
 	XSCALE_CP15_CACHE_TYPE = 0,
 	XSCALE_CP15_AUX_CONTROL = 1,
 	XSCALE_CP15_COPRO_ACCESS = 15,
+	VECTOR_BASE_ADDR = 12
 
 } mmu_regnum_t;
 

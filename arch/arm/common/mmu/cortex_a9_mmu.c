@@ -925,7 +925,12 @@ cortex_a9_mmu_mcr (ARMul_State *state, ARMword instr, ARMword value)
 				printf ("mmu_mcr wrote UNKNOWN - reg %d\n", creg);
 			}
 			break;
-
+		case VECTOR_BASE_ADDR:
+			state->vector_remap_addr = (value & ~0x1f);
+			/* Mark the vector_addr is remapped*/
+			state->vector_remap_flag = 1;
+			printf("In %s, Line %d value 0x%x 0x%x\n", __func__, __LINE__, value, state->vector_remap_addr);
+			break;
 		default:
 			printf ("mmu_mcr wrote UNKNOWN - reg %d\n", creg);
 			break;
