@@ -62,15 +62,19 @@ static int intc_am335x_raise_signal(conf_object_t *opaque, int line){
 	 * before priority sorting is done, the interrupt status is readable
 	 * from the PENDING_IRQn and PENDING_FIQn registers.
 	 */
-	if(regs->ilr[line] & 0x1 == 0x0){
+	if((regs->ilr[line] & 0x1) == 0x0){
 		/* IRQ */
 		regs->pending_irq[index] |= (0x1 << reg_off);
+		regs->sir_irq &= ~0x7f;
 		regs->sir_irq |= line;
-		interrupt_signal.arm_signal.irq =  High_level;
+		interrupt_signal.arm_signal.irq =  Low_level;
+		interrupt_signal.arm_signal.firq = High_level;
 	}else{
 		/* FIQ */
 		regs->pending_fiq[index] |= (0x1 << reg_off);
-		interrupt_signal.arm_signal.firq =  High_level;
+		interrupt_signal.arm_signal.irq = High_level;
+		interrupt_signal.arm_signal.firq =  Low_level;
+		regs->sir_fiq &= ~0x7f;
 		regs->sir_fiq |= line;
 	}
 	interrupt_signal.arm_signal.reset =  Prev_level;
@@ -208,7 +212,7 @@ static exception_t intc_am335x_write(conf_object_t *opaque, generic_address_t of
 				printf("Automatic OCP clock gating strategy is applied\n");
 			break;
 		case INTC_SYSSTATUS:
-			printf("In %s:%d register is read only\n", __func__, offset);
+			printf("In %s:%x register is read only\n", __func__, offset);
 			break;
 		case INTC_SIR_IRQ: 
 			regs->sir_irq= *buf;
@@ -226,10 +230,10 @@ static exception_t intc_am335x_write(conf_object_t *opaque, generic_address_t of
 			regs->idle = *buf;
 			break;
 		case INTC_IRQ_PRIORITY:
-			printf("In %s:%d register is read only\n", __func__, offset);
+			printf("In %s:%x register is read only\n", __func__, offset);
 			break;
 		case INTC_FIQ_PRIORITY:
-			printf("In %s:%d register is read only\n", __func__, offset);
+			printf("In %s:%x register is read only\n", __func__, offset);
 			break;
 		case INTC_THRESHOLD:
 			regs->threshold = *buf;
@@ -238,7 +242,7 @@ static exception_t intc_am335x_write(conf_object_t *opaque, generic_address_t of
 		case INTC_ITR(1):
 		case INTC_ITR(2):
 		case INTC_ITR(3):
-			printf("In %s:%d register is read only\n", __func__, offset);
+			printf("In %s:%x register is read only\n", __func__, offset);
 			break;
 		case INTC_MIR(0):
 		case INTC_MIR(1):
