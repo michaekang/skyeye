@@ -47,9 +47,11 @@ static int intc_am335x_raise_signal(conf_object_t *opaque, int line){
 	 * The current incoming interrupt status before masking is readable
 	 * from the MPU_INTC.INTC_ITRn register.
 	 */
+
+
 	regs->itr[index] |= reg_off;
 	/* Judge the interrupt source is unmasked */
-	if(!((regs->mir[index] >> reg_off) & 0x1))
+	if(((regs->mir[index] >> reg_off) & 0x1))
 		return Not_found_exp;
 	/* Judge the priority threshold */
 	uint16_t threshold = (regs->ilr[index] >> 1) & 0x3f;
@@ -80,7 +82,6 @@ static int intc_am335x_raise_signal(conf_object_t *opaque, int line){
 	interrupt_signal.arm_signal.reset =  Prev_level;
 	/* We don't need the mechanism of priority sorting temporarily */
 	send_signal(&interrupt_signal);
-
 	return No_exp;
 }
 
@@ -111,7 +112,7 @@ static exception_t intc_am335x_read(conf_object_t *opaque, generic_address_t off
 			*(uint32_t*)buf = regs->sir_fiq;
 			break;
 		case INTC_CONTROL:
-			printf("In %s:%d register is write only\n", __func__, offset);
+			//printf("In %s:%d register is write only\n", __func__, offset);
 			break;
 		case INTC_PROTECTION:
 			*(uint32_t*)buf = regs->protection;
@@ -222,6 +223,11 @@ static exception_t intc_am335x_write(conf_object_t *opaque, generic_address_t of
 			break;
 		case INTC_CONTROL:
 			regs->sir_fiq = *buf;
+			interrupt_signal_t interrupt_signal;
+			interrupt_signal.arm_signal.irq =  High_level;
+			interrupt_signal.arm_signal.firq = High_level;
+			interrupt_signal.arm_signal.reset =  Prev_level;
+			send_signal(&interrupt_signal);
 			break;
 		case INTC_PROTECTION:
 			regs->protection = *buf;
@@ -263,6 +269,7 @@ static exception_t intc_am335x_write(conf_object_t *opaque, generic_address_t of
 		case INTC_MIR_SET(1):
 		case INTC_MIR_SET(2):
 		case INTC_MIR_SET(3):
+			printf("set mir %x\n", offset);
 			index = (offset - 0x8c) / 0x20;
 			/* Write 1 sets the mask bit to 1 */
 			regs->mir[index] |= (*buf);
@@ -335,6 +342,7 @@ void reset_intc_am335x(conf_object_t* opaque, const char* parameter)
 {
 	struct intc_am335x_device *dev = opaque->obj;
 	intc_am335x_reg_t* regs = dev->regs;
+	memset(regs, 0, sizeof(regs));
 	regs->revision = 0x50;
 	return;
 }
