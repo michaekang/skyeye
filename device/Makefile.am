@@ -185,7 +185,7 @@ DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0  @C
 
 skyeye_bin_dir = \"$(prefix)/bin/\"
 INCLUDES = -I./ @COMMON_INCLUDES@ -I./uart_16550 -DSKYEYE_BIN=$(skyeye_bin_dir)
-INCLUDES += -I./nandflash  -I./uart_xdht 
+INCLUDES += -I./nandflash  -I./uart_xdht   -I./gpio_am335x
 
 
 INCLUDES += @LCD_CFLAGS@
@@ -232,4 +232,7 @@ libuart_xdht_la_SOURCES = $(dev_xdht_uart)
 libuart_xdht_la_LDFLAGS = -module
 pkglib_LTLIBRARIES += libuart_xdht.la
 
-
+dev_am335x_gpio = gpio_am335x/gpio_am335x.c gpio_am335x/gpio_am335x_module.c
+libgpio_am335x_la_SOURCES = $(dev_am335x_gpio)
+libgpio_am335x_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libgpio_am335x.la
