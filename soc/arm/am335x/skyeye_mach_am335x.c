@@ -124,6 +124,19 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	ret = set_conf_attr(uart1, "term", value);
 	/**********************/
 
+	/*instance onchip uart0*/                                                                                                     
+	conf_object_t* onchip_uart0 = pre_conf_obj("onchip_uart0", "am335x_uart");
+	memory_space_intf* oncuart0_io_memory = (memory_space_intf*)SKY_get_interface(onchip_uart0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x44E09000, 0xFFF, 0x0, oncuart0_io_memory, 1, 1);
+	reset_conf_obj(onchip_uart0);
+	/**********************/
+
+	/*instance term1*/
+	conf_object_t* term1 = pre_conf_obj("term1", "uart_term");
+	value = make_new_attr(Val_Object, term1);
+	ret = set_conf_attr(onchip_uart0, "term1", value);
+	/**********************/
+
 	return mach->obj;
 }
 
