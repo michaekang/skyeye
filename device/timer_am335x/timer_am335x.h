@@ -48,6 +48,7 @@ typedef struct timer_am335x_reg{
 typedef struct timer_am335x_device{
 	conf_object_t* obj;
 	timer_am335x_reg_t* regs;
+	general_signal_intf *signal;
 }timer_am335x_device;
 
 #define DMTIMER_TIDR		(0x0)
