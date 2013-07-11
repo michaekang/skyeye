@@ -93,7 +93,8 @@ static exception_t uart_term_read(conf_object_t *opaque, void* buf, size_t count
 	rec_t* receive = dev->receive;
 	int i = 0;
 	char* rec_buf = buf;
-	if (dev->attached) {
+	if (dev->attached && receive->mutex == 1) {
+	//if (dev->attached) {
 		/* move the charaters in buffer */
 		while(i < count && (receive->rec_tail < receive->rec_count)){
 			if(receive->rec_head >= receive->rec_tail){
@@ -113,7 +114,11 @@ static exception_t uart_term_read(conf_object_t *opaque, void* buf, size_t count
 			}
 		}
 		DEBUG_UART("rec_buf %s\n", rec_buf);
-        }
+
+		receive->mutex = 0;
+        }else{
+		return Not_found_exp;
+	}
 
 	return No_exp;
 }
@@ -337,6 +342,8 @@ retry:
 #ifndef __MINGW32__
 					res = read(dev_uart->socket, receive->rec_buf + receive->rec_tail, receive->rec_count - receive->rec_tail);
 #else
+				//	res = recv(dev_uart->socket, buf, receive->rec_count - receive->rec_tail, 0);
+					while(receive->mutex);
 					res = recv(dev_uart->socket, receive->rec_buf + receive->rec_tail, receive->rec_count - receive->rec_tail, 0);
 #endif
 				}
@@ -352,9 +359,11 @@ retry:
 				} else if (res<0) {
 					perror("read");
 				} else {
-					/* expand receive buf */
-					receive->rec_tail += res;
-					DEBUG_UART("recieve %s\n", receive->rec_buf);
+
+						/* expand receive buf */
+						receive->rec_tail += res;
+						receive->mutex = 1;
+						DEBUG_UART("recieve %s\n", receive->rec_buf);
 				}
 			}
 		}//if (fds.revents & POLLIN)
@@ -377,6 +386,7 @@ static conf_object_t* new_uart_term(char* obj_name){
 	receive->rec_buf = skyeye_mm_zero(MAX_REC_NUM);
 	receive->rec_head = 0;
 	receive->rec_tail = 0;
+	receive->mutex = 0;
 	receive->rec_count = MAX_REC_NUM;
 
 	/* Register io function to the object */
