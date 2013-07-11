@@ -88,6 +88,12 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	ret = add_map(mach->space, 0x44e00000, 0xaff, 0x0, prcm0_io_memory, 1, 1);
 	ret = reset_conf_obj(prcm0);
 
+	/*instance gpio1*/
+	conf_object_t* gpio1 = pre_conf_obj("gpio1", "am335x_gpio");
+	memory_space_intf* gpio1_io_memory = (memory_space_intf*)SKY_get_interface(gpio1, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x4804C000, 0xFFF, 0x0, gpio1_io_memory, 1, 1);
+        /****************/
+
 	return mach->obj;
 }
 
