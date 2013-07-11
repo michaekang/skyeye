@@ -110,6 +110,20 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	ret = set_conf_attr(xdht_intc0, "signal", make_new_attr(Val_Object, gpio2));
 	/*******************/
 
+	/*instance uart0*/
+	conf_object_t* uart1 = pre_conf_obj("uart1", "xdht_uart");
+	memory_space_intf* uart1_io_memory = (memory_space_intf*)SKY_get_interface(uart1, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x1006a00, 0xF, 0x0, uart1_io_memory, 1, 1);
+	reset_conf_obj(uart1);
+	ret = set_conf_attr(uart1, "signal", make_new_attr(Val_Object, xdht_intc0));
+	/**********************/
+
+	/*instance term0*/
+	conf_object_t* term0 = pre_conf_obj("term0", "uart_term");
+	value = make_new_attr(Val_Object, term0);
+	ret = set_conf_attr(uart1, "term", value);
+	/**********************/
+
 	return mach->obj;
 }
 
