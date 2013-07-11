@@ -13,6 +13,7 @@ typedef struct receive_t{
 	int	rec_head;
 	int	rec_tail;
 	int	rec_count;
+	int	mutex;
 }rec_t;
 
 typedef struct skyeye_uart_term{
