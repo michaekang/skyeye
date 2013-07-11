@@ -102,6 +102,14 @@ static conf_object_t* new_am335x_mach(char* obj_name){
 	ret = set_conf_attr(gpio2, "signal", make_new_attr(Val_Object, intc0));
         /****************/
 
+	/*instance xtht_intc*/
+	conf_object_t* xdht_intc0 = pre_conf_obj("xdht_intc0", "xdht_intc");
+	memory_space_intf* xdhtintc0_io_memory = (memory_space_intf*)SKY_get_interface(xdht_intc0, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(mach->space, 0x1006200, 0x200, 0x0, xdhtintc0_io_memory, 1, 1);
+	reset_conf_obj(xdht_intc0);
+	ret = set_conf_attr(xdht_intc0, "signal", make_new_attr(Val_Object, gpio2));
+	/*******************/
+
 	return mach->obj;
 }
 
