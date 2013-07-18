@@ -31,6 +31,7 @@
 #include "skyeye_options.h"
 #include "skyeye_command.h"
 #include "skyeye_module.h"
+#include "skyeye_mm.h"
 
 /*
  * If status of shutdown device is 1, when "shutdown_addr"
@@ -48,6 +49,8 @@ static shutdown_config_t* shutdown = NULL;
 static max_insn_shutdown_enable = 0;
 static addr_access_shutdown_enable = 0;
 
+static void max_insn_callback(generic_arch_t* arch_instance);
+static void write_shutdown_callback(generic_arch_t* arch_instance);
 static int
 do_shutdown_option (skyeye_option_t * this_option, int num_params,
 		const char *params[])
@@ -68,6 +71,8 @@ do_shutdown_option (skyeye_option_t * this_option, int num_params,
 		return -1;
 	}
 	addr_access_shutdown_enable = 1;
+	register_callback(write_shutdown_callback, Bus_write_callback);
+
 
 	if(ret = strncmp(params[1],"max_ins=",8)){
 		SKYEYE_ERR ("Error, Wrong parameter for shutdown_device\n");
@@ -79,6 +84,7 @@ do_shutdown_option (skyeye_option_t * this_option, int num_params,
 	else
 		shutdown->max_ins = strtoull(value,NULL,10);
 	max_insn_shutdown_enable = 1;
+	register_callback(max_insn_callback, Step_callback);
 
 	printf("Shutdown addr=%x, max_ins=%x\n",shutdown->shutdown_addr,shutdown->max_ins);
 	return 1;
@@ -108,9 +114,7 @@ const char* skyeye_module = "shutdown";
 
 /* module initialization and will be executed automatically when loading. */
 void module_init(){
-	shutdown = malloc(sizeof(shutdown_config_t));
-	register_callback(max_insn_callback, Step_callback);
-	register_callback(write_shutdown_callback, Bus_write_callback);
+	shutdown = skyeye_mm(sizeof(shutdown_config_t));
 	if(register_option("shutdown_device", do_shutdown_option, "Used to stop machine by writing a special address or set the max executed instruction number.") != No_exp)
 		fprintf(stderr,"Can not register shutdown_device option\n");
 }
@@ -118,7 +122,7 @@ void module_init(){
 /* module destruction and will be executed automatically when unloading */
 void module_fini(){
 	if(shutdown != NULL){
-		free(shutdown);
+		skyeye_free(shutdown);
 		shutdown = NULL;
 	}
 }
