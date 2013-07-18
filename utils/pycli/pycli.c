@@ -35,12 +35,34 @@ cli(const char* prompt)
 	Py_Finalize();
 	return 0;
 }
+
+int
+gui(const char* prompt)
+{
+	char new_path[1024];
+	char* skyeye_bin = SKYEYE_BIN;
+	setenv("SKYEYEBIN", skyeye_bin, 1);
+	Py_Initialize();
+	PyRun_SimpleString("import sys\n");
+	sprintf(new_path, "sys.path.append(\"%s\")\n", skyeye_bin);
+	PyRun_SimpleString(new_path);
+	PyRun_SimpleString("import wx\n");
+	PyRun_SimpleString("import skyeye_xrc\n");
+	PyRun_SimpleString("app = wx.PySimpleApp()\n");
+	PyRun_SimpleString("frame = skyeye_xrc.xrcframe(parent = None)\n");
+	PyRun_SimpleString("frame.Show()\n");
+	PyRun_SimpleString("app.MainLoop()\n");
+	Py_Finalize();
+
+	return 0;
+}
 /* module name */
 const char* skyeye_module = "python-cli";
 
 /* module initialization and will be executed automatically when loading. */
 void module_init(){
 	register_cli(cli);
+	register_gui(gui);
 }
 
 /* module destruction and will be executed automatically when unloading */

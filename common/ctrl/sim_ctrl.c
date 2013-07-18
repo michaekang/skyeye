@@ -80,6 +80,7 @@ static exception_t try_init(){
 
 //void SIM_cli();
 cli_func_t global_cli = NULL;
+cli_func_t global_gui = NULL;
 
 /**
 * @brief all the initilization of the simulator
@@ -165,18 +166,17 @@ void SIM_init(){
 	tcgetattr(0, &tmp);
 	memcpy(&pref->saved_term, &tmp, sizeof(struct termios));
 
-	//skyeye_config_t *config;
-	//config = malloc(sizeof(skyeye_config_t));
-	/*	
-	if(pref->autoboot == True){
-		SIM_start();
-		SIM_run();
-	}
-	*/
 	/*
 	 * if we run simulator in GUI or external IDE, we do not need to
 	 * launch our CLI.
 	 */
+	if(pref->gui_mode == True)
+	{
+		if(global_gui != NULL)
+			global_gui("SkyEye");
+		else
+			printf("No gui found\n");
+	}
 	if(pref->interactive_mode == True){
 		if(global_cli != NULL)
 			global_cli("SkyEye");
@@ -421,5 +421,8 @@ void SIM_restart(void){
 #if 1
 void register_cli(cli_func_t cli){
 	global_cli = cli;
+}
+void register_gui(cli_func_t gui){
+	global_gui= gui;
 }
 #endif

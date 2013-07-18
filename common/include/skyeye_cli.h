@@ -5,4 +5,5 @@ extern int setenv(const char *name, const char *value, int replace);
 #endif
 typedef int(*cli_func_t)(const char *prompt); 
 void register_cli(cli_func_t cli);
+void register_gui(cli_func_t gui);
 #endif

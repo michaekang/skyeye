@@ -371,6 +371,7 @@ int init_option(int argc, char** argv, sky_pref_t* pref){
 	bool_t user_mode = False;
 	bool_t mmap_access = False;
 	bool_t interpret_mode = False;
+	bool_t gui_mode = False;
 	uint32_t bot_log = 0;
 	uint32_t top_log = 0;
 	int remote_debugmode = 0;
@@ -393,7 +394,7 @@ int init_option(int argc, char** argv, sky_pref_t* pref){
 	//char *exec_file = NULL;
 	int ret = 0;
 	opterr = 0;
-	while ((c = getopt (argc, argv, "be:dc:p:nl:humig:")) != -1)
+	while ((c = getopt (argc, argv, "Gbe:dc:p:nl:humig:")) != -1)
 		switch (c) {
 		case 'e':
 			exec_file = optarg;
@@ -448,6 +449,9 @@ int init_option(int argc, char** argv, sky_pref_t* pref){
 				bot_log = strtoul(astr1, NULL, 16);
 				top_log = strtoul(astr2, NULL, 16);
 			}
+			break;
+		case 'G':
+			gui_mode = True;
 			break;
 		case '?':
 			if (isprint (optopt))
@@ -523,6 +527,7 @@ loop_exit:
 		pref->interactive_mode = False;
 	*/
 	pref->interactive_mode = interactive_mode;
+	pref->gui_mode = gui_mode;
 	pref->autoboot = autoboot_mode;
 
 	if(exec_file){

@@ -49,6 +49,7 @@ struct _sky_pref_s{
 
 	char* conf_filename;
 	bool_t interactive_mode;
+	bool_t gui_mode;
 	endian_t endian;
 
 	/* FIXME sky_exec_info_t is inside sky_pref_t, to avoid
