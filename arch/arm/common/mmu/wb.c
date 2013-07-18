@@ -1,5 +1,6 @@
 #include "armdefs.h"
 #include "bank_defs.h"
+#include <skyeye_mm.h>
 
 /* wb_init
  * @wb_t	:wb_t to init
@@ -15,7 +16,7 @@ mmu_wb_init (wb_s * wb_t, int num, int nb)
 	int i;
 	wb_entry_t *entrys, *wb;
 
-	entrys = (wb_entry_t *) malloc (sizeof (*entrys) * num);
+	entrys = (wb_entry_t *) skyeye_mm_zero(sizeof (*entrys) * num);
 	if (entrys == NULL) {
 		err_msg ("malloc size %d\n", sizeof (*entrys) * num);
 		goto entrys_malloc_error;
