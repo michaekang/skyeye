@@ -5,6 +5,7 @@ import wx
 import wx.xrc as xrc
 import os
 import sys, platform
+import set_configure
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -22,7 +23,6 @@ configure_file = ""
 kernel_path = ""
 initrd_path = "" 
 last_path = ""
-
 
 # initialize the option of loading. 
 def init_opt():
@@ -197,8 +197,10 @@ class xrcframe(wx.Frame):
 #!XRCED:begin-block:xrcframe.OnMenu_set_configure
     def OnMenu_set_configure(self, evt):
         # Replace with event handler code
-        print "OnMenu_set_configure()"
-        execfile('./testdialog.py')
+	app = wx.PySimpleApp()
+	frame = set_configure.xrcmainframe(parent=None)
+	frame.Show(True)
+	app.MainLoop()
 #!XRCED:end-block:xrcframe.OnMenu_set_configure        
 
 #!XRCED:begin-block:xrcframe.OnMenu_exit
