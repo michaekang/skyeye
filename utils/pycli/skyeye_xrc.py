@@ -1296,3 +1296,7 @@ def __gettext_strings():
     _("help")
     _("Help")
 
+app = wx.PySimpleApp()
+frame = xrcframe(parent = None)
+frame.Show()
+app.MainLoop()

@@ -1,5 +1,4 @@
 #include <Python.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "skyeye_types.h"
@@ -43,15 +42,11 @@ gui(const char* prompt)
 	char* skyeye_bin = SKYEYE_BIN;
 	setenv("SKYEYEBIN", skyeye_bin, 1);
 	Py_Initialize();
-	PyRun_SimpleString("import sys\n");
+	PyRun_SimpleString("import sys, os\n");
 	sprintf(new_path, "sys.path.append(\"%s\")\n", skyeye_bin);
 	PyRun_SimpleString(new_path);
-	PyRun_SimpleString("import wx\n");
-	PyRun_SimpleString("import skyeye_xrc\n");
-	PyRun_SimpleString("app = wx.PySimpleApp()\n");
-	PyRun_SimpleString("frame = skyeye_xrc.xrcframe(parent = None)\n");
-	PyRun_SimpleString("frame.Show()\n");
-	PyRun_SimpleString("app.MainLoop()\n");
+	PyRun_SimpleString("execfile(os.getenv(\"SKYEYEBIN\") + \"skyeye_xrc.py\")\n");
+
 	Py_Finalize();
 
 	return 0;
