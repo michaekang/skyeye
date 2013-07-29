@@ -172,9 +172,10 @@ void SIM_init(){
 	 */
 	if(pref->gui_mode == True)
 	{
-		if(global_gui != NULL)
+		if(global_gui != NULL){
 			global_gui("SkyEye");
-		else
+			exit(0);
+		}else
 			printf("No gui found\n");
 	}
 	if(pref->interactive_mode == True){
