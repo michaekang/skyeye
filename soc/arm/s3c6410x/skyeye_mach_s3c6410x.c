@@ -43,6 +43,7 @@
 #include <skyeye_uart.h>
 #include <skyeye_mm.h>
 #include <skyeye_signal.h>
+#include <skyeye_attr.h>
 
 #ifdef __CYGWIN__
 #include <time.h>
@@ -281,7 +282,6 @@ io_do_cycle (generic_arch_t *state)
 				return;
 			}
 		}
-#endif
 
 	
 		for (i = 0; i < 3; i++) {
@@ -316,6 +316,7 @@ io_do_cycle (generic_arch_t *state)
 				}
 			}
 		}
+#endif
 	}
 #ifdef MK_LCD
 	static int lcd_prescale = 10000;
@@ -380,14 +381,14 @@ s3c6410x_uart_read (u32 offset, u32 *data, int index)
 	default:
 		break;
 	}
-	SKYEYE_DBG ("%s(UART%d: 0x%x, 0x%x)\n", __FUNCTION__, index, offset, data);
+	printf("%s(UART%d: 0x%x, 0x%x)\n", __FUNCTION__, index, offset, data);
 }
 
 static void
 s3c6410x_uart_write (generic_arch_t *state, u32 offset, u32 data, int index)
 {
 
-	SKYEYE_DBG ("%s(UART%d: 0x%x, 0x%x)\n", __FUNCTION__, index, offset, data);
+	printf("%s(UART%d: 0x%x, 0x%x)\n", __FUNCTION__, index, offset, data);
 	switch (offset) {
 	case ULCON:
 		io.uart[index].ulcon = data;
@@ -1142,6 +1143,7 @@ static int vic_lower_signal(conf_object_t* target, int line){
 	return 0;
 }
 
+exception_t set_conf_attr(conf_object_t* obj, char* attr_name, attr_value_t* value);
 void
 s3c6410x_mach_init (void *arch_instance, machine_config_t *this_mach)
 {
@@ -1170,11 +1172,36 @@ s3c6410x_mach_init (void *arch_instance, machine_config_t *this_mach)
 	vic_signal->conf_obj = vic0_dev->obj;
 	vic_signal->raise_signal = vic_raise_signal;
 	vic_signal->lower_signal = vic_lower_signal;
+	SKY_register_interface((void*)vic_signal, vic0_dev->obj->objname, GENERAL_SIGNAL_INTF_NAME);
+
+	exception_t ret;
+	attr_value_t* value;
+#if 1
+	/* Create the uart_term and register it to uart */
+	conf_object_t* uart_term0 = pre_conf_obj("uart_term_0", "uart_term");
+	conf_object_t* uart0= pre_conf_obj("uart_s3c6410_0", "uart_s3c6410");
+	reset_conf_obj(uart0);
+	memory_space_intf* uart0_io_memory = (memory_space_intf*)SKY_get_interface(uart0, MEMORY_SPACE_INTF_NAME);
+       	ret = add_map(phys_mem, 0x7F005000, 0x3c, 0x0, uart0_io_memory, 1, 1);
+	if(ret != No_exp){
+		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for uart0\n");
+	}
+	value = make_new_attr(Val_Object, uart_term0);
+	ret = set_conf_attr(uart0, "term", value);
+	if(ret != No_exp){
+		skyeye_log(Error_log, __FUNCTION__, "Can not register term for uart0\n");
+	}
+	/* register the vic to the uart's signal */
+	value = make_new_attr(Val_Object, vic0_dev->obj);
+	ret = set_conf_attr(uart0, "signal", value);
+	if(ret != No_exp){
+		skyeye_log(Error_log, __FUNCTION__, "Can not register signal for uart0\n");
+	}
+#endif
 
 	conf_object_t* sysctrl = pre_conf_obj("s3c6410_sysctrl_0", "s3c6410_sysctrl");
 	memory_space_intf* sysctrl_io_memory = (memory_space_intf*)SKY_get_interface(sysctrl, MEMORY_SPACE_INTF_NAME);
 	DBG("In %s, get the interface instance 0x%x\n", __FUNCTION__, lcd_io_memory);
-	exception_t ret;
        	ret = add_map(phys_mem, 0x7e00f000, 0x1000, 0x0, sysctrl_io_memory, 1, 1);
 	if(ret != No_exp){
 		skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for system controller\n");

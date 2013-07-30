@@ -247,3 +247,7 @@ libuart_am335x_la_SOURCES = $(dev_am335x_uart)
 libuart_am335x_la_LDFLAGS = -module
 pkglib_LTLIBRARIES += libuart_am335x.la
 
+dev_uart_s3c6410 = uart_s3c6410/uart_s3c6410.c uart_s3c6410/uart_s3c6410_module.c
+libuart_s3c6410_la_SOURCES = $(dev_uart_s3c6410)
+libuart_s3c6410_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libuart_s3c6410.la
