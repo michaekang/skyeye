@@ -112,7 +112,7 @@ AM_CONDITIONAL([BUILD_ANDROID], [test "${ENABLE_ANDROID}" = "yes"])
 #check compile target
 ENABLE_TARGETS=
 AC_ARG_ENABLE([targets],
-        AC_HELP_STRING([--enable-targets],[Build specific host targets: all or target1,target2,... Valid targets are: arm,bfin,coldfire,mips,ppc,sparc,x86(default=all) ]),
+        AC_HELP_STRING([--enable-targets],[Build specific host targets: all or target1,target2,... Valid targets are: arm,bfin,coldfire,mips,ppc,sparc,x86, c6k(default=all) ]),
     [case "${enableval}" in
     arm)ENABLE_TARGETS=arm;;
     bfin)ENABLE_TARGETS=bfin;;
@@ -121,6 +121,7 @@ AC_ARG_ENABLE([targets],
     ppc)ENABLE_TARGETS=ppc;;
     sparc)ENABLE_TARGETS=sparc;;
     x86)ENABLE_TARGETS=x86;;
+    c6k)ENABLE_TARGETS=c6k;;
     all)ENABLE_TARGETS=all;;
     yes)ENABLE_TARGETS=default_arch;;
     *)AC_MSG_ERROR([bad value ${ENABLE_TARGETS} for --enable-targets]);;
@@ -135,6 +136,7 @@ AM_CONDITIONAL([BUILD_MIPS], [test "${ENABLE_TARGETS}" = "mips"])
 AM_CONDITIONAL([BUILD_PPC], [test "${ENABLE_TARGETS}" = "ppc"])
 AM_CONDITIONAL([BUILD_SPARC], [test "${ENABLE_TARGETS}" = "sparc"])
 AM_CONDITIONAL([BUILD_X86], [test "${ENABLE_TARGETS}" = "x86"])
+AM_CONDITIONAL([BUILD_C6K], [test "${ENABLE_TARGETS}" = "c6k"])
 AM_CONDITIONAL([BUILD_ALL], [test "${ENABLE_TARGETS}" = "all"])
 AM_CONDITIONAL([BUILD_DEFAULT], [test "${ENABLE_TARGETS}" = "default_arch"])
 if test "x${ENABLE_TARGETS}" = "xdefault_arch" ; then
@@ -361,6 +363,7 @@ if test ["${ENABLE_TARGETS}" = "all"] ;then
     AC_CONFIG_FILES(arch/mips/Makefile)
     AC_CONFIG_FILES(arch/x86/Makefile)
     AC_CONFIG_FILES(arch/sparc/Makefile)
+    AC_CONFIG_FILES(arch/c6k/Makefile)
 else
     if test "x${ENABLE_TARGETS}" = "xdefault_arch" ; then
         AC_CONFIG_FILES(arch/${DEFAULT_TARGET_1}/Makefile)

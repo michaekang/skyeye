@@ -42,6 +42,10 @@ if BUILD_X86
 SUBDIRS += arch/x86
 endif
 
+if BUILD_C6K
+SUBDIRS += arch/c6k
+endif
+
 if BUILD_DEFAULT
 SUBDIRS += arch/ppc arch/arm soc/arm arch/sparc
 default_targets=arm, ppc, sparc
