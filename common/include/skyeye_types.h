@@ -103,6 +103,8 @@ typedef enum{
 	Excess_range_exp,
 	/* Can not find the desirable result */
 	Not_found_exp,
+	/* Wrong executable file format */
+	Exec_format_exp,
 
 	/* Unknown exception */
 	Unknown_exp

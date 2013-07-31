@@ -31,6 +31,7 @@
 #include "skyeye_ram.h"
 #include "skyeye_arch.h"
 #include "elf.h"
+#include "coff.h"
 #include "skyeye_mm.h"
 /** 
  * add by michael.Kang, to load elf file to another address 
@@ -273,7 +274,7 @@ out:
 #else //#ifndef HAVE_LIBBFD
 
 //teawater add for load elf 2005.07.31------------------------------------------
-#define ELF_LOADING_INFO 0
+#define ELF_LOADING_INFO 1
 #include <bfd.h>
 
 /**
@@ -287,7 +288,7 @@ out:
 static exception_t
 load_exec (const char *file, addr_type_t addr_type)
 {
-	int ret = -1;
+	exception_t ret = Exec_format_exp;
 	bfd *tmp_bfd = NULL;
 	asection *s;
 	char *tmp_str = NULL;
@@ -417,7 +418,7 @@ load_exec (const char *file, addr_type_t addr_type)
 	skyeye_config_t* config = get_current_config();
 	config->start_address = bfd_get_start_address (tmp_bfd);
 
-	ret = 0;
+	ret = No_exp;
       out:
 	if (tmp_str)
 		free (tmp_str);
@@ -464,6 +465,38 @@ endian_t get_elf_endian(const char* elf_filename){
 }
 
 /**
+* @brief get the endian of an elf file
+*
+* @param elf_filename
+*
+* @return 
+*/
+bool_t is_elf(const char* filename){
+	Elf32_Ehdr elf_header;
+	bool_t ret = False;
+	FILE* file = fopen(filename, "r");
+	if(file == NULL){
+		fprintf(stderr, "In %s, can not open file %s\n", __FUNCTION__, filename);
+		exit(-1);
+	}
+
+	if (fread (elf_header.e_ident, EI_NIDENT, 1, file) != 1)
+		goto out;
+
+	if (elf_header.e_ident[EI_MAG0] != ELFMAG0
+		|| elf_header.e_ident[EI_MAG1] != ELFMAG1
+		|| elf_header.e_ident[EI_MAG2] != ELFMAG2
+		|| elf_header.e_ident[EI_MAG3] != ELFMAG3)
+		ret = False;
+	else
+		ret = True;
+out:
+	fclose(file);
+	return ret;
+}
+
+
+/**
 * @brief the elf loading function
 *
 * @param elf_filename
@@ -471,6 +504,12 @@ endian_t get_elf_endian(const char* elf_filename){
 *
 * @return 
 */
-exception_t SKY_load_elf(const char* elf_filename, addr_type_t addr_type){
-	return load_exec(elf_filename, addr_type);
+exception_t SKY_load_elf(const char* filename, addr_type_t addr_type){
+	if(is_elf(filename) == True)
+		return load_exec(filename, addr_type);
+	else if(is_coff(filename))
+		return load_coff(filename, addr_type);
+	else
+		/* something wrong */
+		return Exec_format_exp;
 }
