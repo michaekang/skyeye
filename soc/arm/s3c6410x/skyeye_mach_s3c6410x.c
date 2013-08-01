@@ -215,10 +215,10 @@ static void s3c6410x_timer_callback(generic_arch_t* state)
 			io.vic0fiqstatus |=  ((1 << INT_TIMER4) & io.vic0intselect & io.vic0intenable);
 
 			s3c6410x_update_int (state);
-			return;
+			goto exit_func;
 		}
 	}
-
+exit_func:
 	RW_UNLOCK(lock);
 }
 
