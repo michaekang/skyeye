@@ -28,10 +28,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "skyeye_types.h"
+#include "skyeye_bus.h"
+#include "skyeye_uart_ops.h"
 
 //#define DEBUG
 #include <skyeye_log.h>
 
+int exec_32b_insn(c6k_core_t* core, uint32_t insn);
+int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
+extern int exec_16b_insn(c6k_core_t* core, uint32_t insn);
 #define NOT_IMP DBG("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
 #define PR_ALL_REG 1
 void print_all_gpr(c6k_core_t* core){

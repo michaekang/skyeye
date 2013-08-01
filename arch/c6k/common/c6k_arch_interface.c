@@ -32,18 +32,22 @@
 #include <unistd.h>
 #endif
 
+#include "skyeye_internal.h"
 #include "skyeye_types.h"
 #include "skyeye_config.h"
 #include "skyeye_options.h"
 #include "skyeye_exec.h"
 #include "skyeye_cell.h"
 #include "skyeye_arch.h"
+#include "skyeye_mm.h"
+#include "skyeye_obj.h"
 #include "c6k_cpu.h"
 
 static char * arch_name = "c6k";
 static c6k_core_t* core;
 static void per_cpu_step();
 static void per_cpu_stop();
+extern uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet);
 void
 c6k_init_state ()
 {
@@ -156,6 +160,7 @@ c6k_ICE_read_byte(generic_address_t addr, uint8_t * pv){
 static int
 c6k_parse_cpu (cpu_config_t * cpu, const char *param[])
 {
+	return 0;
 }
 
 static int 

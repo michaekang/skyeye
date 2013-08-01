@@ -29,6 +29,7 @@
 
 const char* skyeye_module = "c6k";
 
+extern void init_c6k_arch ();
 void module_init(){
 	//skyeye_module = strdup("c6000");
 	init_c6k_arch ();

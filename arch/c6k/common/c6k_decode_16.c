@@ -26,11 +26,16 @@
 #include "c6k_cpu.h"
 #include "c6k_decode.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "skyeye_types.h"
+#include "skyeye_bus.h"
+#include "bank_defs.h"
 
 //#define DEBUG
 #include <skyeye_log.h>
 
+extern int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
+extern void write_buffer(c6k_core_t* core, int regno, uint32_t result);
 #define NOT_IMP printf("In %s : line %d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
 /* 16 - 18 should be DSZ */
 const ISEITEM insn16_decode_table[] = {
