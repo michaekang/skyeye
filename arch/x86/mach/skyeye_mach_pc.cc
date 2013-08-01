@@ -258,20 +258,20 @@ pc_io_read_word(void* arch_instance, uint32 addr)
 	return ret;
 }
 
-static void
+static exception_t
 pc_io_write_byte(void* arch_instance, uint32 addr, uint32 data)
 {
 	unsigned char c = data & 0xff;
 
 }
 
-static void
+static exception_t
 pc_io_write_halfword(void* arch_instance, uint32 addr, uint32 data)
 {
 	
 }
 
-static void
+static exception_t
 pc_io_write_word(void* arch_instance, uint32 addr, uint32 data)
 {
 	
