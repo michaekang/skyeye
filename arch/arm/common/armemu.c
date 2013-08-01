@@ -978,8 +978,8 @@ ARMul_Emulate26 (ARMul_State * state)
 				/* clrex do nothing here temporary */
 				if (instr == 0xf57ff01f) {
 					//printf("clrex \n");
-					SKYEYE_LOG_IN_CLR(RED, "In %s, line = %d, instr = 0x%x, pc = 0x%x, clrex instr!!\n",
-							__func__, __LINE__, instr, pc);
+					//SKYEYE_LOG_IN_CLR(RED, "In %s, line = %d, instr = 0x%x, pc = 0x%x, clrex instr!!\n",
+//							__func__, __LINE__, instr, pc);
 #if 0
 					int i;
 					for(i = 0; i < 128; i++){

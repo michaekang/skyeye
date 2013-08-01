@@ -167,7 +167,7 @@ static exception_t uart_s3c6410_read(conf_object_t *opaque, generic_address_t of
 
 static exception_t uart_s3c6410_write(conf_object_t *opaque, generic_address_t offset, uint32_t* buf, size_t count)
 {
-//	printf("In %s offset 0x%x buf 0x%x\n", __func__, offset, *buf);
+	//printf("In %s offset 0x%x buf 0x%x\n", __func__, offset, *buf);
 	struct uart_s3c6410_device *dev = opaque->obj;
 	uart_s3c6410_reg_t* regs = dev->regs;
 	uint32_t data = *buf;
