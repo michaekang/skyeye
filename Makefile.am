@@ -52,7 +52,7 @@ default_targets=arm, ppc, sparc
 endif
 
 if BUILD_ALL
-SUBDIRS += arch/arm/ soc/arm arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ arch/sparc
+SUBDIRS += arch/arm/ soc/arm arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ arch/sparc arch/c6k
 endif
 
 DIST_SUBDIRS = $(SUBDIRS)
