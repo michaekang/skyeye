@@ -395,7 +395,7 @@ malta_io_write_byte(void * state, UInt32 addr, UInt32 data)
 		case 0x3f8:
 		{
 			char c = data & 0xff;
-			skyeye_uart_write(index, &c, 1, NULL);
+			skyeye_uart_write(-1, &c, 1, NULL);
 			break;
 		}
 		default:

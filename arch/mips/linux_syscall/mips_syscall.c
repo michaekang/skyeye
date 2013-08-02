@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/times.h>
-#include <linux/unistd.h>			//exit_group
+#include <unistd.h>			//exit_group
 
 static void bus_read_string(char *buf, char *str){
 	int i = 0;
@@ -122,7 +122,9 @@ int mips_syscall(mips_core_t* core, int num){
 		}
 		case SYSCALL_getuid32:	/* 24 */
 			printf("syscall 24 \n");
+#ifndef WIN32
 			core->gpr[v0] = getuid();
+#endif
 			core->gpr[a0] = 0;
 			break;
 		case SYSCALL_times:{		/* 43 */
@@ -142,17 +144,23 @@ int mips_syscall(mips_core_t* core, int num){
 		}
 		case SYSCALL_getgid32:	/* 47 */
 			printf("syscall 47\n");
+#ifndef WIN32
 			core->gpr[v0] = getgid();
+#endif
 			core->gpr[a3] = 0;
 			break;
 		case SYSCALL_geteuid32:	/* 49 */
 			printf("syscall 49 \n");
+#ifndef WIN32
 			core->gpr[v0] = geteuid();
+#endif
 			core->gpr[a3] = 0;
 			break;
 		case SYSCALL_getegid32:	/* 50 */
 			printf("syscall 50 \n");
+#ifndef WIN32
 			core->gpr[v0] = getegid();
+#endif
 			core->gpr[a3] = 0;
 			break;
 		case SYSCALL_ioctl:{		/* 54 */
