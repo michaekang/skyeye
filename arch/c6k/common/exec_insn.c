@@ -2590,6 +2590,38 @@ static int exec_sub(c6k_core_t* core, uint32_t insn){
 	core->pc += 4;
 	return 0;
 }
+
+static int exec_sub_d(c6k_core_t* core, uint32_t insn){
+	if(calc_cond(core,insn)){
+		//DST(insn)
+		int op = BITS(7, 12);
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		if(op == 0x11){
+			core->gpr[s][dst] = core->gpr[s][src2] - core->gpr[s][src1];
+			DBG("In %s, dst=%d, src1=%d, src2=%d\n", __FUNCTION__, dst, src1, src2);
+		}
+		else if(op == 0x13){
+			core->gpr[s][dst] = core->gpr[s][src2] -src1;
+			DBG("In %s, dst=%d, src1=%d, src2=%d\n", __FUNCTION__, dst, src1, src2);
+		}
+		else{
+			NOT_IMP;
+		}
+	}
+	core->pc += 4;
+	return 0;
+}
+static int exec_sub_d_x(c6k_core_t* core, uint32_t insn){
+	if(calc_cond(core,insn)){
+		//DST(insn)
+	}
+	NOT_IMP;
+	return 0;
+}
+
 static int exec_subab(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
@@ -2999,6 +3031,10 @@ const ISEITEM insn32_decode_table[] = {
 {"sub", 2, 6, 2, 4, 0x6, 5, 11, 0x37},
 {"sub", 2, 6, 2, 4, 0x6, 5, 11, 0x6},
 {"sub", 2, 6, 2, 4, 0x6, 5, 11, 0x24},
+{"sub_d_x", 1, 6, 2, 11, 0x2cc}, /* sub D, cross path */
+
+{"sub_d", 2, 6, 2, 6, 0x10, 7, 12, 0x11}, /* sub D, not cross path */
+{"sub_d", 2, 6, 2, 6, 0x10, 7, 12, 0x13}, /* sub D, not cross path */
 
 {"subab", 0, 6, 2, 4, 0x6},
 {"subabs4", 0, 6, 2, 4, 0x6},
@@ -3305,6 +3341,9 @@ insn_action_t insn_action[] = {
 	exec_sub,
 	exec_sub,
 	exec_sub,
+	exec_sub_d_x,
+	exec_sub_d,
+	exec_sub_d,
 
 	exec_subab,
 	exec_subabs4,

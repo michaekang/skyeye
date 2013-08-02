@@ -457,12 +457,22 @@ static int exec_l2c(c6k_core_t* core, uint32_t insn){
 		//sleep(3);
 	}
 	else if(op == 0x5){
+		/* CMPGT , FIXME, sign comparison */
 		if(x)
-			core->gpr[s][dst] = (core->gpr[s][src1] >= core->gpr[(!s) & 0x1][src2]);
+			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[(!s) & 0x1][src2]);
 		else
-			core->gpr[s][dst] = (core->gpr[s][src1] >= core->gpr[s][src2]);
+			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[s][src2]);
 
 	}
+	else if(op == 0x7){
+		/* CMPGTU */
+		if(x)
+			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[(!s) & 0x1][src2]);
+		else
+			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[s][src2]);
+
+	}
+
 	else{
 		NOT_IMP;
 	}
