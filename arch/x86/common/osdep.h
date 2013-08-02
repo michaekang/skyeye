@@ -146,7 +146,7 @@ extern "C" {
 
 #if !BX_HAVE_VSNPRINTF
   #define vsnprintf bx_vsnprintf
-  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
+  //extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
 #endif
 
 #if BX_HAVE_STRTOULL
