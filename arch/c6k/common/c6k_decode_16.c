@@ -27,6 +27,7 @@
 #include "c6k_decode.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "portable/portable.h"
 #include "skyeye_types.h"
 #include "skyeye_bus.h"
 #include "bank_defs.h"
