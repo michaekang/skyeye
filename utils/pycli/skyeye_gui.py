@@ -4,6 +4,7 @@
 import wx
 import os
 import sys, platform
+import skyeye_ir
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -22,6 +23,7 @@ def GetImage(self, picture, l, h):
 	return imageBit
 
 class MainFrame(wx.Frame):
+	InfoRegsDlg = None
 	def __init__(self, parent = None, id = -1,
 			title = "天目仿真平台"):
 		wx.Frame.__init__(self, parent, id, title, size = (450, 300))
@@ -116,9 +118,7 @@ class MainFrame(wx.Frame):
         	libcommon.SIM_start()
 		dialog.Destroy()
 
-	def SetConfig(self, event):
-		print "In SetConfig"
-		
+	
 	def Run(self, event):
 		self.RunBtn.SetBitmapLabel(self.ImageStop)
 		self.Bind(wx.EVT_BUTTON, self.Stop, self.RunBtn)
@@ -128,9 +128,13 @@ class MainFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.Run, self.RunBtn)
 		self.RunBtn.SetBitmapLabel(self.ImageRun)
         	libcommon.SIM_stop()
-
+		self.RefurbishSubGui()
+		
+	def SetConfig(self, event):
+		print "In SetConfig"
+		
 	def RemoteGdb(self, event):
-		print "In RemoteGdb"
+		libgdbserver.com_remote_gdb()
 
 	def Help(self, event):
 		print "In Help"
@@ -147,7 +151,10 @@ class MainFrame(wx.Frame):
 		print Checkpoint, last_path
 
 	def InfoRegs(self, event):
-		print "In Info registers"
+		app = wx.PySimpleApp()
+		self.InfoRegsDlg = skyeye_ir.InfoRegsDialog()
+		self.InfoRegsDlg.Show()
+		app.MainLoop()
 
 	def ShowMem(self, event):
 		print "In Info Memory"
@@ -159,7 +166,17 @@ class MainFrame(wx.Frame):
 		print "In ShowVersion"
 
 	def QuitSky(self, event):
-		print "In QuitSkyEye"
+		self.Close(True)
+		self.Destroy()
+		libcommon.com_quit()
+
+	# Add the SubGui's refurbish in this function, call it when you stop skyeye
+	def RefurbishSubGui(self):
+		if(self.InfoRegsDlg != None):
+			self.InfoRegsDlg.RegsRefurbish()
+		else:
+			print "Info Regs is None"
+
 
 
 class SkyEyeGUI(wx.App):
@@ -169,7 +186,7 @@ class SkyEyeGUI(wx.App):
 		self.SetTopWindow(self.frame)
 		return True
 	def OnExit(self):
-		print "OnExit"
+		libcommon.com_quit()
 
 if __name__ == '__main__':
 	app = SkyEyeGUI()
