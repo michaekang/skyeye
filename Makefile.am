@@ -1,5 +1,6 @@
 
-#SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/ SUBDIRS =  common/
+#SUBDIRS =  arch/arm/ arch/bfin arch/coldfire arch/mips arch/ppc/ arch/x86/ device/ utils/ arch/sparc/ libltdl common/ soc/arm/ 
+SUBDIRS =  common/
 bin_PROGRAMS = 
 
 if BUILD_ANDROID
@@ -178,6 +179,7 @@ endif
 	cp -a $(top_srcdir)/testsuite/sparc_hello $(prefix)/testsuite/
 
 	cp -a $(top_srcdir)/utils/pycli/*.py $(prefix)/bin/
+	cp -a $(top_srcdir)/utils/pycli/picture $(prefix)/bin/
 #	rm -f -r $(prefix)/conf && mkdir $(prefix)/conf
 #	cp -a $(top_srcdir)/conf/* $(prefix)/conf
 
