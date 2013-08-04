@@ -31,13 +31,14 @@ cli(const char* prompt)
 	PyRun_SimpleString("import sys\n");
 	PyRun_SimpleString(new_path);
 	PyRun_SimpleString("from skyeye_cli import *\nSkyEyeCli().cmdloop()\n");
+	
 	Py_Finalize();
 	return 0;
 }
 
 int
-gui(const char* prompt)
-{
+gui(const char* prompt){
+
 	char new_path[1024];
 	char* skyeye_bin = SKYEYE_BIN;
 	setenv("SKYEYEBIN", skyeye_bin, 1);
@@ -45,8 +46,10 @@ gui(const char* prompt)
 	PyRun_SimpleString("import sys, os\n");
 	sprintf(new_path, "sys.path.append(\"%s\")\n", skyeye_bin);
 	PyRun_SimpleString(new_path);
-	PyRun_SimpleString("execfile(os.getenv(\"SKYEYEBIN\") + \"skyeye_xrc.py\")\n");
-
+	//PyRun_SimpleString("execfile(os.getenv(\"SKYEYEBIN\") + \"skyeye_xrc.py\")\n");
+	PyRun_SimpleString("import skyeye_gui\n");
+	PyRun_SimpleString("app = skyeye_gui.SkyEyeGUI()\n");
+	PyRun_SimpleString("app.MainLoop()\n");
 	Py_Finalize();
 
 	return 0;
