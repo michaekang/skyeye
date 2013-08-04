@@ -448,7 +448,7 @@ void logfunctions::ask(int level, const char *prefix, const char *fmt, va_list a
     return;
   }
   in_ask_already = 1;
-  vsnprintf(buf1, sizeof(buf1), fmt, ap);
+  //vsnprintf(buf1, sizeof(buf1), fmt, ap);
   // FIXME: facility set to 0 because it's unknown.
 
   // update vga screen.  This is useful because sometimes useful messages
