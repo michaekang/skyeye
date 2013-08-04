@@ -401,7 +401,8 @@ mem_reset ()
 				return Malloc_exp;
 			}
 #else
-			if(mb[0].addr < 0x8000){
+			//if(mb[0].addr < 0x8000){
+			if(1){
 				global_memory.rom[bank] = skyeye_mm (mb[bank].len);
 				if (!global_memory.rom[bank]) {
 					fprintf (stderr,
@@ -423,7 +424,7 @@ mem_reset ()
 			}
 #endif
 		}
-	#if 1 
+	#if  0
 		if (mb[bank].filename
 			    && (f = fopen (mb[bank].filename, "rb"))) {
 			if (fread(global_memory.rom[bank], 1, mb[bank].len,
