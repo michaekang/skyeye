@@ -42,6 +42,7 @@
 #include "skyeye_mm.h"
 #include "skyeye_obj.h"
 #include "c6k_cpu.h"
+#include "regformat/c6k_regformat.h"
 
 static char * arch_name = "c6k";
 static c6k_core_t* core;
@@ -269,6 +270,27 @@ c6k_parse_mem(int num_params, const char* params[])
 #endif
 	return 0;
 }
+static exception_t c6k_set_register_by_id(int id, uint32 value){
+	if(id >= A0 && id <= A31)
+		core->gpr[GPR_A][id - A0];
+	if(id > A31 && id <= B31)
+		core->gpr[GPR_B][id - B0] = value;
+	else if(id == PC_REG)
+		core->pc;
+		
+	return No_exp;
+}
+
+static uint32 c6k_get_regval_by_id(int id){
+	if (id == PC_REG)
+		return core->pc;
+	else if(id >= A0 && id <= A31)
+		return core->gpr[GPR_A][id - A0];
+	else if(id > A31 && id <= B31)
+		return core->gpr[GPR_B][id - B0];
+	else
+		return 0xFFFFFFFF; /* something wrong */
+}
 
 void
 init_c6k_arch ()
@@ -286,5 +308,7 @@ init_c6k_arch ()
 	c6k_arch.parse_cpu = c6k_parse_cpu;
 	c6k_arch.parse_mem = c6k_parse_mem;
 
+	c6k_arch.get_regval_by_id = c6k_get_regval_by_id;
+	c6k_arch.set_regval_by_id = c6k_set_register_by_id;
 	register_arch (&c6k_arch);
 }

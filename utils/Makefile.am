@@ -1,5 +1,5 @@
 #utils_config = config/skyeye_config.c  config/skyeye_options.c
-utils_debugger = debugger/arch_regdefs.c debugger/gdbserver.c debugger/gdb_tracepoint.c  debugger/skyeye2gdb.c debugger/gdbserver_module.c debugger/arm_regdefs.c debugger/bfin_regdefs.c debugger/cf_regdefs.c debugger/mips_regdefs.c debugger/ppc_regdefs.c debugger/sparc_regdefs.c
+utils_debugger = debugger/arch_regdefs.c debugger/gdbserver.c debugger/gdb_tracepoint.c  debugger/skyeye2gdb.c debugger/gdbserver_module.c debugger/arm_regdefs.c debugger/bfin_regdefs.c debugger/cf_regdefs.c debugger/mips_regdefs.c debugger/ppc_regdefs.c debugger/sparc_regdefs.c debugger/ti_c64x_regdefs.c
 
 utils_disassembler = disassembler/dis_asm.c disassembler/dis_asm_module.c
 

@@ -50,6 +50,7 @@ extern void init_mips_register_defs();
 extern void init_cf_register_defs();
 extern void init_ppc_register_defs();
 extern void init_sparc_register_defs();
+extern void init_ti_c64x_register_defs();
 
 //extern skyeye_config_t skyeye_config;	
 
@@ -85,6 +86,8 @@ int init_register_type(){
 
         /* register ppc_arch */
 	init_ppc_register_defs ();
+
+	init_ti_c64x_register_defs();
 
 	return No_exp;
 }
