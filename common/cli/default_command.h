@@ -23,4 +23,6 @@ int com_show_map(char* arg);
 int com_info(char* arg);
 int com_x(char* arg);
 exception_t run_command(char* command_str);
+
+uint32 gui_x(char *addr);
 #endif

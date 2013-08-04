@@ -501,3 +501,16 @@ int com_set_all(char* arg)
 	}
 	return 0;
 }
+
+
+/*This function is allow gui to call*/
+uint32 gui_x(char* addr){
+	uint32 value, addr_value;
+	if(addr == NULL || addr == '\0') 
+		return Invarg_exp;
+	else{
+		addr_value = strtoul(addr, NULL, 0);
+	}
+	bus_read(32, addr_value, &value);
+	return value;
+}
