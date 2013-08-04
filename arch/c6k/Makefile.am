@@ -5,3 +5,6 @@ pkglib_LTLIBRARIES = libc6k.la
 libc6k_la_LDFLAGS = -module
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS @COMMON_CFLAGS@
 INCLUDES = -I./common -I./mach @COMMON_INCLUDES@
+if WIN32
+libc6k_la_LDFLAGS += -no-undefined -shared -module  -Xlinker -L../../common/.libs/ -Xlinker -lcommon -Xlinker -L/mingw/lib --export-all-symbol
+endif
