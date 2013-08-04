@@ -128,7 +128,7 @@ c6k_set_pc (generic_address_t addr)
 	return;
 }
 static generic_address_t c6k_get_pc(){
-	return 0;
+	return core->pc;
 }
 /*
 cpu_config_t c6k_cpu[] = {
@@ -296,6 +296,7 @@ void
 init_c6k_arch ()
 {
 	static arch_config_t c6k_arch;
+	memset(&c6k_arch, '\0', sizeof(c6k_arch));
 
 	c6k_arch.arch_name = arch_name;
 	c6k_arch.init = c6k_init_state;
