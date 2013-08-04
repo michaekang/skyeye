@@ -1286,6 +1286,7 @@ static int exec_ldhu(c6k_core_t* core, uint32_t insn){
 			NOT_IMP;
 		}
 	}
+	core->pc += 4;
 	return 0;
 }
 static int exec_ldhu_1(c6k_core_t* core, uint32_t insn){
@@ -3343,8 +3344,14 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 		//int pbit = 0, last_pbit = 0;
 		int pbit = core->parallel;
 		int i = ((core->pc  & 0xFFFFFFFC)- core->pce1) / 4;
+		if((core->pc & 0x1f) == 0x1c){
+			/* skip header word */
+			core->pc += 4;
+			return 0;
+		}
 		//DBG("In %s, i = 0x%x, core->pce1=0x%x, pc=0x%x\n", __FUNCTION__, i, core->pce1, core->pc);
-		while( i < (FP_SIZE - 1)){
+		//while( i < (FP_SIZE - 1)){
+		if( i < (FP_SIZE - 1)){
 			//DBG("In %s COMPACT, i = 0x%x, core->pce1=0x%x, parallel=%d, pc=0x%x\n", __FUNCTION__, i, core->pce1, core->parallel, core->pc);
 			/*
 			if(core->spmask && (core->pc >= core->spmask_begin && core->pc <= core->spmask_end)){
@@ -3399,7 +3406,8 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 						if(((core->pc - core->pce1) / 4) < (FP_SIZE - 1)){
 							i = ((core->pc - core->pce1) / 4);
 							DBG("In %s, branch triggered inner packet, target=0x%x, i=%d\n", __FUNCTION__, core->pc, i);
-							continue;
+							//continue;
+							return 0;
 						}
 						else
 							return 0;
@@ -3548,12 +3556,13 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 
 		}
 		/* skip header word */
-		core->pc += 4;
+		//core->pc += 4;
 	}
 	else{
 		int pbit;
 		int i = (core->pc - core->pce1) / 4;
-		while(i < FP_SIZE){
+		//while(i < FP_SIZE){
+		if(i < FP_SIZE){
 			exec_32b_insn(core, fetch_packet[i]);
 			core->insn_num ++;
 			pbit = fetch_packet[i] & 0x1;	
