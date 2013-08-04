@@ -102,6 +102,13 @@ class MainFrame(wx.Frame):
 
 		self.Panel = wx.Panel(self)
 		self.Panel.SetBackgroundColour('White')
+		wx.StaticText(self.Panel, -1, "处理器:", (10, 10))
+		self.cpu = wx.StaticText(self.Panel, -1, "NULL", (80, 10))
+		wx.StaticText(self.Panel, -1, "状态 :", (10, 50))
+		self.status = wx.StaticText(self.Panel, -1, "NULL", (80, 50))
+#		wx.StaticText(self.Panel, -1, "配置文件:", (10, 90))
+#		self.SkyeyeConf = wx.StaticText(self.Panel, -1, "NULL", (80, 90))
+
 
 
 	def OpenConfig(self, event):
@@ -117,24 +124,32 @@ class MainFrame(wx.Frame):
 		libcommon.com_load_conf(c_char_p(configure_file))
         	libcommon.SIM_start()
 		dialog.Destroy()
+		DspPic = wx.StaticBitmap(self.Panel, -1,  pos=(200,10), size=(300, 300))
+		ImageDSP = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/DSP.jpg", 200, 200)
+		DspPic.SetBitmap(ImageDSP)
+		self.status.SetLabel("停止")
+		self.cpu.SetLabel("DSP")
 
 	
 	def Run(self, event):
 		self.RunBtn.SetBitmapLabel(self.ImageStop)
 		self.Bind(wx.EVT_BUTTON, self.Stop, self.RunBtn)
         	libcommon.SIM_run()
+		self.status.SetLabel("运行")
 
 	def Stop(self, event):
 		self.Bind(wx.EVT_BUTTON, self.Run, self.RunBtn)
 		self.RunBtn.SetBitmapLabel(self.ImageRun)
         	libcommon.SIM_stop()
 		self.RefurbishSubGui()
+		self.status.SetLabel("停止")
 		
 	def SetConfig(self, event):
 		print "In SetConfig"
 		
 	def RemoteGdb(self, event):
 		libgdbserver.com_remote_gdb()
+		self.status.SetLabel("远程调试")
 
 	def Help(self, event):
 		print "In Help"
