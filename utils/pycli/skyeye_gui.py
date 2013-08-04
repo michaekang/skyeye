@@ -5,6 +5,7 @@ import wx
 import os
 import sys, platform
 import skyeye_ir
+import x
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -172,7 +173,11 @@ class MainFrame(wx.Frame):
 		app.MainLoop()
 
 	def ShowMem(self, event):
-		print "In Info Memory"
+		app = wx.PySimpleApp()
+		self.ShowMemFrame = x.Memory()
+		self.ShowMemFrame.Show()
+		app.MainLoop()
+
 
 	def UserMan(self, event):
 		print "In User Manu"
@@ -191,6 +196,10 @@ class MainFrame(wx.Frame):
 			self.InfoRegsDlg.RegsRefurbish()
 		else:
 			print "Info Regs is None"
+		if(self.ShowMem != None):
+			self.ShowMemFrame.Refreshput()
+		else:
+			print "Show Mem is None"
 
 
 
