@@ -49,6 +49,75 @@ static c6k_core_t* core;
 static void per_cpu_step();
 static void per_cpu_stop();
 extern uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet);
+static void register_core_chp(c6k_core_t* core){
+	char buf[100];
+	int i;
+	for(i = 0; i < 32; i++){
+		sprintf(buf, "A%d", i);
+		add_chp_data((void*)(&core->gpr[GPR_A][i]),sizeof(core->gpr[GPR_A][i]), buf);
+	}
+	for(i = 0; i < 32; i++){
+		sprintf(buf, "B%d", i);
+		add_chp_data((void*)(&core->gpr[GPR_B][i]),sizeof(core->gpr[GPR_B][i]), buf);
+	}
+	strcpy(buf, "ILC");
+	add_chp_data((void*)(&core->ilc),sizeof(core->ilc), buf);
+	strcpy(buf, "PC");
+	add_chp_data((void*)(&core->pc),sizeof(core->pc), buf);
+	strcpy(buf, "PFC");
+	add_chp_data((void*)(&core->pfc),sizeof(core->pfc), buf);
+	strcpy(buf, "PFC_BAK1");
+	add_chp_data((void*)(&core->pfc_bak1),sizeof(core->pfc_bak1), buf);
+	strcpy(buf, "cycles");
+	add_chp_data((void*)(&core->cycles),sizeof(core->cycles), buf);
+	strcpy(buf, "insn_num");
+	add_chp_data((void*)(&core->insn_num),sizeof(core->insn_num), buf);
+	strcpy(buf, "delay_slot");
+	add_chp_data((void*)(&core->delay_slot),sizeof(core->delay_slot), buf);
+	strcpy(buf, "delay_slot_bak1");
+	add_chp_data((void*)(&core->delay_slot_bak1),sizeof(core->delay_slot_bak1), buf);
+	strcpy(buf, "header");
+	add_chp_data((void*)(&core->header),sizeof(core->header), buf);
+	strcpy(buf, "parallel");
+	add_chp_data((void*)(&core->parallel),sizeof(core->parallel), buf);
+	strcpy(buf, "buffer_pos");
+	add_chp_data((void*)(&core->buffer_pos),sizeof(core->buffer_pos), buf);
+
+	strcpy(buf, "sploop_begin");
+	add_chp_data((void*)(&core->sploop_begin),sizeof(core->sploop_begin), buf);
+	strcpy(buf, "sploop_end");
+	add_chp_data((void*)(&core->sploop_end),sizeof(core->sploop_end), buf);
+	strcpy(buf, "sploop_flag");
+	add_chp_data((void*)(&core->sploop_flag),sizeof(core->sploop_flag), buf);
+	for(i = 0; i < 32; i++){
+		sprintf(buf, "sploop_buffer[%d]", i);
+		add_chp_data((void*)(&core->sploop_buffer[i]),sizeof(core->sploop_buffer[i]), buf);
+	}
+	strcpy(buf, "sploopw_cond");
+	add_chp_data((void*)(&core->sploopw_cond),sizeof(core->sploopw_cond), buf);
+	strcpy(buf, "sploopw_flag");
+	add_chp_data((void*)(&core->sploopw_flag),sizeof(core->sploopw_flag), buf);
+	strcpy(buf, "spmask");
+	add_chp_data((void*)(&core->spmask),sizeof(core->spmask), buf);
+	strcpy(buf, "spmask_begin");
+	add_chp_data((void*)(&core->spmask_begin),sizeof(core->spmask_begin), buf);
+	strcpy(buf, "spmask_end");
+	add_chp_data((void*)(&core->spmask_end),sizeof(core->spmask_end), buf);
+	for(i = 0; i < 64; i++){
+		sprintf(buf, "wb_result[%d]", i);
+		add_chp_data((void*)(&core->wb_result[i]),sizeof(core->wb_result[i]), buf);
+	}
+	for(i = 0; i < 64; i++){
+		sprintf(buf, "wb_index[%d]", i);
+		add_chp_data((void*)(&core->wb_index[i]),sizeof(core->wb_index[i]), buf);
+	}
+
+	strcpy(buf, "wb_result_pos");
+	add_chp_data((void*)(&core->wb_result_pos),sizeof(core->wb_result_pos), buf);
+	strcpy(buf, "wb_flag");
+	add_chp_data((void*)(&core->wb_flag),sizeof(core->wb_flag), buf);
+
+}
 void
 c6k_init_state ()
 {
@@ -70,7 +139,8 @@ c6k_init_state ()
 	core->sploop_begin = core->sploop_end = 0xFFFFFFFF;
 	core->spmask_begin = 0xFFFFFFFF;
 	core->buffer_pos = 0;
-	
+
+	register_core_chp(core);	
 	return;
 }
 void
