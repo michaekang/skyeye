@@ -122,8 +122,13 @@ bool_t is_coff(const char* filename){
 		exit(-1);
 	}
 
-	if (fread (&header, sizeof(filehdr_v12), 1, file) != 1)
+	if (fread (&header, sizeof(filehdr_v12), 1, file) != 1){
+#if __WIN32__
+		fprintf(stderr, "Workaround for windows fopen function in %s\n", __FUNCTION__);
+#else
 		goto out;
+#endif
+	}
 	printf("In %s, header.f_magic = 0x%x\n", __FUNCTION__, header.f_magic);
 	if (header.f_magic != 0xc1
 		&& header.f_magic != 0xc2
