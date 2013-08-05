@@ -551,3 +551,9 @@ void info_register_free(char *register_p)
 {
 	free(register_p);
 }
+
+char *gui_get_current_mach(void)
+{
+	machine_config_t *current_mach = get_current_mach();
+	return  current_mach->machine_name;
+}

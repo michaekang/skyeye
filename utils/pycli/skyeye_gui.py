@@ -37,6 +37,7 @@ HelpID = wx.NewId()
 class MainFrame(wx.Frame):
 	InfoRegsDlg = None
 	ShowMemFrame = None
+	OpenConfFlag = 0
 	
 	def __init__(self, parent = None, id = -1,
 			title = C.FontMainTitle):
@@ -44,29 +45,29 @@ class MainFrame(wx.Frame):
 		self.MenuBar = wx.MenuBar()
 		# Create Menu for Debug
 		self.DebugMenu = wx.Menu()
-		Registers = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontInfoRegs)
-		Memories = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontShowMems)
-		RemoteGdb = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontRemoteGdb)
-		self.DebugMenu.AppendItem(Registers)
-		self.DebugMenu.AppendItem(Memories)
-		self.DebugMenu.AppendItem(RemoteGdb)
-		self.Bind(wx.EVT_MENU, self.InfoRegs, id=Registers.GetId())
-		self.Bind(wx.EVT_MENU, self.ShowMem, id=Memories.GetId())
-		self.Bind(wx.EVT_MENU, self.RemoteGdb, id=RemoteGdb.GetId())
+		self.Registers = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontInfoRegs)
+		self.Memories = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontShowMems)
+		self.Remote = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontRemoteGdb)
+		self.DebugMenu.AppendItem(self.Registers)
+		self.DebugMenu.AppendItem(self.Memories)
+		self.DebugMenu.AppendItem(self.Remote)
+		self.Bind(wx.EVT_MENU, self.InfoRegs, id=self.Registers.GetId())
+		self.Bind(wx.EVT_MENU, self.ShowMem, id=self.Memories.GetId())
+		self.Bind(wx.EVT_MENU, self.RemoteGdb, id=self.Remote.GetId())
 			
 		# Create Menu for File
 		self.FileMenu = wx.Menu()
-		OpenConf = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontOpenConfig)
-		OpenChp = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontOpenSnapshot)
-		SaveChp = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontSaveSnapshot)
+		self.OpenConf = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontOpenConfig)
+		self.OpenCh = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontOpenSnapshot)
+		self.SaveCh = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontSaveSnapshot)
 		Quit = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontQuit)
-		self.FileMenu.AppendItem(OpenConf)
-		self.FileMenu.AppendItem(OpenChp)
-		self.FileMenu.AppendItem(SaveChp)
+		self.FileMenu.AppendItem(self.OpenConf)
+		self.FileMenu.AppendItem(self.OpenCh)
+		self.FileMenu.AppendItem(self.SaveCh)
 		self.FileMenu.AppendItem(Quit)
-		self.Bind(wx.EVT_MENU, self.OpenConfig, id=OpenConf.GetId())
-		self.Bind(wx.EVT_MENU, self.OpenChp, id=OpenChp.GetId())
-		self.Bind(wx.EVT_MENU, self.SaveChp, id=SaveChp.GetId())
+		self.Bind(wx.EVT_MENU, self.OpenConfig, id=self.OpenConf.GetId())
+		self.Bind(wx.EVT_MENU, self.OpenChp, id=self.OpenCh.GetId())
+		self.Bind(wx.EVT_MENU, self.SaveChp, id=self.SaveCh.GetId())
 		self.Bind(wx.EVT_MENU, self.QuitSky, id=Quit.GetId())
 
 		# Create Menu for Help
@@ -120,6 +121,9 @@ class MainFrame(wx.Frame):
 		wx.StaticText(self.Panel, -1, C.FontStatus, (10, 50))
 		self.status = wx.StaticText(self.Panel, -1, "NULL", (80, 50))
 
+		self.DisableButton()
+
+
 
 	def OpenConfig(self, event):
 		dialog = wx.FileDialog(None, C.FontOpenConfig, os.getcwd(),"", "All files (*)|*", wx.OPEN)
@@ -138,7 +142,14 @@ class MainFrame(wx.Frame):
 		ImageDSP = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/DSP.jpg", 200, 200)
 		DspPic.SetBitmap(ImageDSP)
 		self.status.SetLabel(C.FontStop)
-		self.cpu.SetLabel("DSP")
+		pchar = libcommon.gui_get_current_mach()
+		pychar = c_char_p(pchar)
+		current_mach = pychar.value
+		self.cpu.SetLabel(current_mach.upper())
+		if self.OpenConfFlag == 0:
+			self.EnableButton()
+			self.OpenConfFlag = 1
+
 
 	
 	def Run(self, event):
@@ -148,6 +159,8 @@ class MainFrame(wx.Frame):
 		self.ToolBar.Realize()
         	libcommon.SIM_run()
 		self.status.SetLabel(C.FontRun)
+		self.Remote.Enable(0)
+		self.ToolBar.EnableTool(DebugID, 0)
 
 	def Stop(self, event):
 		self.ToolBar.DeleteTool(id = StopID)
@@ -164,6 +177,7 @@ class MainFrame(wx.Frame):
 	def RemoteGdb(self, event):
 		libgdbserver.com_remote_gdb()
 		self.status.SetLabel(C.FontRemoteGdb)
+		self.ToolBar.EnableTool(RunID, 0)
 
 	def Help(self, event):
 		print "In Help"
@@ -213,6 +227,29 @@ class MainFrame(wx.Frame):
 			self.ShowMemFrame.Refreshput()
 		else:
 			print "Show Mem is None"
+
+       #This function is used to enable or disable any button
+	def EnableButton(self):                 
+		self.Registers.Enable(1)
+		self.Memories.Enable(1)
+		self.Remote.Enable(1)
+		self.SaveCh.Enable(1)
+		self.ToolBar.EnableTool(RunID, 1)
+		self.ToolBar.EnableTool(DebugID, 1)
+		self.ToolBar.EnableTool(ChpID, 1)
+
+
+
+	def DisableButton(self):    
+		self.Registers.Enable(0)
+		self.Memories.Enable(0)
+		self.Remote.Enable(0)
+		self.SaveCh.Enable(0)
+		self.ToolBar.EnableTool(RunID, 0)
+		self.ToolBar.EnableTool(DebugID, 0)
+		self.ToolBar.EnableTool(ChpID, 0)
+
+
 
 
 class SkyEyeGUI(wx.App):
