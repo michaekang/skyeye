@@ -38,10 +38,10 @@ int exec_32b_insn(c6k_core_t* core, uint32_t insn);
 int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern int exec_16b_insn(c6k_core_t* core, uint32_t insn);
 #define NOT_IMP DBG("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
-#define PR_ALL_REG 1
+#define PR_ALL_REG 0
 void print_all_gpr(c6k_core_t* core){
 	int i;
-#if 0
+#if PR_ALL_REG 
 	DBG("------------------- pc =0x%x(insn_num=%d)-------------------\n", core->pc, core->insn_num);
 	for(i = 0; i < 32; i++){
 		skyeye_printf_in_color(LIGHT_BLUE, "A[%d]=0x%x\t", i, core->gpr[GPR_A][i]);
