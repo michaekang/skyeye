@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <malloc.h>
 
 #include "skyeye_cli.h"
 #include "skyeye_module.h"
@@ -513,4 +514,40 @@ uint32 gui_x(char* addr){
 	}
 	bus_read(32, addr_value, &value);
 	return value;
+}
+
+char *gui_info_register(void)
+{
+	char str[500] = {'\0'}, temp[50];
+	int num = 0;
+	char *register_p;
+	generic_arch_t* arch_instance = get_arch_instance("");
+	if(arch_instance == NULL)
+		return NULL;
+	if(arch_instance->get_regval_by_id){
+		int i = 0;
+		uint32 reg_value = 0;
+		while(i <= arch_instance->get_regnum()){
+			reg_value = arch_instance->get_regval_by_id(i);
+			sprintf(temp, "%s:%x;", arch_instance->get_regname_by_id(i), reg_value);
+			i++;
+			strcat(str, temp);
+		}
+		strcat(str, "|");
+		register_p = malloc(strlen(str) * sizeof(char *));
+		strncpy(register_p, str, strlen(str) + 1);
+		return register_p;
+
+	}
+	else{
+		printf("Current processor not implement the interface.\n");
+		return NULL;
+	}
+
+	return NULL;
+}
+
+void info_register_free(char *register_p)
+{
+	free(register_p);
 }

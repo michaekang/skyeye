@@ -25,4 +25,7 @@ int com_x(char* arg);
 exception_t run_command(char* command_str);
 
 uint32 gui_x(char *addr);
+char *gui_info_register(void);
+void info_register_free(char *register_p);
+
 #endif

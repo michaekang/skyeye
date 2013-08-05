@@ -31,24 +31,25 @@ class TestListCtrl(wx.ListCtrl,
             listmix.TextEditMixin.OpenEditor(self,col, row)
             
     def CloseEditor(self, evt=None):
-        listmix.TextEditMixin.CloseEditor(self, evt)
-        item = self.GetItem(self.curRow,col=1)
-        oldname = item.GetText()
-        item = self.GetItem(self.curRow,col=2)
-        newname = item.GetText()
-        if oldname != newname:
-            self.SetItemBackgroundColour(self.curRow,"pink")
-        else:
-            self.SetItemBackgroundColour(self.curRow,"white")
+	        listmix.TextEditMixin.CloseEditor(self, evt)
+	        item = self.GetItem(self.curRow,col=1)
+	        oldname = item.GetText()
+	        item = self.GetItem(self.curRow,col=2)
+	        newname = item.GetText()
+	        if oldname != newname:
+	            self.SetItemBackgroundColour(self.curRow,"pink")
+	        else:
+	            self.SetItemBackgroundColour(self.curRow,"white")
  
 
 
 
 
-class Memory(wx.Frame):
+class Memory(wx.Dialog):
+	global_input = 0
 		
 	def __init__(self):
-		wx.Frame.__init__(self, None, -1, C.FontMems, size=(580, 410), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
+		wx.Dialog.__init__(self, None, -1, C.FontMems, size=(580, 410), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
         	sizer = wx.GridBagSizer(hgap=5, vgap=5)
 		basicLabel = wx.StaticText(self, -1, C.FontAddr)
 		sizer.Add(basicLabel, pos = (0, 0), flag = wx.LEFT|wx.TOP, border=10)
@@ -90,11 +91,6 @@ class Memory(wx.Frame):
 		sizer.AddGrowableRow(2)
 		self.SetSizer(sizer)
 		self.Center()
-		self.statusbar = self.CreateStatusBar()
-		self.statusbar.SetFieldsCount(2)
-		self.statusbar.SetStatusWidths([-1, -2])
-		self.statusbar.SetStatusText("PC:", 0)
-		self.statusbar.SetStatusText("Value:", 1)
 
         
 
@@ -142,24 +138,23 @@ class Memory(wx.Frame):
 		
 		
 	def Refreshput(self):
-		self.Init()
-		print self.global_input 
-		start_value = self.global_input - 16* 6
-		self.minaddrvalue = start_value
-		self.maxaddrvalue = self.global_input + 16 * 6
-		for i in range(13):
-			arg_item = " %x" % (start_value + i * 16)
-			value_str = self.HandleLineValue(start_value + i * 16)
-			index = self.list.InsertStringItem(self.maxitem, arg_item.upper())
-			self.list.SetStringItem(index, 1, value_str)
-			self.list.SetItemTextColour(self.colitem, wx.RED)
-			self.maxitem += 1
+		if(self.global_input != 0):
+			self.Init()
+			start_value = self.global_input - 16* 6
+			self.minaddrvalue = start_value
+			self.maxaddrvalue = self.global_input + 16 * 6
+			for i in range(13):
+				arg_item = " %x" % (start_value + i * 16)
+				value_str = self.HandleLineValue(start_value + i * 16)
+				index = self.list.InsertStringItem(self.maxitem, arg_item.upper())
+				self.list.SetStringItem(index, 1, value_str)
+				self.list.SetItemTextColour(self.colitem, wx.RED)
+				self.maxitem += 1
 
 
 
 	def InputAddr(self, event):
 		self.Init()
-		self.global_input = 0
 		input_str = self.pwdText.GetLineText(0)
 		self.pwdText.Clear()
 		input_value = int(input_str, 16)

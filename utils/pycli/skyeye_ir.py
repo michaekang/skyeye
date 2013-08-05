@@ -3,6 +3,8 @@
 import wx
 import os
 import sys, platform
+from ctypes import *
+import string
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -31,6 +33,25 @@ class InfoRegsDialog(wx.Dialog):
 
 	def RegsRefurbish(self):
 		print "Refurbish when stop skyeye."
+		item = 0
+		self.RegsList.DeleteAllItems()
+		pchar = libcommon.gui_info_register()
+		pychar = c_char_p(pchar)
+		registers_str = pychar.value
+		register_str = registers_str.split(';')
+		for i in register_str:
+			e = i.split(':')
+			if cmp(e[0], '|') != 0 :
+				reg_value_10 = "%d" % int(e[1], 16)
+				index = self.RegsList.InsertStringItem(item, e[0])
+				self.RegsList.SetStringItem(index, 1, e[1].upper())
+				self.RegsList.SetStringItem(index, 2, reg_value_10)
+				item += 1
+		libcommon.info_register_free(pchar)
+
+
+
+
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()

@@ -36,6 +36,8 @@ HelpID = wx.NewId()
 
 class MainFrame(wx.Frame):
 	InfoRegsDlg = None
+	ShowMemFrame = None
+	
 	def __init__(self, parent = None, id = -1,
 			title = C.FontMainTitle):
 		wx.Frame.__init__(self, parent, id, title, size = (450, 300))
@@ -207,7 +209,7 @@ class MainFrame(wx.Frame):
 			self.InfoRegsDlg.RegsRefurbish()
 		else:
 			print "Info Regs is None"
-		if(self.ShowMem != None):
+		if(self.ShowMemFrame != None):
 			self.ShowMemFrame.Refreshput()
 		else:
 			print "Show Mem is None"
