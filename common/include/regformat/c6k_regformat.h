@@ -93,6 +93,7 @@ typedef enum{
 	CSR_REG,
 	TSR_REG,
 	ILC_REG,
-	RILC_REG
+	RILC_REG,
+	C6K_REGNUM
 }reg_id_t;
 #endif

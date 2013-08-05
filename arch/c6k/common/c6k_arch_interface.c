@@ -43,7 +43,18 @@
 #include "skyeye_obj.h"
 #include "c6k_cpu.h"
 #include "regformat/c6k_regformat.h"
-
+const char* c6k_regstr[] = {
+"A0", "A1", "A2","A3","A4","A5","A6","A7",
+"A8","A9","A10","A11","A12","A13","A14","A15",
+"A16","A17","A18","A19","A20","A21","A22","A23",
+"A24","A25","A26","A27","A28","A29","A30","A31",
+"B0","B1","B2",	"B3","B4","B5",	"B6","B7",
+"B8","B9","B10","B11","B12","B13","B14","B15",
+"B16","B17","B18","B19","B20","B21","B22","B23",
+"B24","B25","B26","B27","B28","B29","B30","B31",
+"PC_REG","CSR_REG","TSR_REG","ILC_REG","RILC_REG",
+NULL
+};
 static char * arch_name = "c6k";
 static c6k_core_t* core;
 static void per_cpu_step();
@@ -350,6 +361,13 @@ static exception_t c6k_set_register_by_id(int id, uint32 value){
 		
 	return No_exp;
 }
+static uint32 c6k_get_regnum(){
+	return C6K_REGNUM;
+	//return MAX_REG_NUM;
+}
+static char* get_regname_by_id(int id){
+        return c6k_regstr[id];
+}
 
 static uint32 c6k_get_regval_by_id(int id){
 	if (id == PC_REG)
@@ -378,6 +396,8 @@ init_c6k_arch ()
 	c6k_arch.ICE_read_byte = c6k_ICE_read_byte;
 	c6k_arch.parse_cpu = c6k_parse_cpu;
 	c6k_arch.parse_mem = c6k_parse_mem;
+	c6k_arch.get_regnum = c6k_get_regnum;
+	c6k_arch.get_regname_by_id = get_regname_by_id;
 
 	c6k_arch.get_regval_by_id = c6k_get_regval_by_id;
 	c6k_arch.set_regval_by_id = c6k_set_register_by_id;
