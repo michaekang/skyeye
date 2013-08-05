@@ -110,7 +110,8 @@ sim_read (generic_address_t addr, unsigned char *buffer, int size)
 {
 	int i;
 	int fault = 0;
-	unsigned char v;
+	//unsigned char v;
+	uint32_t v;
 	skyeye_config_t* config = get_current_config();
 	generic_arch_t *arch_instance = get_arch_instance(config->arch->arch_name);
 	for (i = 0; i < size; i++) {
