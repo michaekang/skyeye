@@ -43,12 +43,13 @@ gui(const char* prompt){
 	char* skyeye_bin = SKYEYE_BIN;
 	setenv("SKYEYEBIN", skyeye_bin, 1);
 	Py_Initialize();
-	PyRun_SimpleString("import sys, os\n");
+	PyRun_SimpleString("import sys, os, wx\n");
 	sprintf(new_path, "sys.path.append(\"%s\")\n", skyeye_bin);
 	PyRun_SimpleString(new_path);
-	//PyRun_SimpleString("execfile(os.getenv(\"SKYEYEBIN\") + \"skyeye_xrc.py\")\n");
 	PyRun_SimpleString("import skyeye_gui\n");
-	PyRun_SimpleString("app = skyeye_gui.SkyEyeGUI()\n");
+	PyRun_SimpleString("app = wx.PySimpleApp()\n");
+	PyRun_SimpleString("GUI = skyeye_gui.MainFrame(parent = None)\n");
+	PyRun_SimpleString("GUI.Show()\n");
 	PyRun_SimpleString("app.MainLoop()\n");
 	Py_Finalize();
 

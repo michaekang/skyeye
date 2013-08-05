@@ -2,16 +2,24 @@
 
 import wx
 import os
-import sys
+import sys, platform
+
+os_info = platform.system()
+if cmp(os_info, "Linux"):
+	from skyeye_common_windows_module import *
+	import windows_font as C
+else:
+	from skyeye_common_module import *
+	import linux_font as C
 
 class InfoRegsDialog(wx.Dialog):
 	def __init__(self):
-		wx.Dialog.__init__(self, None, -1, "查看寄存器",size=(500, 500),
+		wx.Dialog.__init__(self, None, -1, C.FontInfoRegs ,size=(500, 500),
 			style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
 		self.RegsList = wx.ListCtrl(self, -1, style = wx.LC_REPORT | wx.LC_HRULES)
-		self.RegsList.InsertColumn(0, "寄存器名", format = wx.LIST_FORMAT_LEFT, width = 100)
-		self.RegsList.InsertColumn(1, "十六进制值", format = wx.LIST_FORMAT_LEFT, width = 180)
-		self.RegsList.InsertColumn(2, "十进制值", format = wx.LIST_FORMAT_LEFT, width = 220)
+		self.RegsList.InsertColumn(0, C.FontReg, format = wx.LIST_FORMAT_LEFT, width = 100)
+		self.RegsList.InsertColumn(1, C.FontHex, format = wx.LIST_FORMAT_LEFT, width = 180)
+		self.RegsList.InsertColumn(2, C.FontDec, format = wx.LIST_FORMAT_LEFT, width = 220)
 		# Refurbish the regs' informations
 		self.RegsRefurbish()
 

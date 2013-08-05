@@ -3,14 +3,15 @@ import wx, platform, sys, os, string
 from wx.lib import masked
 import  wx.lib.mixins.listctrl  as  listmix
 from ctypes import *
+
 os_info = platform.system()
 
 if cmp(os_info, "Linux"):
-	print("IS windows")
 	from skyeye_common_windows_module import *
+	import windows_font as C
 else:
-	print("IS Linux")
 	from skyeye_common_module import *
+	import linux_font as C
 
 
 class TestListCtrl(wx.ListCtrl, 
@@ -47,9 +48,9 @@ class TestListCtrl(wx.ListCtrl,
 class Memory(wx.Frame):
 		
 	def __init__(self):
-		wx.Frame.__init__(self, None, -1, '内存', size=(580, 410), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
+		wx.Frame.__init__(self, None, -1, C.FontMems, size=(580, 410), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
         	sizer = wx.GridBagSizer(hgap=5, vgap=5)
-		basicLabel = wx.StaticText(self, -1, "地址")
+		basicLabel = wx.StaticText(self, -1, C.FontAddr)
 		sizer.Add(basicLabel, pos = (0, 0), flag = wx.LEFT|wx.TOP, border=10)
 
 		self.pwdText = wx.TextCtrl(self, -1, "", style=wx.TE_PROCESS_ENTER)
@@ -57,29 +58,29 @@ class Memory(wx.Frame):
 
 		self.Bind(wx.EVT_TEXT_ENTER, self.InputAddr, self.pwdText)
 
-		groupbox = wx.StaticBox(self, -1, "内存:",name="groupbox2_sbox")
+		groupbox = wx.StaticBox(self, -1, C.FontMems, name = "groupbox2_sbox")
         	groupsizer = wx.StaticBoxSizer(groupbox, wx.VERTICAL)
 
 
 
 		self.list = TestListCtrl(self, -1,  style=wx.LC_REPORT|wx.LC_HRULES)
-        	self.list.InsertColumn(0, "地址",format=wx.LIST_FORMAT_LEFT, width=100)
+        	self.list.InsertColumn(0, C.FontAddr, format=wx.LIST_FORMAT_LEFT, width=100)
         	self.list.InsertColumn(1, " 0   1   2   3    4   5   6   7    8   9   A   B    C   D   E   F",format=wx.LIST_FORMAT_LEFT, width = 375)
         	groupsizer.Add(self.list, 1, wx.EXPAND|wx.TOP, 10)
 
         	sizer.Add(groupsizer, pos=(1,0),span=(6,2), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.BOTTOM,border=10)
 
 
-		ok_button = wx.Button(self, -1, "确定", size = (50, 30), name = "ok_button")
+		ok_button = wx.Button(self, -1, C.FontOK, size = (50, 30), name = "ok_button")
         	sizer.Add(ok_button, pos=(0,2),flag=wx.ALIGN_BOTTOM|wx.TOP|wx.RIGHT,border=10)
 		self.Bind(wx.EVT_BUTTON, self.InputAddr, ok_button)
 
-		up_button = wx.Button(self,-1,"向上", size = (50, 30), name="up_button")
+		up_button = wx.Button(self,-1, C.FontUp, size = (50, 30), name= "up_button")
         	sizer.Add(up_button, pos=(5,2),flag=wx.ALIGN_BOTTOM|wx.TOP|wx.RIGHT,border=10)
 		self.Bind(wx.EVT_BUTTON, self.Up, up_button)
 		self.Bind(wx.EVT_LEFT_DOWN, self.Up, up_button)
         
-        	down_button = wx.Button(self,-1,"向下",size = (50, 30), name="down_button")
+        	down_button = wx.Button(self,-1, C.FontDown, size = (50, 30), name= "down_button")
         	sizer.Add(down_button, pos=(6,2),flag=wx.ALIGN_CENTER|wx.TOP|wx.RIGHT|wx.BOTTOM,border=10)
 		self.Bind(wx.EVT_BUTTON, self.Down, down_button)
 		
@@ -93,7 +94,7 @@ class Memory(wx.Frame):
 		self.statusbar.SetFieldsCount(2)
 		self.statusbar.SetStatusWidths([-1, -2])
 		self.statusbar.SetStatusText("PC:", 0)
-		self.statusbar.SetStatusText("值:", 1)
+		self.statusbar.SetStatusText("Value:", 1)
 
         
 
