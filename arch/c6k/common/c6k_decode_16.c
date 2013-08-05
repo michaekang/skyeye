@@ -120,10 +120,19 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 	int ptr = BITS(7, 8);
 	int s = BITS(0, 0);
 	int t = BITS(12, 12);
-	int dsz = (core->header >> 15) & 0x7;
+	int dsz = DSZ(core->header);
 	if(ld_st){
 		if(sz){
-			NOT_IMP;
+			if(dsz == 0){ /* ldbu */
+				int base = ptr | 0x4;
+				int ucst = (ucst3 << 3) | ucst_0_2;
+				generic_address_t addr = core->gpr[s][base] + ucst;
+				bus_read(8, addr, &core->gpr[t][src]);
+				DBG("In %s, ldbu addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+			}
+			else{
+				NOT_IMP;
+			}
 		}
 		else{
 			int base = ptr | 0x4;
@@ -186,7 +195,7 @@ static int exec_dinc(c6k_core_t* core, uint32_t insn){
 	int ptr = BITS(7, 8);
 	int s = BITS(0, 0);
 	int t = BITS(12, 12);
-	int dsz = (core->header >> 15) & 0x7;
+	int dsz = (core->header >> 16) & 0x7;
 	int base = ptr | 0x4;
 	if(ld_st){
 		if(sz){
@@ -222,7 +231,24 @@ static int exec_dinc(c6k_core_t* core, uint32_t insn){
 
 		}
 		else{
-			NOT_IMP;
+			int na = BITS(4, 4);
+			if(dsz & 0x4){
+				if(na == 0){ /* stdw */
+					int ucst2 = ucst0 + 1;
+					generic_address_t addr = core->gpr[s][base];
+					core->gpr[s][base] += (ucst2 << 3) ;
+					bus_write(32, addr, core->gpr[t][src]);
+					bus_write(32, addr + 4, core->gpr[t][src + 1]);
+
+				}
+				else{
+					NOT_IMP;
+				}
+			}
+			else{
+				DBG("In %s, dsz = %d, header=0x%x, header >> 15=0x%x\n", __FUNCTION__, dsz, core->header, core->header >> 16);
+				NOT_IMP;
+			}
 		}
 	}
 	core->pc += 2;
@@ -459,9 +485,9 @@ static int exec_l2c(c6k_core_t* core, uint32_t insn){
 	else if(op == 0x5){
 		/* CMPGT , FIXME, sign comparison */
 		if(x)
-			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[(!s) & 0x1][src2]);
+			core->gpr[s][dst] = ((int)core->gpr[s][src1] > (int)core->gpr[(!s) & 0x1][src2]);
 		else
-			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[s][src2]);
+			core->gpr[s][dst] = ((int)core->gpr[s][src1] > (int)core->gpr[s][src2]);
 
 	}
 	else if(op == 0x7){
@@ -472,7 +498,13 @@ static int exec_l2c(c6k_core_t* core, uint32_t insn){
 			core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[s][src2]);
 
 	}
-
+	else if(op == 0x6){
+		/* CMPLTU */
+		if(x)
+			core->gpr[s][dst] = (core->gpr[s][src1] < core->gpr[(!s) & 0x1][src2]);
+		else
+			core->gpr[s][dst] = (core->gpr[s][src1] < core->gpr[s][src2]);
+	}
 	else{
 		NOT_IMP;
 	}
@@ -856,15 +888,17 @@ static int exec_uspl(c6k_core_t* core, uint32_t insn){
 	uint32_t pbits = core->header & 0x3FFF;
 	generic_address_t addr = core->pc;
 	int i = (addr - core->pce1) / 2;
-	if((pbits >> i) & 0x1){
+	if((pbits >> i) & 0x1){ /* FIXME, we should calculate the sploop begin */
 		if(core->pc == 0x816130)
 			core->sploop_begin = core->pc + 0xc;
 		else if(core->pc == 0x8163b0)
 			core->sploop_begin = core->pc + 0x8;
 		else if(core->pc == 0x8163da)
 			core->sploop_begin = core->pc + 8;
+		else if(core->pc == 0x8141a0)
+			core->sploop_begin = core->pc + 8;
 		else{
-			DBG("sploop maybe wrong for parallel bit\n");
+			DBG("sploop maybe wrong for parallel bit at 0x%x\n", core->pc);
 			sleep(10);
 		}
 	}

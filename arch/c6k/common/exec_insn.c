@@ -930,6 +930,15 @@ static int exec_cmpgtu(c6k_core_t* core, uint32_t insn){
 			else
 				core->gpr[s][dst] = (core->gpr[s][src1] > core->gpr[s][src2])? 1: 0;
 		}
+		else if(op == 0x4e){
+			src1 &= 0xf;
+			if(x)
+				core->gpr[s][dst] = (src1 > core->gpr[(!s) & 0x1][src2])? 1: 0;
+			else
+				core->gpr[s][dst] = (src1 > core->gpr[s][src2])? 1: 0;
+
+		}
+
 		else{
 			NOT_IMP;
 		}
@@ -1919,8 +1928,20 @@ static int exec_or_s(c6k_core_t* core, uint32_t insn){
 static int exec_pack2(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		int x = BITS(12, 12);
+		if(x){
+			core->gpr[s][dst] = (core->gpr[(~s) & 0x1][src2] & 0xFFFF) | ((core->gpr[s][src1] & 0xFFFF) << 16);
+		}
+		else{
+			core->gpr[s][dst] = (core->gpr[s][src2] & 0xFFFF) | ((core->gpr[s][src1] & 0xFFFF) << 16);
+		}
+
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_packh2(c6k_core_t* core, uint32_t insn){
@@ -1954,8 +1975,21 @@ static int exec_packlh2(c6k_core_t* core, uint32_t insn){
 static int exec_packl4(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		int x = BITS(12, 12);
+		int upper_half = ((core->gpr[s][src1] << 8) & 0xFF000000) | ((core->gpr[s][src1] << 16) & 0x00FF0000);
+		int lower_half;
+		if(x)
+			lower_half = ((core->gpr[(~s) & 0x1][src2] >> 8) & 0xFF00) | (core->gpr[(~s) & 0x1][src2] & 0xFF);
+		else
+			lower_half = ((core->gpr[s][src2] >> 8) & 0xFF00) | (core->gpr[s][src2] & 0xFF);
+		core->gpr[s][dst] = upper_half | lower_half;
+
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_rint(c6k_core_t* core, uint32_t insn){
@@ -2583,6 +2617,21 @@ static int exec_sub(c6k_core_t* core, uint32_t insn){
 			}
 			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
 		}
+		else if(op == 0x6){
+			src1 = SIGN_EXTEND(src1, 5);
+			int result;
+			if(x){
+				result = src1 - core->gpr[(!s) & 0x1][src2];
+				core->gpr[s][dst] = result;
+			}
+			else{
+				result = src1 - core->gpr[s][src2];
+				/* dst is slong type */
+				core->gpr[s][dst] = result;
+			}
+			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
+
+		}
 		else{
 			NOT_IMP;
 		}
@@ -2959,12 +3008,14 @@ const ISEITEM insn32_decode_table[] = {
 {"or_s", 2, 6, 2, 5, 0x8, 6 ,11, 0x1a},
 {"or_s", 2, 6, 2, 5, 0x8, 6 ,11, 0x1b},
 
-{"pack", 0, 6, 2, 4, 0x6},
+{"pack2", 1, 6, 2, 11, 0x6},
+{"pack2", 1, 6, 2, 11, 0x3fc},
+
 {"packh2", 0, 6, 2, 4, 0x6},
 {"packh4", 0, 6, 2, 4, 0x6},
 {"packhl2", 0, 6, 2, 4, 0x6},
 {"packlh2", 0, 6, 2, 4, 0x6},
-{"packl4", 0, 6, 2, 4, 0x6},
+{"packl4", 1, 6, 2, 11, 0x346},
 {"rint", 0, 6, 2, 4, 0x6},
 {"rotl", 0, 6, 2, 4, 0x6},
 {"rpack2", 0, 6, 2, 4, 0x6},
@@ -3269,6 +3320,7 @@ insn_action_t insn_action[] = {
 	exec_or_s,
 	exec_or_s,
 
+	exec_pack2,
 	exec_pack2,
 	exec_packh2,
 	exec_packh4,

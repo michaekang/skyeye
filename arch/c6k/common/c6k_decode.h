@@ -42,4 +42,5 @@ enum DECODE_STATUS {
 #define BITS(a,b) ((insn >> (a)) & ((1 << (1+(b)-(a)))-1))
 #define BIT(n) ((instr >> (n)) & 1)
 #define SIGN_EXTEND(cst, n) ((cst & (1 << (n - 1))) ? (cst | (0xFFFFFFFF << n)) : cst)
+#define DSZ(header) ((header >> 16) & 0x7)
 #endif
