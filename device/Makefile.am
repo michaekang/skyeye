@@ -128,6 +128,14 @@ libuart_term_la_SOURCES = $(dev_uart_term)
 libuart_term_la_LDFLAGS = -module
 
 
+dev_am35x_hecc = am35x_hecc/am35x_hecc.c am35x_hecc/am35x_hecc_module.c
+libam35x_hecc_la_SOURCES = $(dev_am35x_hecc)
+libam35x_hecc_la_LDFLAGS = -module
+
+dev_can_zlg = can_zlg/can_zlg.c can_zlg/can_zlg_module.c
+libcan_zlg_la_SOURCES = $(dev_can_zlg)
+libcan_zlg_la_LDFLAGS = -module
+
 if WIN32
 WIN32_LD_DEVICE = -no-undefined -shared -module -Xlinker -L../common/.libs/  -Xlinker -lcommon -L/mingw/lib  -Xlinker -L/mingw/ -Xlinker --export-all-symbol
 libuart_la_LDFLAGS += $(WIN32_LD_DEVICE)
@@ -158,6 +166,7 @@ libts_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 libpci_la_LDFLAGS += $(WIN32_LD_DEVICE)
 libleon2_uart_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 libuart_term_la_LDFLAGS  += $(WIN32_LD_DEVICE)
+libam35x_hecc_la_LDFLAGS  += $(WIN32_LD_DEVICE)
 endif
 
 pkglib_LTLIBRARIES = libuart.la libuart_16550.la libflash.la libnandflash.la libsound.la liblcd.la libnet.la libts.la libpci.la
@@ -167,6 +176,8 @@ if GTK_LCD
 pkglib_LTLIBRARIES += libgtk_lcd.la
 endif
 pkglib_LTLIBRARIES += libsdl_lcd.la
+pkglib_LTLIBRARIES += libam35x_hecc.la
+pkglib_LTLIBRARIES += libcan_zlg.la
 
 
 DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0  @COMMON_CFLAGS@
