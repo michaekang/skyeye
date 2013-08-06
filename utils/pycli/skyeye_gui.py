@@ -6,6 +6,7 @@ import os
 import sys, platform
 import skyeye_ir
 import x
+import skyeye_gui_dev as SkyEyeDev
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -48,12 +49,15 @@ class MainFrame(wx.Frame):
 		self.Registers = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontInfoRegs)
 		self.Memories = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontShowMems)
 		self.Remote = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontRemoteGdb)
+		self.DeviceList = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontDeviceList)
 		self.DebugMenu.AppendItem(self.Registers)
 		self.DebugMenu.AppendItem(self.Memories)
 		self.DebugMenu.AppendItem(self.Remote)
+		self.DebugMenu.AppendItem(self.DeviceList)
 		self.Bind(wx.EVT_MENU, self.InfoRegs, id=self.Registers.GetId())
 		self.Bind(wx.EVT_MENU, self.ShowMem, id=self.Memories.GetId())
 		self.Bind(wx.EVT_MENU, self.RemoteGdb, id=self.Remote.GetId())
+		self.Bind(wx.EVT_MENU, self.ShowDevice, id=self.DeviceList.GetId())
 			
 		# Create Menu for File
 		self.FileMenu = wx.Menu()
@@ -72,11 +76,11 @@ class MainFrame(wx.Frame):
 
 		# Create Menu for Help
 		self.HelpMenu = wx.Menu()
-		UserMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontUserManu)
+		#UserMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontUserManu)
 		VersionMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontVersion)
-		self.HelpMenu.AppendItem(UserMenu)
+		#self.HelpMenu.AppendItem(UserMenu)
 		self.HelpMenu.AppendItem(VersionMenu)
-		self.Bind(wx.EVT_MENU, self.UserMan, id= UserMenu.GetId())
+		#self.Bind(wx.EVT_MENU, self.UserMan, id= UserMenu.GetId())
 		self.Bind(wx.EVT_MENU, self.ShowVersion, id= VersionMenu.GetId())
 
 		# Add the Memuitem into  MenuBar
@@ -212,6 +216,12 @@ class MainFrame(wx.Frame):
 	def ShowVersion(self, event):
 		print "In ShowVersion"
 
+	def ShowDevice(self, event):
+		app = wx.PySimpleApp()
+		frame = SkyEyeDev.DevRegsFrame()
+		frame.Show()
+		app.MainLoop()
+		
 	def QuitSky(self, event):
 		self.Close(True)
 		self.Destroy()
