@@ -99,12 +99,13 @@ static conf_object_t* new_can_zlg(char* obj_name){
 	dev->obj = new_conf_object(obj_name, dev);
 	dev->info = info;
 
-	can_ops_interface_t* ops = skyeye_mm_zero(sizeof(can_ops_interface_t));
+	can_ops_intf* ops = skyeye_mm_zero(sizeof(can_ops_intf));
 	ops->start = start_can;
 	ops->stop = stop_can;
 	ops->transmit = can_transmit;
 	ops->receive = can_receive;
 	dev->ops = ops;
+	SKY_register_interface(ops, obj_name, CAN_OPS_INTF_NAME);	
 
 	info->device_type = 20;
 	info->device_id = 0;

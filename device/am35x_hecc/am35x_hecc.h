@@ -70,7 +70,7 @@ typedef struct message_obj{
 typedef struct am35x_hecc_device{
 	conf_object_t* obj;
 	hecc_reg_t* regs;
-	can_ops_interface_t* can_ops;
+	can_ops_intf* can_ops;
 	message_obj_t message[64];
 }am35x_hecc_device;
 

@@ -31,7 +31,7 @@ typedef struct can_ops_intf{
 	exception_t (*stop)(conf_object_t* obj);	
 	exception_t (*transmit)(conf_object_t* obj, void* buf, int nbytes);
 	exception_t (*receive)(conf_object_t* obj, void* buf, int nbytes);	
-}can_ops_interface_t;
+}can_ops_intf;
 #define CAN_OPS_INTF_NAME "can_ops_intf"
 
 #endif

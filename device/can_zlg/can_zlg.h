@@ -35,7 +35,7 @@ typedef struct dev_info{
 typedef struct can_zlg_device{
 	conf_object_t* obj;
 	dev_info_t* info;
-	can_ops_interface_t* ops;
+	can_ops_intf* ops;
 }can_zlg_device;
 
 #endif

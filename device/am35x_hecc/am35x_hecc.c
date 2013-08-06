@@ -82,6 +82,13 @@ static conf_object_t* new_am35x_hecc(char* obj_name){
 	dev->obj = new_conf_object(obj_name, dev);
 	dev->regs = regs;
 
+	can_ops_intf* ops = skyeye_mm_zero(sizeof(can_ops_intf));
+	dev->can_ops = ops;
+	ops->start = NULL;
+	ops->stop = NULL;
+	ops->transmit = NULL;
+	ops->receive = NULL;
+	SKY_register_interface(dev->can_ops, obj_name, CAN_OPS_INTF_NAME);	
 	/* Register io function to the object */
 	memory_space_intf* io_memory = skyeye_mm_zero(sizeof(memory_space_intf));
 	io_memory->conf_obj = dev->obj;
