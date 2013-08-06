@@ -16,13 +16,18 @@ else:
 
 class InfoRegsDialog(wx.Dialog):
 	def __init__(self):
-		wx.Dialog.__init__(self, None, -1, C.FontInfoRegs ,size=(500, 500),
+		wx.Dialog.__init__(self, None, -1, C.FontInfoRegs ,size=(500, 410),
 			style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
-		self.RegsList = wx.ListCtrl(self, -1, style = wx.LC_REPORT | wx.LC_HRULES)
+
+		sizer = wx.GridBagSizer(hgap=1, vgap=1)
+		self.RegsList = wx.ListCtrl(self, -1, size = (500, 500), style = wx.LC_REPORT | wx.LC_HRULES)
 		self.RegsList.InsertColumn(0, C.FontReg, format = wx.LIST_FORMAT_LEFT, width = 100)
 		self.RegsList.InsertColumn(1, C.FontHex, format = wx.LIST_FORMAT_LEFT, width = 180)
 		self.RegsList.InsertColumn(2, C.FontDec, format = wx.LIST_FORMAT_LEFT, width = 220)
 		# Refurbish the regs' informations
+		sizer.Add(self.RegsList, pos = (0, 0), flag = wx.EXPAND | wx.TOP, border=0)
+
+		self.SetSizer(sizer)
 		self.RegsRefurbish()
 
 	def GetRegsInfo(self):

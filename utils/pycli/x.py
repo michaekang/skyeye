@@ -71,7 +71,7 @@ class Memory(wx.Dialog):
 
         	sizer.Add(groupsizer, pos=(1,0),span=(6,2), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.BOTTOM,border=10)
 
-
+		
 		ok_button = wx.Button(self, -1, C.FontOK, size = (50, 30), name = "ok_button")
         	sizer.Add(ok_button, pos=(0,2),flag=wx.ALIGN_BOTTOM|wx.TOP|wx.RIGHT,border=10)
 		self.Bind(wx.EVT_BUTTON, self.InputAddr, ok_button)
@@ -148,7 +148,7 @@ class Memory(wx.Dialog):
 				value_str = self.HandleLineValue(start_value + i * 16)
 				index = self.list.InsertStringItem(self.maxitem, arg_item.upper())
 				self.list.SetStringItem(index, 1, value_str)
-				self.list.SetItemTextColour(self.colitem, wx.RED)
+		#		self.list.SetItemTextColour(self.colitem, wx.RED)
 				self.maxitem += 1
 
 
@@ -167,7 +167,7 @@ class Memory(wx.Dialog):
 			value_str = self.HandleLineValue(start_value + i * 16)
 			index = self.list.InsertStringItem(self.maxitem, arg_item.upper())
 			self.list.SetStringItem(index, 1, value_str)
-			self.list.SetItemTextColour(self.colitem, wx.RED)
+		#	self.list.SetItemTextColour(self.colitem, wx.RED)
 			self.maxitem += 1
 
 			
@@ -177,10 +177,10 @@ class Memory(wx.Dialog):
 		value_str = self.HandleLineValue(self.minaddrvalue)
 		index = self.list.InsertStringItem(0, arg_item.upper())
 		self.list.SetStringItem(index, 1, value_str)
-		colour = self.list.GetItemTextColour(0)
-		self.list.SetItemTextColour(self.colitem, colour)
-		self.colitem += 1
-		self.list.SetItemTextColour(self.colitem, wx.RED)
+		#colour = self.list.GetItemTextColour(0)
+		#self.list.SetItemTextColour(self.colitem, colour)
+		#self.colitem += 1
+		#self.list.SetItemTextColour(self.colitem, wx.RED)
 		self.maxitem += 1
 
 	
