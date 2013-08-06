@@ -217,17 +217,6 @@ cpu_config_t c6k_cpu[] = {
 	{NULL,NULL,0,0,0}
 };
 */
-void c6421_io_reset(void* state){
-	return;
-}
-void c6421_mach_init(void* state,  machine_config_t * mach){
-	mach->mach_io_reset = c6421_io_reset;
-	return;
-}
-machine_config_t c6k_machines[] = {
-	{"c6k", c6421_mach_init, NULL, NULL, NULL},
-	{NULL, NULL, NULL, NULL, NULL},
-};
 
 //chy 2006-04-15
 static int 

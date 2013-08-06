@@ -30,6 +30,12 @@
 const char* skyeye_module = "c6k";
 
 extern void init_c6k_arch ();
+extern void c6421_mach_init();
+machine_config_t c6k_machines[] = {
+	{"c6k", c6421_mach_init, NULL, NULL, NULL},
+	{NULL, NULL, NULL, NULL, NULL},
+};
+
 void module_init(){
 	//skyeye_module = strdup("c6000");
 	init_c6k_arch ();
