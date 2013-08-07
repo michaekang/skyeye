@@ -87,12 +87,12 @@ io_write_halfword (generic_arch_t *state, uint32 addr, uint32 data)
 	return;
 }
 
-void c6421_io_reset(void* state){
+void c6747_io_reset(void* state){
 	return;
 }
-void c6421_mach_init(void* state,  machine_config_t * mach){
+void c6747_mach_init(void* state,  machine_config_t * mach){
 	exception_t ret;
-	mach->mach_io_reset = c6421_io_reset;
+	mach->mach_io_reset = c6747_io_reset;
 
 	addr_space_t* phys_mem = new_addr_space("c6747_mach_space");
 	conf_object_t* hecc = pre_conf_obj("am35x_hecc_0", "am35x_hecc");
@@ -110,7 +110,6 @@ void c6421_mach_init(void* state,  machine_config_t * mach){
 	hecc_can_ops->stop = can_ops->stop;
 	hecc_can_ops->transmit = can_ops->transmit;
 	hecc_can_ops->receive = can_ops->receive;
-
 
 	return;
 }
