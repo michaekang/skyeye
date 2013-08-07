@@ -22,6 +22,21 @@
 * @version 7849
 * @date 2013-08-06
 */
+
+#include <skyeye_config.h>
+#include <skyeye_arch.h>
+#include <skyeye_sched.h>
+#include <skyeye_lock.h>
+#include <skyeye_class.h>
+#include <skyeye_addr_space.h>
+#include "skyeye_internal.h"
+#include <skyeye_interface.h>
+#include <skyeye_can_ops.h>
+#include <skyeye_io.h>
+#include <skyeye_log.h>
+#include <skyeye_uart.h>
+#include <skyeye_mm.h>
+
 static uint32
 io_read_word (void *arch_instance, uint32 addr){
 	uint32 data = 0;
@@ -34,7 +49,7 @@ io_read_word (void *arch_instance, uint32 addr){
 	if(ret == No_exp){
 		return data;
 	}
-	return;
+	return 0;
 }
 static uint32
 io_read_halfword (void *arch_instance, uint32 addr)
@@ -76,6 +91,7 @@ void c6421_io_reset(void* state){
 	return;
 }
 void c6421_mach_init(void* state,  machine_config_t * mach){
+	exception_t ret;
 	mach->mach_io_reset = c6421_io_reset;
 
 	addr_space_t* phys_mem = new_addr_space("c6747_mach_space");
@@ -83,9 +99,8 @@ void c6421_mach_init(void* state,  machine_config_t * mach){
        	ret = add_map(phys_mem, 0x7f008000, 0x1000, 0x0, hecc, 1, 1);
 
 	conf_object_t* can_zlg = pre_conf_obj("can_zlg_0", "can_zlg");
-       	ret = add_map(phys_mem, 0x7f009000, 0x1000, 0x0, can, 1, 1);
 
-	conf_object_t* uart = pre_conf_obj("uart_leon2_0", "uart_leon2");
+	conf_object_t* uart = pre_conf_obj("leon2_uart_0", "leon2_uart");
        	ret = add_map(phys_mem, 0x7f00a000, 0x1000, 0x0, uart, 1, 1);
 
 	can_ops_intf* can_ops = (can_ops_intf*)SKY_get_interface(can_zlg, CAN_OPS_INTF_NAME);
