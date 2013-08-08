@@ -228,10 +228,32 @@ static int
 c6k_ICE_read_byte(generic_address_t addr, uint8_t * pv){
 	return 0;
 }
+cpu_config_t c6k_cpus[] = {
+	{"c64x", "c6747", 0xFFFFFFFF, 0xFFFFFFFF, 0},
+	NULL
+};
 static int
-c6k_parse_cpu (cpu_config_t * cpu, const char *param[])
+c6k_parse_cpu (const char *params[])
 {
-	return 0;
+	int i;
+	for (i = 0; i < (sizeof (c6k_cpus) / sizeof (cpu_config_t)); i++) {
+		printf("In %s, c6k_cpus[i].cpu_name=%s\n", __FUNCTION__, c6k_cpus[i].cpu_name);
+		if (!strncmp
+		    (params[0], c6k_cpus[i].cpu_name, MAX_PARAM_NAME)) {
+
+			cpu_config_t *p_c6k_cpu = &c6k_cpus[i];
+			SKYEYE_INFO("cpu info: %s, %s, %x, %x, %x \n",
+				     p_c6k_cpu->cpu_arch_name,
+				     p_c6k_cpu->cpu_name,
+				     p_c6k_cpu->cpu_val,
+				     p_c6k_cpu->cpu_mask,
+				     p_c6k_cpu->cachetype);
+			return 0;
+
+		}
+	}
+	SKYEYE_ERR ("Error: Unknown cpu name \"%s\"\n", params[0]);
+	return -1;
 }
 
 static int 

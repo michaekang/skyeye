@@ -48,12 +48,12 @@ void print_all_gpr(c6k_core_t* core){
 		skyeye_printf_in_color(LIGHT_BLUE, "A[%d]=0x%x\t", i, core->gpr[GPR_A][i]);
 		//DBG("A[%d]=0x%x\t", i, core->gpr[GPR_A][i]);
 		if(( (i + 1) % 8) == 0)
-			DBG("\n");
+			printf("\n");
 	}
 	for(i = 0; i < 32; i++){
 		skyeye_printf_in_color(LIGHT_BLUE, "B[%d]=0x%x\t", i, core->gpr[GPR_B][i]);
 		if(( (i + 1) % 8) == 0)
-			DBG("\n");
+			printf("\n");
 	}
 	DBG("delay_slot=0x%x, pfc=0x%x, parallel=%d\n", core->delay_slot, core->pfc, core->parallel);
 	printf("delay_slot=0x%x, pfc=0x%x, parallel=%d\n", core->delay_slot, core->pfc, core->parallel);
@@ -155,6 +155,7 @@ void write_back(c6k_core_t* core){
 
 static void inline dec_delay_slot(c6k_core_t* core){
 	if(core->delay_slot){
+		//printf("In %s, core->pc=0x%x\n", __FUNCTION__, core->pc);
 		core->delay_slot--;
 	}
 }
@@ -3750,8 +3751,9 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 			}
 			print_all_gpr(core);
 			/* if we reach new packet region */
-			if((core->pc & 0x1f) == 0)
+			if((core->pc & 0x1f) == 0){
 				return 0;
+			}
 		}
 	}
 	return 0;

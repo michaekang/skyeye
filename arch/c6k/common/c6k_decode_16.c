@@ -33,8 +33,14 @@
 #include "skyeye_uart_ops.h"
 #include "bank_defs.h"
 
-//#define DEBUG
+#define DEBUG
 #include <skyeye_log.h>
+
+#ifdef DBG
+//#undef DBG
+//#define DBG
+//#define DBG(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
+#endif
 
 extern int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern void write_buffer(c6k_core_t* core, int regno, uint32_t result);
@@ -168,10 +174,11 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 				bus_write(8, addr, core->gpr[t][src]);
 				DBG("In %s, stb header=0x%x, dsz=0x%x\n", __FUNCTION__, core->header, dsz);
 				DBG("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
-				printf("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+				//printf("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+				//printf("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x, val=0x%x\n", __FUNCTION__, addr, src, base, insn, core->gpr[t][src]);
 				if(addr >= 0x817ded && addr < (0x817ded + 0x10)){
 					char c = core->gpr[t][src] & 0xFF;
-					skyeye_uart_write(0, &c, 1, NULL);
+					//skyeye_uart_write(0, &c, 1, NULL);
 				}
 
 				//sleep(10);
@@ -284,6 +291,7 @@ static int exec_ddec(c6k_core_t* core, uint32_t insn){
 	int ucst = BITS(13, 13) + 1;
 	int ptr = BITS(7, 8);
 	int s = BITS(0, 0);
+	int t = BITS(12, 12);
 	int dsz_2 = BITS(20, 20);
 	if(ld_st){
 		NOT_IMP;
@@ -298,7 +306,7 @@ static int exec_ddec(c6k_core_t* core, uint32_t insn){
 			int base = ptr | 0x4;
 			core->gpr[s][base] -= ucst;
 			generic_address_t addr = core->gpr[s][base];
-			bus_write(32, addr, core->gpr[s][src]);
+			bus_write(32, addr, core->gpr[t][src]);
 			DBG("In %s, addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
 			//sleep(10);
 		}
@@ -312,21 +320,23 @@ static int exec_ddec_dw(c6k_core_t* core, uint32_t insn){
 }
 static int exec_dstk(c6k_core_t* core, uint32_t insn){
 	int ld_st = BITS(3, 3);
+	int t = BITS(12, 12);
 	int src = BITS(4, 6);
 	int ucst5 = BITS(13, 14) | (BITS(7, 9) << 2);
 	if(ld_st){
 		//NOT_IMP;
 		/* ldw */
 		generic_address_t addr = core->gpr[GPR_B][15] + (ucst5 << 2);
-		bus_read(32, addr, &core->gpr[GPR_B][src]);
-		DBG("In %s, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, addr, src, ucst5);
+		bus_read(32, addr, &core->gpr[t][src]);
+		DBG("In %s, LDW@0x%x, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, core->pc, addr, src, ucst5);
+		DBG("In %s, LDW@0x%x, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, core->pc, addr, src, ucst5);
 
 	}
 	else{
 		/* stw */
 		generic_address_t addr = core->gpr[GPR_B][15] + (ucst5 << 2);
-		bus_write(32, addr, core->gpr[GPR_B][src]);
-		DBG("In %s, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, addr, src, ucst5);
+		bus_write(32, addr, core->gpr[t][src]);
+		DBG("In %s, STW@0x%x, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, core->pc, addr, src, ucst5);
 	}
 	core->pc += 2;
 	return 0;
@@ -336,7 +346,13 @@ static int exec_dx2op(c6k_core_t* core, uint32_t insn){
 	return 0;
 }
 static int exec_dx5(c6k_core_t* core, uint32_t insn){
-	NOT_IMP;
+	int ucst2_0 = BITS(13, 15);
+	int ucst3_4 = BITS(11, 12);
+	int ucst5 = (ucst3_4 << 3) | ucst2_0;
+	int dst = BITS(7, 9);
+	int s = BITS(0, 0);
+	core->gpr[s][dst] = core->gpr[GPR_B][15] + (ucst5 << 2);
+	core->pc += 2;
 	return 0;
 }
 static int exec_dx5p(c6k_core_t* core, uint32_t insn){
@@ -438,6 +454,7 @@ static int exec_l3(c6k_core_t* core, uint32_t insn){
 		else
 			core->gpr[s][dst] = core->gpr[s][src1] + core->gpr[s][src2];
 		DBG("In %s, src1=%d, src2=%d, dst=%d\n", __FUNCTION__, src1, src2, dst);
+		printf("In %s, src1=%d, src2=%d, dst=%d\n", __FUNCTION__, src1, src2, dst);
 
 	}
 	else{
@@ -458,6 +475,7 @@ static int exec_l3i(c6k_core_t* core, uint32_t insn){
 	int scst5;
 	if(sn){
 		scst5 = cst3 | 0x18;
+		scst5 = SIGN_EXTEND(scst5, 5);
 	}
 	else{
 		if(cst3 == 0)
@@ -591,7 +609,23 @@ static int exec_m3(c6k_core_t* core, uint32_t insn){
 	return 0;
 }
 static int exec_sbs7(c6k_core_t* core, uint32_t insn){
-	NOT_IMP;
+	/* bnop */
+	int n3 = BITS(13, 15);
+	int scst7 = BITS(6, 12);
+	scst7 = SIGN_EXTEND(scst7, 7);
+	core->pfc = core->pce1 + (scst7 << 1);
+	if(core->delay_slot){
+			NOT_IMP;
+	}
+	
+	core->delay_slot = 5 + 1;
+	/* nop insert */
+	if(core->delay_slot)
+		core->delay_slot -= n3;
+	DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+	//printf("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+	core->pc += 2;
+	//NOT_IMP;
 	return 0;
 }
 static int exec_sbu8(c6k_core_t* core, uint32_t insn){
@@ -671,7 +705,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 					NOT_IMP;
 				}
 
-				core->delay_slot = 5;
+				core->delay_slot = 5 + 1;
 				/* nop insert */
 				if(core->delay_slot)
 					core->delay_slot -= n3;
@@ -687,7 +721,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 					NOT_IMP;
 				}
 			
-				core->delay_slot = 5;
+				core->delay_slot = 5 + 1;
 				/* nop insert */
 				if(core->delay_slot)
 					core->delay_slot -= n3;
@@ -702,7 +736,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 					NOT_IMP;
 				}
 
-				core->delay_slot = 5;
+				core->delay_slot = 5 + 1;
 				/* nop insert */
 				if(core->delay_slot)
 					core->delay_slot -= n3;
@@ -745,7 +779,26 @@ static int exec_smvk8(c6k_core_t* core, uint32_t insn){
 	return 0;
 }
 static int exec_ssh5(c6k_core_t* core, uint32_t insn){
-	NOT_IMP;
+	int op = BITS(5,6);
+	int sat = (core->header >> 14) & 0x1;
+	int ucst0_2 = BITS(13, 15);
+	int ucst3_4 = BITS(11, 12);
+	int ucst5 = ucst0_2 | (ucst3_4 << 3);
+	int src_dst = BITS(7, 9);
+	int s = BITS(0, 0);
+
+	if(sat == 0){
+		if(op == 2){
+			core->gpr[s][src_dst] >>= ucst5;
+		}
+		else{
+			NOT_IMP;
+		}
+	}
+	else{
+		NOT_IMP;
+	}
+	core->pc += 2;
 	return 0;
 }
 static int exec_s2sh(c6k_core_t* core, uint32_t insn){
