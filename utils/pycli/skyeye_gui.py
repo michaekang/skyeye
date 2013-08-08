@@ -42,7 +42,7 @@ class MainFrame(wx.Frame):
 	
 	def __init__(self, parent = None, id = -1,
 			title = C.FontMainTitle):
-		wx.Frame.__init__(self, parent, id, title, size = (450, 300))
+		wx.Frame.__init__(self, parent, id, title, size = (450, 320))
 		self.MenuBar = wx.MenuBar()
 		# Create Menu for Debug
 		self.DebugMenu = wx.Menu()
@@ -142,7 +142,7 @@ class MainFrame(wx.Frame):
 		libcommon.com_load_conf(c_char_p(configure_file))
         	libcommon.SIM_start()
 		dialog.Destroy()
-		DspPic = wx.StaticBitmap(self.Panel, -1,  pos=(200,10), size=(300, 300))
+		DspPic = wx.StaticBitmap(self.Panel, -1,  pos=(200,10), size=(200, 200))
 		ImageDSP = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/DSP.jpg", 200, 200)
 		DspPic.SetBitmap(ImageDSP)
 		self.status.SetLabel(C.FontStop)
