@@ -30,6 +30,7 @@
 #include "portable/portable.h"
 #include "skyeye_types.h"
 #include "skyeye_bus.h"
+#include "skyeye_uart_ops.h"
 #include "bank_defs.h"
 
 //#define DEBUG
@@ -131,6 +132,17 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 				bus_read(8, addr, &core->gpr[t][src]);
 				DBG("In %s, ldbu addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
 			}
+			else if(dsz == 0x1 || dsz == 0x5){
+				/* ldb */
+				int base = ptr | 0x4;
+				int ucst = (ucst3 << 3) | ucst_0_2;
+				generic_address_t addr = core->gpr[s][base] + ucst;
+				bus_read(8, addr, &core->gpr[t][src]);
+				/* FIXME, sign extend is needed here */
+				DBG("In %s, ldbu addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+
+			}
+
 			else{
 				NOT_IMP;
 			}
@@ -156,6 +168,12 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 				bus_write(8, addr, core->gpr[t][src]);
 				DBG("In %s, stb header=0x%x, dsz=0x%x\n", __FUNCTION__, core->header, dsz);
 				DBG("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+				printf("In %s, stb addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
+				if(addr >= 0x817ded && addr < (0x817ded + 0x10)){
+					char c = core->gpr[t][src] & 0xFF;
+					skyeye_uart_write(0, &c, 1, NULL);
+				}
+
 				//sleep(10);
 			}
 			else{
@@ -297,7 +315,12 @@ static int exec_dstk(c6k_core_t* core, uint32_t insn){
 	int src = BITS(4, 6);
 	int ucst5 = BITS(13, 14) | (BITS(7, 9) << 2);
 	if(ld_st){
-		NOT_IMP;
+		//NOT_IMP;
+		/* ldw */
+		generic_address_t addr = core->gpr[GPR_B][15] + (ucst5 << 2);
+		bus_read(32, addr, &core->gpr[GPR_B][src]);
+		DBG("In %s, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, addr, src, ucst5);
+
 	}
 	else{
 		/* stw */
@@ -576,7 +599,42 @@ static int exec_sbu8(c6k_core_t* core, uint32_t insn){
 	return 0;
 }
 static int exec_scs10(c6k_core_t* core, uint32_t insn){
-	NOT_IMP;
+	//NOT_IMP;
+	/* callp */
+	int scst10 = BITS(6, 15);
+	int s = BITS(0, 0);
+	//core->pc = core->gpr[s][3];
+	if(scst10 & 0x200){
+		scst10 |= 0xFFFFFC00;
+		scst10 = scst10 << 2;
+	}
+	generic_address_t orig_pc = core->pc;
+	generic_address_t addr = core->pc;
+	//core->pc = (signed int)core->pce1 + scst10;
+	core->pfc = (signed int)core->pce1 + scst10;
+	core->delay_slot = 0;
+	DBG("In %s ,scst10=%d, target=0x%x\n", __FUNCTION__, scst10, core->pc);
+	/* Fixme , should calculate the parallel */
+	//core->gpr[s][3] += 4;
+	uint32_t layout = (core->header >> 21) & 0x7f;
+	uint32_t pbits = core->header & 0x3FFF;
+	int i = (addr - core->pce1) / 2;
+	addr += 2;
+	if((pbits >> i) & 0x1){ /* parallel */
+		if((layout >> ((i + 1)/ 2 )) & 0x1){
+			addr += 2;
+		}
+		else{
+			addr += 4;
+		}
+	}
+	else{
+	}	
+	core->gpr[s][3] = addr;
+	DBG("In %s, return addr=0x%x, pc=0x%x, i=%d\n", __FUNCTION__, addr, orig_pc, i);
+	core->pc += 2;
+	//NOT_IMP;
+
 	return 0;
 }
 static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
@@ -634,6 +692,22 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 				if(core->delay_slot)
 					core->delay_slot -= n3;
 				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+			}
+			break;
+		case 3:
+			if(!B0){
+				/* bnop */
+				core->pfc = core->pce1 + (scst7 << 1);
+				if(core->delay_slot){
+					NOT_IMP;
+				}
+
+				core->delay_slot = 5;
+				/* nop insert */
+				if(core->delay_slot)
+					core->delay_slot -= n3;
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+
 			}
 			break;
 

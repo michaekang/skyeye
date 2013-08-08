@@ -43,6 +43,7 @@ void print_all_gpr(c6k_core_t* core){
 	int i;
 #if PR_ALL_REG 
 	DBG("------------------- pc =0x%x(insn_num=%d)-------------------\n", core->pc, core->insn_num);
+	printf("------------------- pc =0x%x(insn_num=%d)-------------------\n", core->pc, core->insn_num);
 	for(i = 0; i < 32; i++){
 		skyeye_printf_in_color(LIGHT_BLUE, "A[%d]=0x%x\t", i, core->gpr[GPR_A][i]);
 		//DBG("A[%d]=0x%x\t", i, core->gpr[GPR_A][i]);
@@ -55,7 +56,9 @@ void print_all_gpr(c6k_core_t* core){
 			DBG("\n");
 	}
 	DBG("delay_slot=0x%x, pfc=0x%x, parallel=%d\n", core->delay_slot, core->pfc, core->parallel);
+	printf("delay_slot=0x%x, pfc=0x%x, parallel=%d\n", core->delay_slot, core->pfc, core->parallel);
 	DBG("================================================\n", core->pc);
+	printf("================================================\n", core->pc);
 #endif
 	return;
 }
@@ -71,6 +74,24 @@ static inline int calc_a_index(int creg){
 	else /* something wrong */
 		;
 	return a;
+}
+int is_parallel(generic_address_t addr){
+	//header =
+	#if 0
+	generic_address_t header_addr = addr & 0xFFFFFFE0 + 0x1c;
+	uint32_t header;
+	bus_read(32, header_addr, &header);
+	int parallel = 0;
+	if((header >> 28) == 0xe){}
+	if((layout >> i) & 0x1){ /* compact instruction */
+		parallel = (pbits >> i) & 0x1 /* parallel */
+	}
+	else{
+		parallel = insn & 0x1;
+	}
+	return parallel;
+	#endif
+	return 0;
 }
 
 static inline int calc_cond(c6k_core_t* core, uint32_t insn){
@@ -3480,6 +3501,7 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 						dec_delay_slot(core);
 					}
 					print_all_gpr(core);
+					if(pbit == 0){
 					if(core->delay_slot == 0 && core->pfc != 0){
 						//skyeye_printf_in_color(GREEN, "In %s, branch happened at 0x%x, target=0x%x, core->delay_slot_bak1=%d\n", __FUNCTION__, core->pc, core->pfc, core->delay_slot_bak1);
 						core->pc = core->pfc;
@@ -3503,6 +3525,7 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 						else
 							return 0;
 
+					}
 					}
 
 				}
@@ -3618,6 +3641,7 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 				//sleep(10);
 			}
 			i++;
+			if(pbit == 0){
 			if(core->delay_slot == 0 && core->pfc != 0){
 				//skyeye_printf_in_color(GREEN, "In %s, branch happened at 0x%x, target=0x%x, core->delay_slot_bak1=%d\n", __FUNCTION__, core->pc, core->pfc, core->delay_slot_bak1);
 				core->pc = core->pfc;
@@ -3640,7 +3664,7 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 					return 0;
 
 			}
-
+			}
 			/* if we reach new packet region */
 			if((core->pc & 0x1f) == 0)
 				return 0;
