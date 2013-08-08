@@ -129,7 +129,7 @@ bool_t is_coff(const char* filename){
 		goto out;
 #endif
 	}
-	printf("In %s, header.f_magic = 0x%x\n", __FUNCTION__, header.f_magic);
+	//printf("In %s, header.f_magic = 0x%x\n", __FUNCTION__, header.f_magic);
 	if (header.f_magic != 0xc1
 		&& header.f_magic != 0xc2
 		)

@@ -133,7 +133,6 @@ skyeye_cell_t* get_default_cell(){
 * @param exec
 */
 void add_to_default_cell(skyeye_exec_t* exec){
-	printf("In %s Line %d \n", __func__, __LINE__);
 	add_to_cell(exec, get_default_cell());
 }
 /**
