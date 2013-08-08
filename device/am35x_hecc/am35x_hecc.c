@@ -49,11 +49,24 @@ static exception_t am35x_hecc_read(conf_object_t *opaque, generic_address_t offs
 		case 0x4:
 			*(uint32_t*)buf = regs->dcan_es;
 			break;
+		case 0x98:
+			*(uint32_t*)buf = regs->dcan_nwdat;
+			break;
+		case 0x100:
+			*(uint32_t*)buf = regs->if1_cmd;
+                        break;
+		case 0x110:
+			*(uint32_t*)buf = regs->if1_data_a;
+                        break;
+		case 0x114:
+			*(uint32_t*)buf = regs->if1_data_b;
+                        break;
 
 		default:
 			printf("Can not read the register at 0x%x in hecc\n", offset);
 			return Invarg_exp;
 	}
+	//printf("In %s, offset=0x%x, data=0x%x\n", __FUNCTION__, offset, *(uint32_t*)buf);
 	return No_exp;
 }
 
@@ -69,7 +82,9 @@ static exception_t am35x_hecc_write(conf_object_t *opaque, generic_address_t off
 			if(msg_num > 0x1 && msg_num < 0x81){ /* valid msg number */
 				/* transfer is triggered */
 				regs->if1_cmd |= 0x8000; /* set BUSY bit */
+				regs->if1_cmd &= ~0x8000; /* unset BUSY bit */
 			}
+			break;
 		default:
 			printf("Can not write the register at 0x%x in hecc\n", offset);
 			return Invarg_exp;
@@ -95,6 +110,13 @@ static conf_object_t* new_am35x_hecc(char* obj_name){
 	io_memory->read = am35x_hecc_read;
 	io_memory->write = am35x_hecc_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	
+
+#define TEST_RECV 1
+#if TEST_RECV
+	regs->dcan_nwdat = 1;
+	regs->if1_data_a = 0x41424344;
+	regs->if1_data_b = 0x45464748;
+#endif
 	return dev->obj;
 }
 void free_am35x_hecc(conf_object_t* dev){

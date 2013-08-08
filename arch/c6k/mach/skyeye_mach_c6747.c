@@ -65,6 +65,7 @@ static void
 io_write_word (generic_arch_t *state, uint32 addr, uint32 data)
 {
 	conf_object_t* conf_obj = get_conf_obj("c6747_mach_space");
+	//printf("In %s, addr=0x%x\n", __FUNCTION__, addr);
 	addr_space_t* phys_mem = (addr_space_t*)conf_obj->obj;
 	exception_t ret = phys_mem->memory_space->write(conf_obj, addr, &data, 4);
 	/* Read the data successfully */
@@ -100,7 +101,8 @@ void c6747_mach_init(void* state,  machine_config_t * mach){
 
 	addr_space_t* phys_mem = new_addr_space("c6747_mach_space");
 	conf_object_t* hecc = pre_conf_obj("am35x_hecc_0", "am35x_hecc");
-	ret = add_map(phys_mem, 0x7f008000, 0x1000, 0x0, hecc, 1, 1);
+	memory_space_intf* hecc_io_memory = (memory_space_intf*)SKY_get_interface(hecc, MEMORY_SPACE_INTF_NAME);
+	ret = add_map(phys_mem, 0x80001000, 0x1000, 0x0, hecc_io_memory, 1, 1);
 
 	conf_object_t* can_zlg = pre_conf_obj("can_zlg_0", "can_zlg");
 

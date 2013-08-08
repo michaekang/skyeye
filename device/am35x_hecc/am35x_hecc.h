@@ -31,6 +31,7 @@ typedef struct hecc_reg{
 	uint32_t dcan_es;
 	uint32_t dcan_errc;
 
+	uint32_t dcan_nwdat;
 	uint32_t if1_cmd;
 	uint32_t if2_cmd;
 	uint32_t if1_mask;
