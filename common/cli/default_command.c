@@ -518,9 +518,11 @@ uint32 gui_x(char* addr){
 
 char *gui_info_register(void)
 {
-	char str[500] = {'\0'}, temp[50];
-	int num = 0;
-	char *register_p;
+	char temp[500];
+	int num = 1;
+	char *register_p = NULL;
+	register_p = malloc(sizeof(char) * 1);
+	*register_p = '\0';
 	generic_arch_t* arch_instance = get_arch_instance("");
 	if(arch_instance == NULL)
 		return NULL;
@@ -531,11 +533,13 @@ char *gui_info_register(void)
 			reg_value = arch_instance->get_regval_by_id(i);
 			sprintf(temp, "%s:%x;", arch_instance->get_regname_by_id(i), reg_value);
 			i++;
-			strcat(str, temp);
+			num = num + strlen(temp) + 1;
+			register_p = realloc(register_p, sizeof(char) * num);
+			strcat(register_p, temp);
 		}
-		strcat(str, "|");
-		register_p = malloc(strlen(str) * sizeof(char *));
-		strncpy(register_p, str, strlen(str) + 1);
+		num = num + strlen("|");
+		register_p = realloc(register_p, sizeof(char) * num);
+		strcat(register_p, "|");
 		return register_p;
 
 	}
