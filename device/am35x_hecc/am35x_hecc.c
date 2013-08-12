@@ -79,12 +79,37 @@ static exception_t am35x_hecc_write(conf_object_t *opaque, generic_address_t off
 		case 0x100:
 			regs->if1_cmd = val;
 			int msg_num = regs->if1_cmd & 0xFF;
+			int rw = regs->if1_cmd >> 23;
 			if(msg_num > 0x1 && msg_num < 0x81){ /* valid msg number */
 				/* transfer is triggered */
 				regs->if1_cmd |= 0x8000; /* set BUSY bit */
+				if(rw == 0){ /* read */
+					char msg_buf[8];
+					dev->can_ops->receive(dev->can_ops->obj, msg_buf, 8);
+					regs->if1_data_a = msg_buf[0] | (msg_buf[1] << 8) | (msg_buf[2] << 16) | (msg_buf[3] <<24);
+					regs->if1_data_b = msg_buf[4] | (msg_buf[5] << 8) | (msg_buf[6] << 16) | (msg_buf[7] <<24);
+				}
+				else{ /* write */
+					char msg_buf[8];
+					msg_buf[0] = regs->if1_data_a & 0xFF;
+					msg_buf[1] = (regs->if1_data_a >> 8 )& 0xFF;
+					msg_buf[2] = (regs->if1_data_a >> 16 ) & 0xFF;
+					msg_buf[3] = (regs->if1_data_a >> 24) & 0xFF;
+					msg_buf[4] = regs->if1_data_b & 0xFF;
+					msg_buf[5] = (regs->if1_data_b >> 8 )& 0xFF;
+					msg_buf[6] = (regs->if1_data_b >> 16 )& 0xFF;
+					msg_buf[7] = (regs->if1_data_b >> 24 )& 0xFF;
+					dev->can_ops->transmit(dev->can_ops->obj, buf, 8);
+				}
 				regs->if1_cmd &= ~0x8000; /* unset BUSY bit */
 			}
 			break;
+		case 0x110:
+			regs->if1_data_a = val;
+                        break;
+		case 0x114:
+			regs->if1_data_b = val;
+                        break;
 		default:
 			printf("Can not write the register at 0x%x in hecc\n", offset);
 			return Invarg_exp;
@@ -111,7 +136,7 @@ static conf_object_t* new_am35x_hecc(char* obj_name){
 	io_memory->write = am35x_hecc_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	
 
-#define TEST_RECV 1
+#define TEST_RECV 0
 #if TEST_RECV
 	regs->dcan_nwdat = 1;
 	regs->if1_data_a = 0x41424344;
