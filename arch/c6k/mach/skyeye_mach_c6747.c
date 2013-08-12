@@ -124,6 +124,15 @@ void c6747_mach_init(void* state,  machine_config_t * mach){
 	hecc_can_ops->stop = can_ops->stop;
 	hecc_can_ops->transmit = can_ops->transmit;
 	hecc_can_ops->receive = can_ops->receive;
+#define TEST_CAN_ZLG 1
+#if TEST_CAN_ZLG
+	char test_data = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+	can_ops->transmit(can_zlg, test_data, 8);
+	usleep(100);
+	char recv_buf[8];
+	can_ops->receive(can_zlg, recv_buf, 8);
+	printf("TEST_CAN_ZLG, recv data 0x%x, 0x%x, 0x%x,0x%x\n", recv_buf[0], recv_buf[1], recv_buf[2], recv_buf[3]);
+#endif
 	
         machine_config_t * this_mach = mach;
         if( !this_mach )

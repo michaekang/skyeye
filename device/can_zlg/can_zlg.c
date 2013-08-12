@@ -72,6 +72,7 @@ exception_t start_can(){
 exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 	can_zlg_device *dev = obj->obj;
 	exception_t ret;
+	printf("In %s\n", __FUNCTION__);
 	#if 0
 	VCI_CAN_OBJ vco;
 	memset(&vco, '\0', sizeof(VCI_CAN_OBJ));
@@ -87,6 +88,7 @@ exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 
 exception_t can_receive(conf_object_t* obj, void* addr, int nbytes){
 	exception_t ret;
+	printf("In %s\n", __FUNCTION__);
 	#if 0
 	VCI_CAN_OBJ vco[100];
 	lRet = VCI_Receive(nDeviceType, nDeviceInd, nCANInd, vco, 100, 400);
@@ -100,12 +102,14 @@ static conf_object_t* new_can_zlg(char* obj_name){
 	dev->info = info;
 
 	can_ops_intf* ops = skyeye_mm_zero(sizeof(can_ops_intf));
+	ops->obj = dev->obj;
 	ops->start = start_can;
 	ops->stop = stop_can;
 	ops->transmit = can_transmit;
 	ops->receive = can_receive;
 	dev->ops = ops;
 	SKY_register_interface(ops, obj_name, CAN_OPS_INTF_NAME);	
+	printf("In %s, ops=0x%x\n", __FUNCTION__, ops);
 
 	info->device_type = 20;
 	info->device_id = 0;
