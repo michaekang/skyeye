@@ -1896,11 +1896,13 @@ static int exec_or_l(c6k_core_t* core, uint32_t insn){
 		if(op == 0x7f){
 			// if(x)
 			//core->gpr[s][dst] = core->gpr[GPR_A][src1] & core->gpr[GPR_A][src2];
+			int result;
 			if(x)
-				core->gpr[s][dst] = core->gpr[s][src1] | core->gpr[(!s) & 0x1][src2];
+				result = core->gpr[s][src1] | core->gpr[(!s) & 0x1][src2];
 			else
-				core->gpr[s][dst] = core->gpr[s][src1] | core->gpr[s][src2];
+				result = core->gpr[s][src1] | core->gpr[s][src2];
 			
+			write_buffer(core, dst + s * 32, result);
 			DBG("In %s, s=%d, dst=%d, src1=%d, src2=%d\n", __FUNCTION__, s, dst, src1, core->gpr[GPR_A][src2]);
 		}
 		else if(op == 0x7e){

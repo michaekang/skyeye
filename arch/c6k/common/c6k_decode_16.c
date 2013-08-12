@@ -37,8 +37,8 @@
 #include <skyeye_log.h>
 
 #ifdef DBG
-//#undef DBG
-//#define DBG
+#undef DBG
+#define DBG
 //#define DBG(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 #endif
 
@@ -637,37 +637,97 @@ static int exec_scs10(c6k_core_t* core, uint32_t insn){
 	/* callp */
 	int scst10 = BITS(6, 15);
 	int s = BITS(0, 0);
+	int br = (core->header >> 15) & 0x1;
 	//core->pc = core->gpr[s][3];
-	if(scst10 & 0x200){
-		scst10 |= 0xFFFFFC00;
-		scst10 = scst10 << 2;
+	if(br){
+		/* not callp */
+		if(scst10 & 0x200){
+			scst10 |= 0xFFFFFC00;
+			scst10 = scst10 << 2;
+		}
+		generic_address_t orig_pc = core->pc;
+		generic_address_t addr = core->pc;
+		//core->pc = (signed int)core->pce1 + scst10;
+		core->pfc = (signed int)core->pce1 + scst10;
+		core->delay_slot = 0;
+		DBG("In %s ,scst10=%d, target=0x%x\n", __FUNCTION__, scst10, core->pc);
+		/* Fixme , should calculate the parallel */
+		//core->gpr[s][3] += 4;
+		uint32_t layout = (core->header >> 21) & 0x7f;
+		uint32_t pbits = core->header & 0x3FFF;
+		int i = (addr - core->pce1) / 2;
+		addr += 2;
+		int pbit = (pbits >> i) & 0x1;
+		i++;
+		//if((pbits >> i) & 0x1){ /* parallel */
+		int word;
+		while(pbit){
+			//printf("In %s, callp, i=%d, addr=0x%x\n", __FUNCTION__, i, addr);
+			if((addr & 0x3) == 0)
+				bus_read(32, addr, &word);
+			if((word >> 28) == 0xe && (addr & 0x1f == 0x1c)){
+				/* skip the header */
+				addr += 4;
+				continue;
+			}
+			if((addr & 0x1f) == 0){
+				uint32_t header;
+				bus_read(32, addr + 0x1c, &header);
+				if((header >> 28) == 0xe){
+					layout = (header >> 21) & 0x7f;
+					pbits = header & 0x3FFF;
+				}
+				else
+					layout = 0;
+				i = 0;
+			}
+			if((layout >> (i / 2 )) & 0x1){
+				pbit = (pbits >> i) & 0x1;
+				addr += 2;
+				if(pbit == 0){
+					break;
+				}
+				i++;
+			}
+			else{
+				addr += 4;
+				pbit = word & 0x1;
+				if(pbit == 0){
+					break;
+				}
+				i += 2;
+			}
+		}
+		core->gpr[s][3] = addr;
+		DBG("In %s, return addr=0x%x, pc=0x%x, i=%d\n", __FUNCTION__, addr, orig_pc, i);
 	}
-	generic_address_t orig_pc = core->pc;
-	generic_address_t addr = core->pc;
-	//core->pc = (signed int)core->pce1 + scst10;
-	core->pfc = (signed int)core->pce1 + scst10;
-	core->delay_slot = 0;
-	DBG("In %s ,scst10=%d, target=0x%x\n", __FUNCTION__, scst10, core->pc);
-	/* Fixme , should calculate the parallel */
-	//core->gpr[s][3] += 4;
-	uint32_t layout = (core->header >> 21) & 0x7f;
-	uint32_t pbits = core->header & 0x3FFF;
-	int i = (addr - core->pce1) / 2;
-	addr += 2;
-	if((pbits >> i) & 0x1){ /* parallel */
-		if((layout >> ((i + 1)/ 2 )) & 0x1){
-			addr += 2;
+	else if((BITS(10, 10) == 1) && (BITS(11, 11) == 0x0)){ /* s3i */
+		/* SHL */
+		int cst3 = BITS(13, 15);
+		int src2 = BITS(7, 9);
+		int dst = BITS(4, 6);
+		int s = BITS(0, 0);
+		int x = BITS(12, 12);
+		int cst5;
+		if(cst3 == 0)
+			cst5 = 16;
+		else if(cst3 == 0x7)
+			cst5 = 0x8;
+		else
+			cst5 = cst3;
+		int result;
+		if(x){
+			result = core->gpr[(!s) & 0x1][src2] << cst5;
 		}
-		else{
-			addr += 4;
-		}
+		else
+			result = core->gpr[s][src2] << cst5;
+		write_buffer(core, dst + s * 32, result);
+		DBG("In %s, shl\n", __FUNCTION__);
 	}
 	else{
-	}	
-	core->gpr[s][3] = addr;
-	DBG("In %s, return addr=0x%x, pc=0x%x, i=%d\n", __FUNCTION__, addr, orig_pc, i);
+		NOT_IMP;
+	}
 	core->pc += 2;
-	//NOT_IMP;
 
 	return 0;
 }
@@ -679,13 +739,21 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 	int scst7 = BITS(6, 12);
 	int A0 = core->gpr[GPR_A][0];
 	int B0 = core->gpr[GPR_B][0];
-	/* sign extend */
-	scst7 = (scst7 & 0x40) ? (scst7 | 0xFFFFFF80) : scst7;
-	switch(sz){
+	int br = (core->header >> 15) & 0x1;
+	if(br){
+		int offset;
+		if((n3 & 0x6) == 0x6){
+			offset = BITS(6, 13);
+		}
+		else{
+		/* sign extend */
+			offset = (scst7 & 0x40) ? (scst7 | 0xFFFFFF80) : scst7;
+		}
+		switch(sz){
 		case 0:
 			if(A0){
 				/* bnop */
-				core->pfc = core->pce1 + (scst7 << 1);
+				core->pfc = core->pce1 + (offset << 1);
 				if(core->delay_slot){
 					NOT_IMP;
 				}
@@ -700,7 +768,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 		case 1:
 			if(!A0){
 				/* bnop */
-				core->pfc = core->pce1 + (scst7 << 1);
+				core->pfc = core->pce1 + (offset << 1);
 				if(core->delay_slot){
 					NOT_IMP;
 				}
@@ -716,7 +784,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 		case 2:
 			if(B0){
 				/* bnop */
-				core->pfc = core->pce1 + (scst7 << 1);
+				core->pfc = core->pce1 + (offset << 1);
 				if(core->delay_slot){
 					NOT_IMP;
 				}
@@ -731,7 +799,7 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 		case 3:
 			if(!B0){
 				/* bnop */
-				core->pfc = core->pce1 + (scst7 << 1);
+				core->pfc = core->pce1 + (offset << 1);
 				if(core->delay_slot){
 					NOT_IMP;
 				}
@@ -740,13 +808,40 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 				/* nop insert */
 				if(core->delay_slot)
 					core->delay_slot -= n3;
-				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d, scst7=0x%x\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot, offset);
 
 			}
 			break;
 
 		default:
 			NOT_IMP;
+		}
+	}
+	else if((BITS(10, 10) == 1) && (BITS(11, 11) == 0x0)){ /* s3i */
+		/* SHL */
+		int cst3 = BITS(13, 15);
+		int src2 = BITS(7, 9);
+		int dst = BITS(4, 6);
+		int s = BITS(0, 0);
+		int x = BITS(12, 12);
+		int cst5;
+		if(cst3 == 0)
+			cst5 = 16;
+		else if(cst3 == 0x7)
+			cst5 = 0x8;
+		else
+			cst5 = cst3;
+		int result;
+		if(x){
+			result = core->gpr[(!s) & 0x1][src2] << cst5;
+		}
+		else
+			result = core->gpr[s][src2] << cst5;
+		
+		write_buffer(core, dst + s * 32, result);
+	}
+	else{
+		NOT_IMP;
 	}
 	core->pc += 2;
 	return 0;
@@ -791,6 +886,10 @@ static int exec_ssh5(c6k_core_t* core, uint32_t insn){
 		if(op == 2){
 			core->gpr[s][src_dst] >>= ucst5;
 		}
+		else if(op == 0x0){
+			core->gpr[s][src_dst] <<= ucst5;
+			DBG("In %s, pc=0x%x, SHL\n", __FUNCTION__, core->pc);
+		}
 		else{
 			NOT_IMP;
 		}
@@ -812,11 +911,38 @@ static int exec_sc5(c6k_core_t* core, uint32_t insn){
 	int src = BITS(7, 9);
 	int s = BITS(0, 0);
 	int ucst5 = ucst0_2 | (ucst3_4 << 3);
-	int v = (0xFFFFFFFF << ucst5) & (0xFFFFFFFF >> (31 - ucst5));
-	
-	core->gpr[s][src] = core->gpr[s][src] | v;
-	DBG("In %s, src=%d, ucst5=%d\n", __FUNCTION__, src, ucst5);
+	//int v = (0xFFFFFFFF << ucst5) & (0xFFFFFFFF >> (31 - ucst5));
+	if(op == 0x2){	
+		int v = ((0xFFFFFFFF << (ucst5 + 1)) | (0xFFFFFFFF >> (32 - ucst5)));
+		core->gpr[s][src] = core->gpr[s][src] & v;
+		DBG("In %s, clr src=%d, ucst5=%d, result=0x%x\n", __FUNCTION__, src, ucst5, core->gpr[s][src]);
+	}
+	else if(op == 0x1){ /* set */
+		int v = ~((0xFFFFFFFF << (ucst5 + 1)) | (0xFFFFFFFF >> (32 - ucst5)));
+		core->gpr[s][src] = core->gpr[s][src] | v;
+		DBG("In %s, set src=%d, ucst5=%d, result=0x%x\n", __FUNCTION__, src, ucst5, core->gpr[s][src]);
+	}
+	else if(op == 0x3){ /* s2ext */
+		int op1 = BITS(11, 12);
+		int dst = BITS(13, 15);
+		if(op1 == 0x1){ /* ext */
+			core->gpr[s][dst] = (core->gpr[s][src] << 24) >> 24;
+			#if 0
+			if((1 << (31 - 24)) & core->gpr[s][dst]){ /* sign extend */
+				core->gpr[s][dst] |= (0xFFFFFFFF << (31 - 24));
+			}
+			#endif
+			core->gpr[s][dst] = SIGN_EXTEND(core->gpr[s][dst], 31 - 24);
 
+			DBG("In %s, ext src=%d, result=0x%x\n", __FUNCTION__, src, core->gpr[s][dst]);
+		}
+		else{
+			NOT_IMP;
+		}
+	}
+	else{
+		NOT_IMP;
+	}
 	core->pc += 2;	
 	return 0;
 }
