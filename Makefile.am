@@ -98,14 +98,16 @@ skyeye_systemc_LDFLAGS = -L$(SYSTEMC_DIR)/lib-linux64 -lsystemc -L$(top_builddir
 endif
 
 if WIN32
-bin_PROGRAMS += uart_instance prof_convert
+bin_PROGRAMS += uart_instance prof_convert zlg_can_console
 uart_instance_SOURCES = utils/uart_console/uart_console.c
+zlg_can_console_SOURCES = utils/zlg_can_console/zlg_can_console.c
 mknandflashdump_SOURCES =
 prof_convert_SOURCES = utils/code_cov/prof_convert.c
 uart_instance_LDADD = -lgw32c
 else
-bin_PROGRAMS += uart_instance mknandflashdump prof_convert
+bin_PROGRAMS += uart_instance mknandflashdump prof_convert zlg_can_console
 uart_instance_SOURCES = utils/uart_console/uart_console.c
+zlg_can_console_SOURCES = utils/zlg_can_console/zlg_can_console.c
 mknandflashdump_SOURCES = utils/nandflash_dump/mknandflashdump.c
 prof_convert_SOURCES = utils/code_cov/prof_convert.c
 endif
