@@ -659,7 +659,7 @@ static uint32 arm_get_regval_by_id(int id){
 * @return the number of regular register
 */
 static uint32 arm_get_gpr_regnum(){
-	return CPSR_REG;
+	return CPSR_REG + 1;
 	//return MAX_REG_NUM;
 }
 static exception_t arm_set_register_by_id(int id, uint32 value){

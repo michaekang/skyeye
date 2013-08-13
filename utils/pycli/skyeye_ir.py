@@ -52,7 +52,7 @@ class InfoRegsDialog(wx.Dialog):
 				self.RegsList.SetStringItem(index, 1, e[1].upper())
 				self.RegsList.SetStringItem(index, 2, reg_value_10)
 				item += 1
-		libcommon.info_register_free(pchar)
+		libcommon.skyeye_free(pchar)
 
 
 

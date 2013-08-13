@@ -465,8 +465,9 @@ static uint32 sparc_get_step(){
         return sparc_state.steps;
 }
 
+#define REG_NUM 72
 static uint32 sparc_get_regnum(){
-        return 71;
+        return REG_NUM;
 }
 
 static char* sparc_get_regname_by_id(int id){

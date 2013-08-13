@@ -521,7 +521,7 @@ char *gui_info_register(void)
 	char temp[500];
 	int num = 1;
 	char *register_p = NULL;
-	register_p = malloc(sizeof(char) * 1);
+	register_p = skyeye_mm(sizeof(char) * 1);
 	*register_p = '\0';
 	generic_arch_t* arch_instance = get_arch_instance("");
 	if(arch_instance == NULL)
@@ -529,7 +529,7 @@ char *gui_info_register(void)
 	if(arch_instance->get_regval_by_id){
 		int i = 0;
 		uint32 reg_value = 0;
-		while(i <= arch_instance->get_regnum()){
+		while(i < arch_instance->get_regnum()){
 			reg_value = arch_instance->get_regval_by_id(i);
 			sprintf(temp, "%s:%x;", arch_instance->get_regname_by_id(i), reg_value);
 			i++;
@@ -549,11 +549,6 @@ char *gui_info_register(void)
 	}
 
 	return NULL;
-}
-
-void info_register_free(char *register_p)
-{
-	free(register_p);
 }
 
 char *gui_get_current_mach(void)
