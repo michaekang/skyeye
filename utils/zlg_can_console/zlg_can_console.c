@@ -48,7 +48,11 @@
 #include <winsock2.h>
 #endif
 
-
+#define TEST_CAN 0
+#if TEST_CAN
+#else
+#include "controlcan.h"
+#endif
 static int setup_zlg_can();
 static int setup_netlink(char * hostp, char * portp);
 static int can_transmit(char* buf , int nbytes);
@@ -60,15 +64,26 @@ int main(int argc, char ** argv)
 	uint8_t buf[1024];
 	char * hostp;
 	char * portp;
+	if(argc == 1){ /* self test */
+	}
 	
+#ifndef __MINGW32__
 	if (argc != 2) {
+#else
+	if (argc != 3) {
+#endif
 		printf("argc=%d, arg0=%s, arg1=%s\n", argc, argv[0], argv[1]);
 		fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
 		exit(1);
 	}
 
+#ifndef __MINGW32__
 	hostp = argv[0];
 	portp = argv[1];
+#else
+	hostp = argv[1];
+	portp = argv[2];
+#endif
 	printf("hostp=%s, portp=%s\n", hostp, portp);
 	setup_zlg_can();
 	fd_socket = setup_netlink(hostp, portp);
@@ -105,6 +120,32 @@ int main(int argc, char ** argv)
 int setup_zlg_can()
 {
 	/* open, init and start can device*/
+#if TEST_CAN
+#else
+	if(VCI_OpenDevice(VCI_USBCAN1,0,0)!=1)
+	{
+		printf("open deivce error\n");
+		exit(1);
+	}
+	VCI_INIT_CONFIG config;
+	config.AccCode=0;
+	config.AccMask=0xffffffff;
+	config.Filter=1;
+	//config.Mode=0;
+	config.Mode = 0x2;
+	config.Timing0=0;
+	config.Timing1=0x14;
+	
+	if(VCI_InitCAN(VCI_USBCAN1,0,0,&config)!=1)
+	{
+		printf("init CAN error\n");
+	}
+
+	if(VCI_StartCAN(VCI_USBCAN1,0,0)!=1)
+	{
+		printf("Start CAN error\n");
+	}
+#endif
 	return 0;
 }
 
@@ -181,8 +222,61 @@ gotit:
 	return skt;
 }
 int can_transmit(char* buf, int nbytes){
+#if TEST_CAN
+#else	
+	VCI_CAN_OBJ send[3];
+	send[0].ID=0;
+	send[0].SendType=2;
+	send[0].RemoteFlag=0;
+	send[0].ExternFlag=1;
+	send[0].DataLen=8;
+	send[1]=send[0];
+	send[2]=send[0];
+	send[1].ID=1;
+	send[2].ID=2;
+	
+	int i=0;
+	int sendind=3;	
+	for(i=0;i<send[0].DataLen;i++)
+	{
+		send[0].Data[i]=i;
+		send[1].Data[i]=i;
+		send[2].Data[i]=i;
+	}	
+	if(VCI_Transmit(VCI_USBCAN1,0,0,send,3)>0)
+	{
+		printf("Send: %08X",send[0].ID);
+		for(i=0;i<send[0].DataLen;i++)
+		{
+			printf(" %08X",send[0].Data[i]);
+		}
+		printf("\n");
+		send[0].ID=sendind++;
+		send[1].ID=sendind++;
+		send[2].ID=sendind++;
+	}
+#endif
 	return 0;
 }
 int can_receive(char* buf, int nbytes){
+#if TEST_CAN
+#else
+	int reclen=0;
+	VCI_CAN_OBJ rec[100];
+	int i;
+	{
+		printf("running....\n");
+		if((reclen=VCI_Receive(VCI_USBCAN1,0,0,rec,100,100))>0)
+		{
+			printf("IND:%d Receive: %08X",0,rec[reclen-1].ID);
+			for(i=0;i<rec[reclen-1].DataLen;i++)
+			{
+				printf(" %08X",rec[reclen-1].Data[i]);
+			}
+			printf("\n");
+			
+		}	
+	}
+#endif
 	return 0;
 }

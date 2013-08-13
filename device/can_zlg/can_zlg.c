@@ -31,15 +31,17 @@
 #include <skyeye_mm.h> 
 #include <memory_space.h>
 #include <skyeye_device.h>
-#include <net/if.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <poll.h>
 #include <stdint.h>
+#include <errno.h>
+#ifndef __MINGW32__
+#include <poll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#else
+#include <windows.h>
+#include <winsock2.h>
+#endif
 
 #include <stdlib.h>
 
@@ -55,7 +57,11 @@ const char* default_bin_dir = "/opt/skyeye/bin/";
 #else
 const char* default_bin_dir = SKYEYE_BIN;
 #endif
+#ifndef __MINGW32__
 const char* uart_prog = "zlg_can_console";
+#else
+const char* uart_prog = "zlg_can_console.exe";
+#endif
 
 static int create_can(char * hostname, int port){
 	pid_t pid;
@@ -68,6 +74,7 @@ static int create_can(char * hostname, int port){
 	strncpy(&can_instance_prog[bin_dir_len], uart_prog, strlen(uart_prog));
 
 	sprintf(port_str, "%d", port);
+#ifndef __MINGW32__
 	switch (pid = fork())
     	{
         	case -1:
@@ -87,6 +94,27 @@ static int create_can(char * hostname, int port){
 		default:
 			break;
 	}
+#else
+	strcat(can_instance_prog, " ");
+	strcat(can_instance_prog, hostname);
+	strcat(can_instance_prog, " ");
+	strcat(can_instance_prog, port_str);
+	PROCESS_INFORMATION process_information;
+	STARTUPINFO startupinfo;
+	BOOL result;
+	memset(&process_information, 0, sizeof(process_information));
+	memset(&startupinfo, 0, sizeof(startupinfo));
+	startupinfo.cb = sizeof(startupinfo);
+	printf("In %s, before CreateProcess, cmd=%s\n", __FUNCTION__, can_instance_prog);
+	result = CreateProcess(NULL, can_instance_prog, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupinfo, &process_information);
+	if (result == 0) {
+		SKYEYE_ERR("ERROR: CreateProcess failed!");
+		return -1;
+	}
+	else {
+		return 0;
+	}
+#endif
 	return 0;
 }
 
@@ -102,19 +130,52 @@ exception_t open_can_device(conf_object_t* obj){
 	struct sockaddr_in server, from;
 	char * froms;
 	printf("In %s\n", __FUNCTION__);
+#ifndef __MINGW32__
 	sv_skt = socket(AF_INET, SOCK_STREAM, 0);
 	if (sv_skt < 0) SKYEYE_ERR("opening stream socket");
 
 	/* enable the reuse of this socket if this process dies */
 	if (setsockopt(sv_skt, SOL_SOCKET, SO_REUSEADDR, (uint8_t*)&on, sizeof(on))<0)
 		SKYEYE_ERR("turning on REUSEADDR");
+#else
+	int nsize;
+	int err;
+	WSADATA wsaData;
+	SOCKET term_socket = INVALID_SOCKET;
+	BOOL bOptVal = FALSE;
+	int bOptLen = sizeof(BOOL);
 
+	/*
+	 * initiates use of the Winsock DLL by a process
+	 * shenoubang modified it 2012-12-4
+	 */
+	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (err != 0) {
+		/* Tell the user that we could not find a usable */
+		/* Winsock DLL.                                  */
+		printf("WSAStartup failed with error: %d\n", err);
+		return 1;
+	}
+	/* creates a socket that is bound to a specific transport service provider */
+	sv_skt = socket(AF_INET, SOCK_STREAM, 0);
+	if (sv_skt == INVALID_SOCKET) {
+		SKYEYE_ERR("socket function failed with error: %u\n", WSAGetLastError());
+		WSACleanup();
+		return 1;
+	}
+	bOptVal = TRUE;
+	err = setsockopt(sv_skt, SOL_SOCKET, SO_REUSEADDR, (char *) &bOptVal, bOptLen);
+	if (err == SOCKET_ERROR) {
+		SKYEYE_ERR("setsockopt for RESUEADDR failed with error: %u\n", WSAGetLastError());
+		return 1;
+	}
+#endif
 		/* bind it */
 retry:
 	server.sin_family = AF_INET;
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_port = htons(0);	/* bind to an OS selected local port */
-
+#ifndef __MINGW32__
 	if (bind(sv_skt, (struct sockaddr *)&server, sizeof(server)) < 0) {
 		switch (errno) {
 		case EAGAIN:
@@ -126,6 +187,19 @@ retry:
 			SKYEYE_ERR("binding tcp stream socket");
 		}
 	}
+#else
+	if (bind(sv_skt, (SOCKADDR *)&server, sizeof(server)) < 0) {
+		switch (errno) {
+		case EAGAIN:
+			goto retry;
+
+		case WSAEADDRINUSE:
+			SKYEYE_ERR("Port is already in use\n");
+		default:
+			SKYEYE_ERR("binding tcp stream socket");
+		}
+	}
+#endif
 
 	length = sizeof(server);
 	if (getsockname(sv_skt, (struct sockaddr *) &server, &length)==-1)
