@@ -37,6 +37,10 @@
 #include "skyeye_can_ops.h"
 //#include "ControlCan.h"
 #include "can_zlg.h"
+#define TEST_CAN 1
+#if TEST_CAN
+char msg_buf[8];
+#endif
 
 exception_t open_can_device(){
 	int nDeviceType = 20; /* USBCAN-E-U */
@@ -67,12 +71,26 @@ exception_t stop_can(){
 
 exception_t start_can(){
 	exception_t ret;
+#if TEST_CAN
+	printf("In %s, TEST_CAN\n", __FUNCTION__);
+#else
+#endif
 	return ret;
 }
 exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 	can_zlg_device *dev = obj->obj;
 	exception_t ret;
 	printf("In %s\n", __FUNCTION__);
+#if TEST_CAN
+	printf("In %s, TEST_CAN\n", __FUNCTION__);
+	char* buf = addr;
+	int i = 0;
+	for(; i < 8; i++){
+		printf("In %s, buf[%d]=0x%x\n", __FUNCTION__, i, buf[i]);
+		msg_buf[i] = buf[i];
+	}
+#else
+#endif
 	#if 0
 	VCI_CAN_OBJ vco;
 	memset(&vco, '\0', sizeof(VCI_CAN_OBJ));
@@ -89,6 +107,16 @@ exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 exception_t can_receive(conf_object_t* obj, void* addr, int nbytes){
 	exception_t ret;
 	printf("In %s\n", __FUNCTION__);
+#if TEST_CAN
+	char* buf = addr;
+	printf("In %s, TEST_CAN\n", __FUNCTION__);
+	int i = 0;
+	for(; i < 8; i++){
+		buf[i] = msg_buf[i];
+		printf("In %s, buf[%d]=0x%x\n", __FUNCTION__, i, buf[i]);
+	}
+#else
+#endif
 	#if 0
 	VCI_CAN_OBJ vco[100];
 	lRet = VCI_Receive(nDeviceType, nDeviceInd, nCANInd, vco, 100, 400);

@@ -38,7 +38,7 @@
 #include "skyeye_can_ops.h"
 #include "am35x_hecc.h"
 
-#define TEST_CAN 1
+#define TEST_CAN 0
 #if TEST_CAN
 static char test_buf[8];
 #endif
@@ -121,7 +121,7 @@ static exception_t am35x_hecc_write(conf_object_t *opaque, generic_address_t off
 					msg_buf[5] = (regs->if1_data_b >> 8 )& 0xFF;
 					msg_buf[6] = (regs->if1_data_b >> 16 )& 0xFF;
 					msg_buf[7] = (regs->if1_data_b >> 24 )& 0xFF;
-					dev->can_ops->transmit(dev->can_ops->obj, buf, 8);
+					dev->can_ops->transmit(dev->can_ops->obj, msg_buf, 8);
 					#endif
 					regs->dcan_nwdat = 0x1;
 				}
@@ -149,6 +149,7 @@ static conf_object_t* new_am35x_hecc(char* obj_name){
 
 	can_ops_intf* ops = skyeye_mm_zero(sizeof(can_ops_intf));
 	dev->can_ops = ops;
+	ops->obj = NULL;
 	ops->start = NULL;
 	ops->stop = NULL;
 	ops->transmit = NULL;
