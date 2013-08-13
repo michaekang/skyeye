@@ -36,6 +36,7 @@ typedef struct can_zlg_device{
 	conf_object_t* obj;
 	dev_info_t* info;
 	can_ops_intf* ops;
+	int conn_socket;
 }can_zlg_device;
 
 #endif

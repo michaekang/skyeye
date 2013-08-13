@@ -16,7 +16,7 @@
 * 
 */
 /**
-* @file can_ops.c
+* @file can_zlg.c
 * @brief The interface for zlg USB CAN I device
 * @author Michael.Kang blackfin.kang@gmail.com
 * @version 7849
@@ -31,32 +31,131 @@
 #include <skyeye_mm.h> 
 #include <memory_space.h>
 #include <skyeye_device.h>
+#include <net/if.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <poll.h>
+#include <stdint.h>
+
+#include <stdlib.h>
+
 #define DEBUG
 #include <skyeye_log.h>
 
 #include "skyeye_can_ops.h"
 //#include "ControlCan.h"
 #include "can_zlg.h"
-#define TEST_CAN 1
-#if TEST_CAN
-char msg_buf[8];
-#endif
 
-exception_t open_can_device(){
-	int nDeviceType = 20; /* USBCAN-E-U */
-	int nDeviceInd = 0;
-	int nReserved = 9600;
+#ifndef SKYEYE_BIN
+const char* default_bin_dir = "/opt/skyeye/bin/";
+#else
+const char* default_bin_dir = SKYEYE_BIN;
+#endif
+const char* uart_prog = "zlg_can_console";
+
+static int create_can(char * hostname, int port){
+	pid_t pid;
+	char port_str[32];
+	char can_instance_prog[1024];
+	//char * argv[]={"xterm","-e",uart_instance_prog,"localhost", "2345"};
+	int bin_dir_len = strlen(default_bin_dir);
+	memset(&can_instance_prog[0], '\0', 1024);
+	strncpy(&can_instance_prog[0], default_bin_dir, bin_dir_len);
+	strncpy(&can_instance_prog[bin_dir_len], uart_prog, strlen(uart_prog));
+
+	sprintf(port_str, "%d", port);
+	switch (pid = fork())
+    	{
+        	case -1:
+        	{
+            		perror("The fork failed!");
+            		break;
+        	}
+		case 0:
+		{
+        	    	//printf("[child]connect to %s:%s!\n", hostname, port_str);
+			int ret = execlp(can_instance_prog, hostname, port_str, (char *)NULL);
+			perror("Child:");
+			fprintf(stderr, "SKYEYE Error: run program %s failed!\n", can_instance_prog);
+
+	        	_exit (-1);
+        	}
+		default:
+			break;
+	}
+	return 0;
+}
+
+exception_t open_can_device(conf_object_t* obj){
+	can_zlg_device *dev = obj->obj;
 	exception_t ret;
-	#if 0
-	DWORD dwRel;
-	dwRel = VCI_openDevice(nDeviceType, nDeviceInd, nReserved);
-	if(dwRel != STATUS_OK){
-		return
+	uint8_t buf[1024];
+	#define	MAXHOSTNAME	256
+	char	myhostname[MAXHOSTNAME];
+	int sv_skt;
+	struct hostent	* hp;
+	int on, length;
+	struct sockaddr_in server, from;
+	char * froms;
+	printf("In %s\n", __FUNCTION__);
+	sv_skt = socket(AF_INET, SOCK_STREAM, 0);
+	if (sv_skt < 0) SKYEYE_ERR("opening stream socket");
+
+	/* enable the reuse of this socket if this process dies */
+	if (setsockopt(sv_skt, SOL_SOCKET, SO_REUSEADDR, (uint8_t*)&on, sizeof(on))<0)
+		SKYEYE_ERR("turning on REUSEADDR");
+
+		/* bind it */
+retry:
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(0);	/* bind to an OS selected local port */
+
+	if (bind(sv_skt, (struct sockaddr *)&server, sizeof(server)) < 0) {
+		switch (errno) {
+		case EAGAIN:
+			goto retry;
+
+		case EADDRINUSE:
+			SKYEYE_ERR("Port is already in use\n");
+		default:
+			SKYEYE_ERR("binding tcp stream socket");
+		}
 	}
-	dwRel = VCI_InitCAN(nDeviceType, nDeviceInd, nCANInd, &vic);
-	if(dwRel == STATUS_ERR){
+
+	length = sizeof(server);
+	if (getsockname(sv_skt, (struct sockaddr *) &server, &length)==-1)
+		SKYEYE_ERR("getting socket name");
+
+	if(listen(sv_skt, 1) < 0){
+		perror("listen:");
 	}
-	#endif
+
+	gethostname(myhostname, MAXHOSTNAME);
+	//printf("In %s, before main loop\n", __FUNCTION__);
+	/* Create the client xterm */
+	create_can(myhostname, ntohs(server.sin_port));
+	/* main loop */
+	struct	sockaddr_in client;
+	client.sin_family = AF_INET;
+	int len = sizeof(struct sockaddr);
+	do {
+		int socket_conn = accept(sv_skt, (struct sockaddr *)&client, &len);
+		if(socket_conn > 0){
+			dev->conn_socket = socket_conn;
+			printf("get a client, socket_conn=%d\n", socket_conn);
+			break;
+		}
+		else{
+			printf("socket_conn=%d\n", socket_conn);
+			perror("socket accept:");
+		}
+	} while (1);
+
 	return ret;
 }
 exception_t close_can(){
@@ -69,28 +168,27 @@ exception_t stop_can(){
 	return ret;
 }
 
-exception_t start_can(){
+exception_t start_can(conf_object_t* obj){
 	exception_t ret;
-#if TEST_CAN
-	printf("In %s, TEST_CAN\n", __FUNCTION__);
-#else
-#endif
+	ret = open_can_device(obj);
 	return ret;
 }
 exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 	can_zlg_device *dev = obj->obj;
+	int cmd = 0x800000;
+	char* buf = addr;
+	int result = 0;
+	int n;
+	printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
+	n = send(dev->conn_socket, &cmd, sizeof(cmd), 0);
+	printf("the ret of send is %d\n", n);
+	recv(dev->conn_socket, &result, sizeof(result), 0);
+	printf("In %s, result=%d\n", __FUNCTION__, result);
+	send(dev->conn_socket, buf, nbytes, 0);
+	recv(dev->conn_socket, &result, sizeof(result), 0);
+	printf("In %s, after send msg, result=%d\n", __FUNCTION__, result);
 	exception_t ret;
 	printf("In %s\n", __FUNCTION__);
-#if TEST_CAN
-	printf("In %s, TEST_CAN\n", __FUNCTION__);
-	char* buf = addr;
-	int i = 0;
-	for(; i < 8; i++){
-		printf("In %s, buf[%d]=0x%x\n", __FUNCTION__, i, buf[i]);
-		msg_buf[i] = buf[i];
-	}
-#else
-#endif
 	#if 0
 	VCI_CAN_OBJ vco;
 	memset(&vco, '\0', sizeof(VCI_CAN_OBJ));
@@ -105,18 +203,25 @@ exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 }
 
 exception_t can_receive(conf_object_t* obj, void* addr, int nbytes){
+	can_zlg_device *dev = obj->obj;
+	int cmd = 0x000000;
+	char* buf = addr;
+	int result = 0;
+	int n;
+	printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
+	n = send(dev->conn_socket, &cmd, sizeof(cmd), 0);
+	printf("the ret of send is %d\n", n);
+	recv(dev->conn_socket, &result, sizeof(result), 0);
+	printf("In %s, result=%d\n", __FUNCTION__, result);
+	recv(dev->conn_socket, buf, nbytes, 0);
+	recv(dev->conn_socket, &result, sizeof(result), 0);
+	int i = 0;
+	for(; i < 8; i++)
+		printf("In %s, buf[%d] = 0x%x\n", __FUNCTION__, i, buf[i]);
+
+
 	exception_t ret;
 	printf("In %s\n", __FUNCTION__);
-#if TEST_CAN
-	char* buf = addr;
-	printf("In %s, TEST_CAN\n", __FUNCTION__);
-	int i = 0;
-	for(; i < 8; i++){
-		buf[i] = msg_buf[i];
-		printf("In %s, buf[%d]=0x%x\n", __FUNCTION__, i, buf[i]);
-	}
-#else
-#endif
 	#if 0
 	VCI_CAN_OBJ vco[100];
 	lRet = VCI_Receive(nDeviceType, nDeviceInd, nCANInd, vco, 100, 400);
@@ -138,6 +243,7 @@ static conf_object_t* new_can_zlg(char* obj_name){
 	dev->ops = ops;
 	SKY_register_interface(ops, obj_name, CAN_OPS_INTF_NAME);	
 	printf("In %s, ops=0x%x\n", __FUNCTION__, ops);
+	start_can(dev->obj);
 
 	info->device_type = 20;
 	info->device_id = 0;
