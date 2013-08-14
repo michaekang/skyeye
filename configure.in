@@ -20,7 +20,7 @@ AC_CONFIG_HEADER(ltdlconf.h)
 COMMON_INCLUDES="-I\$(top_srcdir)/common/include -I\$(srcdir)/common/"
 AC_SUBST(COMMON_INCLUDES)
 # some common cflags to be used in building all the files.
-COMMON_CFLAGS="-g -O2 -Werror-implicit-function-declaration -Werror=return-type -Wmissing-field-initializers -Wuninitialized"
+COMMON_CFLAGS=" -Werror-implicit-function-declaration -Werror=return-type -Wmissing-field-initializers -Wuninitialized"
 AC_SUBST(COMMON_CFLAGS)
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -51,7 +51,7 @@ case $host in
     #dbct=true
     ;;
   *-*-mingw32*)
-    CFLAGS="$CFLAGS -mms-bitfields -DWINVER=0x0501"
+    CFLAGS=" -mms-bitfields -DWINVER=0x0501"
     LIBS="$LIBS -Xlinker -lstdc++ -Xlinker -lole32 -Xlinker -lmingwex -Xlinker -lmingw32 -Xlinker -lpthread -Xlinker -limagehlp -Xlinker -lgcc -Xlinker -lpsapi  -Xlinker -lshell32 -Xlinker -lmoldnamed -Xlinker -lgw32c -Xlinker -lkernel32 -Xlinker -lmsvcrt -Xlinker -lws2_32 -Xlinker -lwinmm -Xlinker -ladvapi32"
     #dbct=true
     ;;

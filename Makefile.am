@@ -82,7 +82,7 @@ endif
 
 INCLUDES = @COMMON_INCLUDES@ -Ithird-party/bfd/ -Iutils/code_cov/
 
-DEFS = -DMODET -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 @COMMON_CFLAGS@ 
+DEFS = -DMODET -g -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 @COMMON_CFLAGS@ 
 AM_CFLAGS = -W -Wall -Wstrict-prototypes -Wmissing-prototypes 
 ACLOCAL_AMFLAGS=-I m4
 
@@ -101,6 +101,7 @@ if WIN32
 bin_PROGRAMS += uart_instance prof_convert zlg_can_console
 uart_instance_SOURCES = utils/uart_console/uart_console.c
 zlg_can_console_SOURCES = utils/zlg_can_console/zlg_can_console.c
+zlg_can_console_LDADD = -lcontrolcan -L./
 mknandflashdump_SOURCES =
 prof_convert_SOURCES = utils/code_cov/prof_convert.c
 uart_instance_LDADD = -lgw32c
