@@ -73,6 +73,31 @@ typedef struct am35x_hecc_device{
 	hecc_reg_t* regs;
 	can_ops_intf* can_ops;
 	message_obj_t message[64];
+	char** regs_name;
 }am35x_hecc_device;
+
+static char* regs_name[] = {
+	"dcan_ctl",
+	"dcan_es",
+	"dcan_errc",
+
+	"dcan_nwdat",
+
+	"if1_cmd",
+	"if2_cmd",
+	"if1_mask",
+	"if2_mask",
+	"if1_arb",
+	"if2_arb",
+	"if1_mctl",
+	"if2_mctl",
+	"if1_data_a",
+	"if2_data_a",
+	"if1_data_b",
+	"if2_data_b",
+	"can_tioc",
+	"can_rioc",
+	NULL
+};
 
 #endif

@@ -6,18 +6,17 @@ import sys, platform
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
+	from skyeye_common_windows_module import *
 	import windows_font as C
 else:
+	from skyeye_common_module import *
 	import linux_font as C
-regs1_value = {"reg1":0x1, "reg2":2, "reg3":3, "reg4":4, "reg5":5, "reg6":6, "reg7":7, "reg8":8, "reg9":9, "reg0":0xf}
-regs2_value = {"reg1":10, "reg2":12, "reg3":13, "reg4":14, "reg5":15, "reg6":16, "reg7":17, "reg8":18, "reg9":19, "reg0":20}
-regs3_value = {"reg1":10, "reg2":12, "reg3":13, "reg4":14, "reg5":15, "reg6":16, "reg7":17, "reg8":18, "reg9":19, "reg0":20}
-dict = {"dev1":regs1_value, "dev2":regs2_value, "dev3":regs3_value}
-devlist = ["dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3","dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3", "dev1", "dev2", "dev3"]
+
+devlist = ["uart_0", "am35x_hecc_0"]
 class DevRegsFrame(wx.Frame):
 	ShowDevRegs = None
 	def __init__(self):
-		wx.Frame.__init__(self, None, -1, C.FontDeviceList, size=(500, 500))
+		wx.Frame.__init__(self, None, -1, C.FontDeviceList, size=(500, 532))
 		self.Panel = wx.Panel(self)
 		MainSizer = wx.BoxSizer(wx.VERTICAL)
 		DevSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -50,14 +49,20 @@ class DevRegsFrame(wx.Frame):
 
 	def RegsRefurbish(self, event):
 		DevName = self.DevList.GetValue()
-		self.ShowDevRegs = dict[DevName]
 		self.DevRegsList.DeleteAllItems()
-		index = 2
-		for key in self.ShowDevRegs:
-			index = self.DevRegsList.InsertStringItem(sys.maxint, key)
-			self.DevRegsList.SetStringItem(index, 0, key)
-			self.DevRegsList.SetStringItem(index, 1, str(hex(self.ShowDevRegs[key])))
-			index = index + 1
+		reg_id = 0;
+		libcommon.dev_get_regname_by_id.restype = c_char_p
+		libcommon.dev_get_regvalue_by_id.restype = c_uint
+		while(True):
+			RegName = libcommon.dev_get_regname_by_id(c_char_p(DevName), c_int(reg_id))
+			if(RegName == None):
+				break;
+			RegValue = libcommon.dev_get_regvalue_by_id(c_char_p(DevName), c_int(reg_id))
+			print RegName, RegValue
+			index = self.DevRegsList.InsertStringItem(sys.maxint, DevName)
+			self.DevRegsList.SetStringItem(index, 0, RegName)
+			self.DevRegsList.SetStringItem(index, 1, str(hex(RegValue)))
+			reg_id = reg_id + 1
 
 if __name__ == '__main__':
 	app = wx.PySimpleApp()

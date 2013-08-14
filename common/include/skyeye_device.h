@@ -197,4 +197,16 @@ int* get_pen_buffer(void);
 #define ACTION_OR		3
 #define ACTION_OR_NOT		4
 
+typedef struct skyeye_reg_intf{
+	conf_object_t* conf_obj;
+	uint32_t (*get_regvalue_by_id) (conf_object_t* conf_obj, uint32_t id);
+	char* (*get_regname_by_id) (conf_object_t* conf_obj, uint32_t id);
+	exception_t (*set_regvalue_by_id) (conf_object_t* conf_obj, uint32_t value, uint32_t id);
+}skyeye_reg_intf;
+#define SKYEYE_REG_INTF        "skyeye_register_intf"
+
+uint32_t dev_get_regvalue_by_id(char* device_name, uint32_t id);
+char* dev_get_regname_by_id(char* device_name, uint32_t id);
+
+
 #endif /*__SKYEYE_DEVICE_H_ */

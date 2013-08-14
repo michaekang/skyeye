@@ -70,7 +70,16 @@ typedef struct UARTState
 		uint32 scaler;
 	}regs;
 	skyeye_uart_intf* term;
+	char **regs_name;
 }leon2_uart_dev;
+
+static char* regs_name[] = {
+	"Data_Reg",
+	"Status_Reg",
+	"Control_reg",
+	"Scaler_reg",
+	NULL
+};
 
 #define DBG_LEON2_U	0
 #define DBG_LEON2_UART(fmt, ...)      if(DBG_LEON2_U){					\

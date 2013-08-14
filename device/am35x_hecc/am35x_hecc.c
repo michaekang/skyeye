@@ -141,11 +141,28 @@ static exception_t am35x_hecc_write(conf_object_t *opaque, generic_address_t off
 	//printf("In %s, offset=0x%x, val=0x%x\n", __FUNCTION__, offset, val);
 	return No_exp;
 }
+
+char* am35x_hecc_get_regname_by_id(conf_object_t* conf_obj, uint32_t id)
+{
+	am35x_hecc_device* dev = conf_obj->obj;
+	return dev->regs_name[id];
+}
+
+uint32_t am35x_hecc_get_regvalue_by_id(conf_object_t* conf_obj, uint32_t id)
+{
+	am35x_hecc_device* dev = conf_obj->obj;
+	uint32_t* regs_value = (uint32_t*)(dev->regs) + id;
+	return *regs_value;
+}
+
+
+
 static conf_object_t* new_am35x_hecc(char* obj_name){
 	am35x_hecc_device* dev = skyeye_mm_zero(sizeof(am35x_hecc_device));
 	hecc_reg_t* regs =  skyeye_mm_zero(sizeof(hecc_reg_t));
 	dev->obj = new_conf_object(obj_name, dev);
 	dev->regs = regs;
+	dev->regs_name = regs_name;
 
 	can_ops_intf* ops = skyeye_mm_zero(sizeof(can_ops_intf));
 	dev->can_ops = ops;
@@ -161,6 +178,13 @@ static conf_object_t* new_am35x_hecc(char* obj_name){
 	io_memory->read = am35x_hecc_read;
 	io_memory->write = am35x_hecc_write;
 	SKY_register_interface(io_memory, obj_name, MEMORY_SPACE_INTF_NAME);	
+	/* register the interface for registers */
+	skyeye_reg_intf* reg_intf = skyeye_mm_zero(sizeof(skyeye_reg_intf));
+	reg_intf->conf_obj = dev->obj;
+	reg_intf->get_regvalue_by_id = am35x_hecc_get_regvalue_by_id;
+	reg_intf->get_regname_by_id = am35x_hecc_get_regname_by_id;
+	reg_intf->set_regvalue_by_id = NULL;
+	SKY_register_interface((void*)reg_intf, obj_name, SKYEYE_REG_INTF);
 
 	return dev->obj;
 }

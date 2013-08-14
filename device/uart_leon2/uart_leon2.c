@@ -105,11 +105,12 @@ static exception_t leon2_uart_write(conf_object_t *opaque, generic_address_t off
 	leon2_uart_dev *dev = opaque->obj;
 	skyeye_uart_intf* skyeye_uart = dev->term;
 	DBG_LEON2_UART("write %s offset %d : 0x%x\n", dev->obj->objname, offset, *buf);
+	char* name = NULL;
+	uint32_t data = 0;
 
 	switch(offset)
 	{
 		case UART_DATA_REGISTER:
-
 			/*  Write the information in the DATA register  */
 			dev->regs.data = *buf;
 			/*  Indicate that the transmitter hold register is NOT empty    */
@@ -172,6 +173,19 @@ static exception_t leon2_uart_read(conf_object_t *opaque, generic_address_t offs
 	return No_exp;
 }
 
+char* leon2_uart_get_regname_by_id(conf_object_t* conf_obj, uint32_t id)
+{
+	leon2_uart_dev *dev = conf_obj->obj;
+	return dev->regs_name[id];
+}
+
+uint32_t leon2_get_regvalue_by_id(conf_object_t* conf_obj, uint32_t id){
+	leon2_uart_dev *dev = conf_obj->obj;
+	uint32_t* regs_value = (uint32_t*)&(dev->regs) + id;
+	return *regs_value;
+}
+
+
 /*
  * ===  FUNCTION  ======================================================================
  *         Name:  new_leon2_uart
@@ -183,6 +197,7 @@ static exception_t leon2_uart_read(conf_object_t *opaque, generic_address_t offs
 static conf_object_t* new_leon2_uart(char* obj_name)
 {
 	leon2_uart_dev* leon2_uart = skyeye_mm_zero(sizeof(leon2_uart_dev));
+	leon2_uart->regs_name = &regs_name;
 	/*  Clear the UART register   */
 	leon2_uart->obj = new_conf_object(obj_name, leon2_uart);
 
@@ -193,6 +208,12 @@ static conf_object_t* new_leon2_uart(char* obj_name)
 	SKY_register_interface((void*)io_memory, obj_name, MEMORY_SPACE_INTF_NAME);
 	/* register skyeye_uart interface */
 
+	skyeye_reg_intf* reg_intf = skyeye_mm_zero(sizeof(skyeye_reg_intf));
+	reg_intf->conf_obj = leon2_uart->obj;
+	reg_intf->get_regvalue_by_id = leon2_get_regvalue_by_id;
+	reg_intf->get_regname_by_id = leon2_uart_get_regname_by_id;
+	reg_intf->set_regvalue_by_id = NULL;
+	SKY_register_interface((void*)reg_intf, obj_name, SKYEYE_REG_INTF);
 	DBG_LEON2_UART("In %s, Line %d, create leon2 uart\n", __func__, __LINE__);
 
 	return leon2_uart->obj;
