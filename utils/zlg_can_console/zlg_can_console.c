@@ -104,7 +104,8 @@ int main(int argc, char ** argv)
 	portp = argv[2];
 #endif
 	//printf("hostp=%s, portp=%s\n", hostp, portp);
-	setup_zlg_can();
+	int dev_status;
+	dev_status = setup_zlg_can();
 	fd_socket = setup_netlink(hostp, portp);
 
 	#define MSG_LEN 8
@@ -124,11 +125,18 @@ int main(int argc, char ** argv)
 			for(; i < 8; i++){
 				//printf("In %s, recv[%d] = 0x%x\n", __FUNCTION__, i, msg_buf[i]);
 			}
-			can_transmit(msg_buf, MSG_LEN);
+			if(dev_status < 0){
+			}
+			else /* send by real can device */
+				can_transmit(msg_buf, MSG_LEN);
 			send(fd_socket, &result, sizeof(result), 0);
 		}
 		else{ /* read command */
-			can_receive(msg_buf, MSG_LEN);
+			if(dev_status < 0){
+			}
+
+			else /* receive from real can device */
+				can_receive(msg_buf, MSG_LEN);
 			send(fd_socket, msg_buf, MSG_LEN, 0);
 			send(fd_socket, &result, sizeof(result), 0);
 		}
@@ -144,8 +152,8 @@ int setup_zlg_can()
 #else
 	if(VCI_OpenDevice(VCI_USBCAN1,0,0)!=1)
 	{
-		printf("open deivce error\n");
-		exit(1);
+		printf("open real can deivce failed. use software can device\n");
+		return -1;
 	}
 	VCI_INIT_CONFIG config;
 	config.AccCode=0;
@@ -159,16 +167,19 @@ int setup_zlg_can()
 	if(VCI_InitCAN(VCI_USBCAN1,0,0,&config)!=1)
 	{
 		printf("init CAN error\n");
-		return -1;
+		goto ext;
 	}
 
 	if(VCI_StartCAN(VCI_USBCAN1,0,0)!=1)
 	{
 		printf("Start CAN error\n");
-		return -1;
+		goto ext;
 	}
 #endif
 	return 0;
+ext:	
+	VCI_CloseDevice(VCI_USBCAN1,0);
+	return -1;
 }
 
 #if 1
