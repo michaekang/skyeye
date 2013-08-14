@@ -47,8 +47,11 @@
 #include <windows.h>
 #include <winsock2.h>
 #endif
-
+#ifndef __MINGW32__
+#define TEST_CAN 1
+#else
 #define TEST_CAN 0
+#endif
 #if TEST_CAN
 #else
 #include "controlcan.h"
