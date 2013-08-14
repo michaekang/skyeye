@@ -101,7 +101,7 @@ if WIN32
 bin_PROGRAMS += uart_instance prof_convert zlg_can_console
 uart_instance_SOURCES = utils/uart_console/uart_console.c
 zlg_can_console_SOURCES = utils/zlg_can_console/zlg_can_console.c
-zlg_can_console_LDADD = -lcontrolcan -L./
+zlg_can_console_LDADD = -lcontrolcan -L$(top_srcdir)
 mknandflashdump_SOURCES =
 prof_convert_SOURCES = utils/code_cov/prof_convert.c
 uart_instance_LDADD = -lgw32c
@@ -183,6 +183,8 @@ endif
 
 	cp -a $(top_srcdir)/utils/pycli/*.py $(prefix)/bin/
 	cp -a $(top_srcdir)/utils/pycli/picture $(prefix)/bin/
+	cp -a $(top_srcdir)/ControlCan.dll $(prefix)/bin
+	cp -a $(top_srcdir)/kerneldlls $(prefix)/bin
 #	rm -f -r $(prefix)/conf && mkdir $(prefix)/conf
 #	cp -a $(top_srcdir)/conf/* $(prefix)/conf
 
