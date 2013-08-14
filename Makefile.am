@@ -183,7 +183,7 @@ endif
 
 	cp -a $(top_srcdir)/utils/pycli/*.py $(prefix)/bin/
 	cp -a $(top_srcdir)/utils/pycli/picture $(prefix)/bin/
-	cp -a $(top_srcdir)/ControlCan.dll $(prefix)/bin
+	cp -a $(top_srcdir)/ControlCAN.dll $(prefix)/bin
 	cp -a $(top_srcdir)/kerneldlls $(prefix)/bin
 #	rm -f -r $(prefix)/conf && mkdir $(prefix)/conf
 #	cp -a $(top_srcdir)/conf/* $(prefix)/conf
