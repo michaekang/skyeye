@@ -68,26 +68,13 @@ int main(int argc, char ** argv)
 	uint8_t buf[1024];
 	char * hostp;
 	char * portp;
+#ifdef __MINGW32__
 	if(argc == 1){ /* self test */
 		char trans_buf[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-#if 0
-		if(setup_zlg_can() == 0)
-			printf("Open and start can device OK\n");
-		can_transmit(trans_buf, 8);
-		usleep(10);
-		char recv_buf[8];
-		can_receive(recv_buf, 8);
-		int i = 0;
-		for(; i < 8; i++){
-			if(recv_buf[i] != trans_buf[i])
-				printf("The recv[%d]=0x%x, error.\n", i, recv_buf[i]);
-			else
-				printf("The recv[%d]=0x%x, OK.\n", i, recv_buf[i]);
-		}
-#endif
 		test_zlg(trans_buf, 8);
 		return 1;
 	}
+#endif
 	
 #ifndef __MINGW32__
 	if (argc != 2) {
@@ -178,10 +165,10 @@ int setup_zlg_can()
 		printf("Start CAN error\n");
 		goto ext;
 	}
-#endif
 	return 0;
 ext:	
 	VCI_CloseDevice(VCI_USBCAN1,0);
+#endif
 	return -1;
 }
 
@@ -327,6 +314,8 @@ int can_receive(char* buf, int nbytes){
 	return 0;
 }
 #endif
+
+#ifdef __MINGW32__
 void receive_func(char* buf, int nbytes)  
 {
 	int reclen=0;
@@ -404,3 +393,4 @@ ext:
 	VCI_CloseDevice(VCI_USBCAN1,0);
 	return 0;
 }
+#endif
