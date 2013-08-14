@@ -203,15 +203,26 @@ class MainFrame(wx.Frame):
 		print "In Help"
 
 	def OpenChp(self, event):
-		print "In Open checkpoint"
+		CheckPoint = ""
+		dialog = wx.DirDialog(None, C.FontOpenConfig, style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
+	        if dialog.ShowModal() == wx.ID_OK:
+	            CheckPoint=  dialog.GetPath()
+		if CheckPoint == "":
+			dialog.Destroy()
+			return
+		libcommon.load_chp(c_char_p(CheckPoint))
+
+
 
 	def SaveChp(self, event):
-		dialog = wx.FileDialog(None, C.FontSaveSnapshot, os.getcwd(),
-					"", "All files (*)|*", wx.SAVE)
+		CheckPoint = ""
+		dialog = wx.DirDialog(None, C.FontSaveSnapshot, style=wx.DD_DEFAULT_STYLE | wx.DD_NEW_DIR_BUTTON)
 	        if dialog.ShowModal() == wx.ID_OK:
-			Checkpoint =  dialog.GetPath()
-			last_path = dialog.GetDirectory()
-		print Checkpoint, last_path
+			CheckPoint =  dialog.GetPath()
+		if CheckPoint == "":
+			dialog.Destroy()
+			return
+		libcommon.save_chp(c_char_p(CheckPoint))
 
 	def InfoRegs(self, event):
 		app = wx.PySimpleApp()
