@@ -57,6 +57,7 @@ static int setup_zlg_can();
 static int setup_netlink(char * hostp, char * portp);
 static int can_transmit(char* buf , int nbytes);
 static int can_receive(char* buf , int nbytes);
+int test_zlg();
 
 int main(int argc, char ** argv)
 {
@@ -65,6 +66,24 @@ int main(int argc, char ** argv)
 	char * hostp;
 	char * portp;
 	if(argc == 1){ /* self test */
+		char trans_buf[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+#if 0
+		if(setup_zlg_can() == 0)
+			printf("Open and start can device OK\n");
+		can_transmit(trans_buf, 8);
+		usleep(10);
+		char recv_buf[8];
+		can_receive(recv_buf, 8);
+		int i = 0;
+		for(; i < 8; i++){
+			if(recv_buf[i] != trans_buf[i])
+				printf("The recv[%d]=0x%x, error.\n", i, recv_buf[i]);
+			else
+				printf("The recv[%d]=0x%x, OK.\n", i, recv_buf[i]);
+		}
+#endif
+		test_zlg(trans_buf, 8);
+		return 1;
 	}
 	
 #ifndef __MINGW32__
@@ -76,7 +95,7 @@ int main(int argc, char ** argv)
 		fprintf(stderr,"usage: %s <hostname> <port>\n", argv[0]);
 		exit(1);
 	}
-
+#if 1
 #ifndef __MINGW32__
 	hostp = argv[0];
 	portp = argv[1];
@@ -84,7 +103,7 @@ int main(int argc, char ** argv)
 	hostp = argv[1];
 	portp = argv[2];
 #endif
-	printf("hostp=%s, portp=%s\n", hostp, portp);
+	//printf("hostp=%s, portp=%s\n", hostp, portp);
 	setup_zlg_can();
 	fd_socket = setup_netlink(hostp, portp);
 
@@ -115,8 +134,9 @@ int main(int argc, char ** argv)
 		}
 
 	} while (1);
+#endif
+	return 0;
 }
-
 int setup_zlg_can()
 {
 	/* open, init and start can device*/
@@ -139,16 +159,19 @@ int setup_zlg_can()
 	if(VCI_InitCAN(VCI_USBCAN1,0,0,&config)!=1)
 	{
 		printf("init CAN error\n");
+		return -1;
 	}
 
 	if(VCI_StartCAN(VCI_USBCAN1,0,0)!=1)
 	{
 		printf("Start CAN error\n");
+		return -1;
 	}
 #endif
 	return 0;
 }
 
+#if 1
 int setup_netlink(char * hostp, char * portp)
 {
 	int	port;
@@ -224,6 +247,7 @@ gotit:
 int can_transmit(char* buf, int nbytes){
 #if TEST_CAN
 #else	
+	//printf("In %s, begin transmit\n", __FUNCTION__);	
 	VCI_CAN_OBJ send[3];
 	send[0].ID=0;
 	send[0].SendType=2;
@@ -239,21 +263,28 @@ int can_transmit(char* buf, int nbytes){
 	int sendind=3;	
 	for(i=0;i<send[0].DataLen;i++)
 	{
-		send[0].Data[i]=i;
-		send[1].Data[i]=i;
-		send[2].Data[i]=i;
+		send[0].Data[i]=buf[i];
+		send[1].Data[i]=buf[i];
+		send[2].Data[i]=buf[i];
 	}	
-	if(VCI_Transmit(VCI_USBCAN1,0,0,send,3)>0)
+	int times=30;
+	while(times--)
 	{
-		printf("Send: %08X",send[0].ID);
-		for(i=0;i<send[0].DataLen;i++)
+		if(VCI_Transmit(VCI_USBCAN1,0,0,send,3)>0)
 		{
-			printf(" %08X",send[0].Data[i]);
+			//printf("Send: %08X",send[0].ID);
+			for(i=0;i<send[0].DataLen;i++)
+			{
+				//printf(" %08X",send[0].Data[i]);
+			}
+			//printf("\n");
+			send[0].ID=sendind++;
+			send[1].ID=sendind++;
+			send[2].ID=sendind++;
 		}
-		printf("\n");
-		send[0].ID=sendind++;
-		send[1].ID=sendind++;
-		send[2].ID=sendind++;
+		else
+			break;
+		usleep(1);
 	}
 #endif
 	return 0;
@@ -265,6 +296,29 @@ int can_receive(char* buf, int nbytes){
 	VCI_CAN_OBJ rec[100];
 	int i;
 	{
+		//printf("running....\n");
+		if((reclen=VCI_Receive(VCI_USBCAN1,0,0,rec,100,100))>0)
+		{
+			//printf("IND:%d Receive: %08X",0,rec[reclen-1].ID);
+			for(i=0;i<rec[reclen-1].DataLen;i++)
+			{
+				//printf(" %08X",rec[reclen-1].Data[i]);
+				buf[i] = rec[reclen - 1].Data[i];
+			}
+			//printf("\n");
+			
+		}	
+	}
+#endif
+	return 0;
+}
+#endif
+void receive_func(char* buf, int nbytes)  
+{
+	int reclen=0;
+	VCI_CAN_OBJ rec[100];
+	int i;
+	{
 		printf("running....\n");
 		if((reclen=VCI_Receive(VCI_USBCAN1,0,0,rec,100,100))>0)
 		{
@@ -272,11 +326,67 @@ int can_receive(char* buf, int nbytes){
 			for(i=0;i<rec[reclen-1].DataLen;i++)
 			{
 				printf(" %08X",rec[reclen-1].Data[i]);
+				buf[i] = rec[reclen - 1].Data[i];
 			}
 			printf("\n");
-			
 		}	
 	}
-#endif
+	return;
+}
+void transmit_func(char* buf, int nbytes){
+	VCI_CAN_OBJ send[3];
+	send[0].ID=0;
+	send[0].SendType=2;
+	send[0].RemoteFlag=0;
+	send[0].ExternFlag=1;
+	send[0].DataLen=8;
+	send[1]=send[0];
+	send[2]=send[0];
+	send[1].ID=1;
+	send[2].ID=2;
+	
+	int i=0;
+	
+	for(i=0;i<send[0].DataLen;i++)
+	{
+		send[0].Data[i]= buf[i];
+		send[1].Data[i]= buf[i];
+		send[2].Data[i]= buf[i];
+	}
+	int ret;
+	int times=3;
+	int sendind=3;
+	while(times--)
+	{
+		if(VCI_Transmit(VCI_USBCAN1,0,0,send,3)>0)
+		{
+			printf("Send: %08X",send[0].ID);
+			for(i=0;i<send[0].DataLen;i++)
+			{
+				printf(" %08X",send[0].Data[i]);
+			}
+			printf("\n");
+			send[0].ID=sendind++;
+			send[1].ID=sendind++;
+			send[2].ID=sendind++;
+		}
+		else
+			break;
+		usleep(1);
+	}
+	return;
+}
+int test_zlg(char* buf, int nbytes){
+	setup_zlg_can();
+
+	transmit_func(buf, nbytes);
+	/* receive */
+	char recv_buf[8];
+	receive_func(recv_buf, 8);
+	
+	usleep(10);
+	
+ext:	
+	VCI_CloseDevice(VCI_USBCAN1,0);
 	return 0;
 }

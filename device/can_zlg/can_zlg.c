@@ -105,7 +105,7 @@ static int create_can(char * hostname, int port){
 	memset(&process_information, 0, sizeof(process_information));
 	memset(&startupinfo, 0, sizeof(startupinfo));
 	startupinfo.cb = sizeof(startupinfo);
-	printf("In %s, before CreateProcess, cmd=%s\n", __FUNCTION__, can_instance_prog);
+	//printf("In %s, before CreateProcess, cmd=%s\n", __FUNCTION__, can_instance_prog);
 	result = CreateProcess(NULL, can_instance_prog, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &startupinfo, &process_information);
 	if (result == 0) {
 		SKYEYE_ERR("ERROR: CreateProcess failed!");
@@ -129,7 +129,7 @@ exception_t open_can_device(conf_object_t* obj){
 	int on, length;
 	struct sockaddr_in server, from;
 	char * froms;
-	printf("In %s\n", __FUNCTION__);
+	//printf("In %s\n", __FUNCTION__);
 #ifndef __MINGW32__
 	sv_skt = socket(AF_INET, SOCK_STREAM, 0);
 	if (sv_skt < 0) SKYEYE_ERR("opening stream socket");
@@ -221,7 +221,7 @@ retry:
 		int socket_conn = accept(sv_skt, (struct sockaddr *)&client, &len);
 		if(socket_conn > 0){
 			dev->conn_socket = socket_conn;
-			printf("get a client, socket_conn=%d\n", socket_conn);
+			//printf("get a client, socket_conn=%d\n", socket_conn);
 			break;
 		}
 		else{
@@ -253,16 +253,16 @@ exception_t can_transmit(conf_object_t* obj, void* addr, int nbytes){
 	char* buf = addr;
 	int result = 0;
 	int n;
-	printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
+	//printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
 	n = send(dev->conn_socket, &cmd, sizeof(cmd), 0);
-	printf("the ret of send is %d\n", n);
+	//printf("the ret of send is %d\n", n);
 	recv(dev->conn_socket, &result, sizeof(result), 0);
-	printf("In %s, result=%d\n", __FUNCTION__, result);
+	//printf("In %s, result=%d\n", __FUNCTION__, result);
 	send(dev->conn_socket, buf, nbytes, 0);
 	recv(dev->conn_socket, &result, sizeof(result), 0);
-	printf("In %s, after send msg, result=%d\n", __FUNCTION__, result);
+	//printf("In %s, after send msg, result=%d\n", __FUNCTION__, result);
 	exception_t ret;
-	printf("In %s\n", __FUNCTION__);
+	//printf("In %s\n", __FUNCTION__);
 	#if 0
 	VCI_CAN_OBJ vco;
 	memset(&vco, '\0', sizeof(VCI_CAN_OBJ));
@@ -282,20 +282,20 @@ exception_t can_receive(conf_object_t* obj, void* addr, int nbytes){
 	char* buf = addr;
 	int result = 0;
 	int n;
-	printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
+	//printf("In %s, conn_socket=%d\n", __FUNCTION__, dev->conn_socket);
 	n = send(dev->conn_socket, &cmd, sizeof(cmd), 0);
-	printf("the ret of send is %d\n", n);
+	//printf("the ret of send is %d\n", n);
 	recv(dev->conn_socket, &result, sizeof(result), 0);
-	printf("In %s, result=%d\n", __FUNCTION__, result);
+	//printf("In %s, result=%d\n", __FUNCTION__, result);
 	recv(dev->conn_socket, buf, nbytes, 0);
 	recv(dev->conn_socket, &result, sizeof(result), 0);
 	int i = 0;
-	for(; i < 8; i++)
-		printf("In %s, buf[%d] = 0x%x\n", __FUNCTION__, i, buf[i]);
-
+	for(; i < 8; i++){
+		//printf("In %s, buf[%d] = 0x%x\n", __FUNCTION__, i, buf[i]);
+	}
 
 	exception_t ret;
-	printf("In %s\n", __FUNCTION__);
+	//printf("In %s\n", __FUNCTION__);
 	#if 0
 	VCI_CAN_OBJ vco[100];
 	lRet = VCI_Receive(nDeviceType, nDeviceInd, nCANInd, vco, 100, 400);
@@ -316,7 +316,7 @@ static conf_object_t* new_can_zlg(char* obj_name){
 	ops->receive = can_receive;
 	dev->ops = ops;
 	SKY_register_interface(ops, obj_name, CAN_OPS_INTF_NAME);	
-	printf("In %s, ops=0x%x\n", __FUNCTION__, ops);
+	//printf("In %s, ops=0x%x\n", __FUNCTION__, ops);
 	start_can(dev->obj);
 
 	info->device_type = 20;
