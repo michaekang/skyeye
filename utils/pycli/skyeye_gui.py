@@ -187,7 +187,18 @@ class MainFrame(wx.Frame):
 		libgdbserver.com_remote_gdb()
 		self.status.SetLabel(C.FontRemoteGdb)
 		self.ToolBar.EnableTool(RunID, 0)
+		self.Bind(wx.EVT_TOOL, self.StopRemoteGdb, id = DebugID)
+	
+	def StopRemoteGdb(self, event):
+		# SkyEye will be stoped when closing the remote gdb
+		libcommon.SIM_stop()
+		self.status.SetLabel(C.FontStop)
+		self.RefurbishSubGui()
 
+		libgdbserver.close_remote_gdb()
+		self.ToolBar.EnableTool(RunID, 1)
+		self.Bind(wx.EVT_TOOL, self.RemoteGdb, id = DebugID)
+		
 	def Help(self, event):
 		print "In Help"
 

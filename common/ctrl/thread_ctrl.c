@@ -231,6 +231,20 @@ void destroy_threads(void){
         }
 }
 
+void destory_threads_by_id(pthread_t id){
+	work_thread_t* thread = get_thread_by_id(id);
+	stop_thread(thread);
+	if(thread->state != Blank_state){
+		if(pthread_equal(id, pthread_self()))
+			return ;
+		pthread_cancel(id);
+#ifndef __MINGW32__
+		pthread_join(id, NULL);
+#endif
+	}
+	return ;
+}
+
 /**
 * @brief Set all the thread to running mode
 */

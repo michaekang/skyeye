@@ -67,6 +67,9 @@ void start_thread(work_thread_t* thread);
 void stop_thread(work_thread_t* thread);
 work_thread_t* get_thread_by_id(pthread_t id);
 void skyeye_exit(int ret);
+void start_thread_by_id(pthread_t id);
+void stop_thread_by_id(pthread_t id);
+void destory_threads_by_id(pthread_t id);
 #ifdef __cplusplus
 }
 #endif

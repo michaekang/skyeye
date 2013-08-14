@@ -91,6 +91,14 @@ jmp_buf toplevel;
 int extended_protocol;
 int general_thread;
 int cont_thread;
+pthread_t remote_thread_id;
+/*
+ * The pthread_cancel can't be used in win32,
+ * So Using the globle value SIM_remote_stoped 
+ * to judge the remote's status, If remote is 
+ * stopped, We let the thread return.
+ */
+static bool_t SIM_remote_stopped = True;
 
 
 unsigned char *registers;
@@ -99,9 +107,10 @@ unsigned char *registers;
    NAME is the filename used for communication.  */
 
 
-void
+int
 remote_open (char *name)
 {
+
 	int save_fcntl_flags;
 
 	char *port_str;
@@ -146,19 +155,27 @@ remote_open (char *name)
 	sockaddr.sin_family = PF_INET;
 	sockaddr.sin_port = htons (port);
 	sockaddr.sin_addr.s_addr = INADDR_ANY;
-
-	if (bind (tmp_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))
-	    || listen (tmp_desc, 1)){
+	if (bind (tmp_desc, (struct sockaddr *) &sockaddr, sizeof (sockaddr))){
+		/* We can't bind the port and the address once more
+		 * before server accepts the gdb client */
 		perror ("Can't bind address");
-		return -1;
+		return 0;
+	}
+	if(listen (tmp_desc, 1)){
+		perror ("Can't Listen address");
+		return 0;
 	}
 	printf("Listen seccess for connect!\n");
 
 	tmp = sizeof (sockaddr);
+	/* It is a best way that I thought to close the socket(tmp_desc)
+	 * before gdb server accepts a client refer to the function : remote_close */
+	remote_desc = tmp_desc;
+
 	remote_desc = accept (tmp_desc, (struct sockaddr *) &sockaddr, &tmp);
 	if (remote_desc == -1){
 		perror ("Accept failed");
-		return -1;
+		return 0;
 	}
 	printf("Wait for client connect\n");
 
@@ -191,6 +208,7 @@ remote_open (char *name)
 #endif /* FASYNC */
 #endif //chy 20050729-------------------
 	printf ("Remote debugging using %s\n", name);
+	return 1;
 }
 
 extern register_defs_t *register_types[8];
@@ -207,10 +225,12 @@ void com_remote_gdb(){
 		return -1;
 	}
 	/* run gdbserver in a single thread */
-	pthread_t id;
-	create_thread(sim_debug, arch_instance, &id);
+	SIM_remote_stopped = False;
+	create_thread(sim_debug, arch_instance, &remote_thread_id);
 }
 
+/* The function will close remote_desc after accepting the client,
+ * it will close the tmp_desc before accepting the client */
 void
 remote_close ()
 {
@@ -220,6 +240,13 @@ remote_close ()
 	closesocket (remote_desc);
 	WSACleanup();
 #endif
+}
+
+void close_remote_gdb(){
+	SIM_remote_stopped = True;
+	remote_close();
+	destory_threads_by_id(remote_thread_id);
+	return ;
 }
 
 /* Convert hex digit A to a number.  */
@@ -987,11 +1014,19 @@ sim_debug ()
 		skyeye_exit (1);
 	}
 	while (1) {
-		remote_open ("host:12345");
-
+		i = remote_open ("host:12345");
+		if(SIM_remote_stopped == True || i == 0){
+			/* Let the thread return if remote is stoped
+			 * or the bind the port failed */
+			return 0;
+		}
 		restart:
 		setjmp (toplevel);
 		while (getpkt (own_buf) > 0) {
+			if(SIM_remote_stopped == True){
+				/* Let the thread return if remote is stoped */
+				return 0;
+			}
 			unsigned char sig;
 			i = 0;
 			ch = own_buf[i++];
