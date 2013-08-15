@@ -7,6 +7,7 @@ import sys, platform
 import skyeye_ir
 import x
 import skyeye_gui_dev as SkyEyeDev
+import skyeye_gui_about as SkyEyeAbout
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -43,6 +44,10 @@ class MainFrame(wx.Frame):
 	def __init__(self, parent = None, id = -1,
 			title = C.FontMainTitle):
 		wx.Frame.__init__(self, parent, id, title, size = (450, 320))
+		if cmp(os_info, "Linux"):
+			iconame = "c:\\SkyEye\\1.0\\skyeye.ico"
+			icon = wx.Icon(iconame, wx.BITMAP_TYPE_ICO)
+			self.SetIcon(icon)
 		self.MenuBar = wx.MenuBar()
 		# Create Menu for Debug
 		self.DebugMenu = wx.Menu()
@@ -76,11 +81,11 @@ class MainFrame(wx.Frame):
 
 		# Create Menu for Help
 		self.HelpMenu = wx.Menu()
-		#UserMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontUserManu)
-		VersionMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontVersion)
-		#self.HelpMenu.AppendItem(UserMenu)
+		UserMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontUserManu)
+		VersionMenu = wx.MenuItem(self.HelpMenu, wx.NewId(), C.FontAbout)
+		self.HelpMenu.AppendItem(UserMenu)
 		self.HelpMenu.AppendItem(VersionMenu)
-		#self.Bind(wx.EVT_MENU, self.UserMan, id= UserMenu.GetId())
+		self.Bind(wx.EVT_MENU, self.UserMan, id= UserMenu.GetId())
 		self.Bind(wx.EVT_MENU, self.ShowVersion, id= VersionMenu.GetId())
 
 		# Add the Memuitem into  MenuBar
@@ -90,7 +95,7 @@ class MainFrame(wx.Frame):
 
 		# Add the Tool Bar
 		self.ImageOpen = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/open.png", 50, 50)
-		self.ImageSet = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/set.png", 50, 50)
+		#self.ImageSet = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/set.png", 50, 50)
 		self.ImageStop = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/stop.png", 50, 50)
 		self.ImageRun = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/run.png", 45, 45)
 		self.ImageMore = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/debug.png", 52, 50)
@@ -107,16 +112,16 @@ class MainFrame(wx.Frame):
 		self.ToolBar.AddSimpleTool(RunID, self.ImageRun, C.FontRun)
 		self.ToolBar.AddSimpleTool(DebugID, self.ImageMore, C.FontRemoteGdb)
 		self.ToolBar.AddSeparator()
-		self.ToolBar.AddSimpleTool(SetID, self.ImageSet, C.FontSet)
-		self.ToolBar.AddSimpleTool(HelpID, self.ImageHelp, C.FontVersion)
+		#self.ToolBar.AddSimpleTool(SetID, self.ImageSet, C.FontSet)
+		self.ToolBar.AddSimpleTool(HelpID, self.ImageHelp, C.FontUserManu)
 		self.ToolBar.Realize()
 
 		self.Bind(wx.EVT_TOOL, self.OpenConfig, id = OpenID)
-		self.Bind(wx.EVT_TOOL, self.SetConfig, id = SetID)
+		#self.Bind(wx.EVT_TOOL, self.SetConfig, id = SetID)
 		self.Bind(wx.EVT_TOOL, self.SaveChp, id = ChpID)
 		self.Bind(wx.EVT_TOOL, self.Run, id = RunID)
 		self.Bind(wx.EVT_TOOL, self.RemoteGdb, id = DebugID)
-		self.Bind(wx.EVT_TOOL, self.Help, id = HelpID)
+		self.Bind(wx.EVT_TOOL, self.UserMan, id = HelpID)
 
 		self.Panel = wx.Panel(self)
 		self.Panel.SetBackgroundColour('White')
@@ -212,9 +217,19 @@ class MainFrame(wx.Frame):
 
 	def UserMan(self, event):
 		print "In User Manu"
+		if cmp(os_info, "Linux"):
+			os.startfile('"c:\\SkyEye\\1.0\\opt\\skyeye\\bin\\doc\\Help.chm"')
+		else:
+			name = os.getenv("SKYEYEBIN") + "/doc/Help.pdf"
+			os.system('run-mailcap "%s"' % name)	
+
 
 	def ShowVersion(self, event):
 		print "In ShowVersion"
+		app = wx.PySimpleApp()
+		dialog = SkyEyeAbout.About()
+		dialog.Show()
+		app.MainLoop()
 
 	def ShowDevice(self, event):
 		app = wx.PySimpleApp()
