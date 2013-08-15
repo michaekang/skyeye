@@ -242,9 +242,15 @@ static void free_leon2_uart(conf_object_t* conf_obj)
 		return;
 	conf_object_t* class_obj = get_conf_obj(conf_term->class_name);
 	skyeye_class_t* class_data = class_obj->obj;
-	/* free ram's attrabute : image */
+	/* free uart attrabute : term */
 	if(class_data->free_instance)
 		class_data->free_instance(conf_term);
+	skyeye_reg_intf* reg_intf = (skyeye_reg_intf*)SKY_get_interface(dev->obj, SKYEYE_REG_INTF);
+	if(reg_intf != NULL){
+		/* free reg_intf */
+		skyeye_free(reg_intf);
+	}
+	/* free uart term interface */
 	skyeye_free(dev->term);
 	skyeye_free(dev->obj);
 	skyeye_free(dev);

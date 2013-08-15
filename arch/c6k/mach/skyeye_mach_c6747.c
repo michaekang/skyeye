@@ -100,6 +100,7 @@ void c6747_mach_init(void* state,  machine_config_t * mach){
 	mach->mach_io_reset = c6747_io_reset;
 
 	addr_space_t* phys_mem = new_addr_space("c6747_mach_space");
+	mach->phys_mem = phys_mem;
 	conf_object_t* hecc = pre_conf_obj("am35x_hecc_0", "am35x_hecc");
 	memory_space_intf* hecc_io_memory = (memory_space_intf*)SKY_get_interface(hecc, MEMORY_SPACE_INTF_NAME);
 	ret = add_map(phys_mem, 0x80001000, 0x1000, 0x0, hecc_io_memory, 1, 1);

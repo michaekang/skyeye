@@ -157,6 +157,13 @@ c6k_init_state ()
 void
 c6k_reset_state ()
 {
+	printf("In %s Line %d\n", __func__, __LINE__);
+	memset(core, '\0', sizeof(core));
+	core->sploop_begin = core->sploop_end = 0xFFFFFFFF;
+	core->spmask_begin = 0xFFFFFFFF;
+	core->buffer_pos = 0;
+
+	return;
 }
 
 /* Execute a single instruction.  */

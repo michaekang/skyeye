@@ -159,7 +159,8 @@ class MainFrame(wx.Frame):
 			self.EnableButton()
 			self.OpenConfFlag = 1
 
-
+	def Restart(self, event):
+        	libcommon.SIM_restart()
 	
 	def Run(self, event):
 		self.ToolBar.DeleteTool(id = RunID)
