@@ -1018,14 +1018,14 @@ sim_debug ()
 		if(SIM_remote_stopped == True || i == 0){
 			/* Let the thread return if remote is stoped
 			 * or the bind the port failed */
-			return 0;
+			pthread_exit(0);
 		}
 		restart:
 		setjmp (toplevel);
 		while (getpkt (own_buf) > 0) {
 			if(SIM_remote_stopped == True){
 				/* Let the thread return if remote is stoped */
-				return 0;
+				pthread_exit(0);
 			}
 			unsigned char sig;
 			i = 0;
