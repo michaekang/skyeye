@@ -147,10 +147,12 @@ int default_bus_write(short size, generic_address_t addr, uint32_t value){
        return 0; 
 }
 
+exception_t mem_free(void);
 /**
 * @brief initialization of global memory map
 */
 void reset_global_memmap(){
+	mem_free();
 	memset(&global_memmap, 0, sizeof(mem_config_t));
 }
 

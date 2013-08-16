@@ -330,6 +330,29 @@ mem_write_word (uint32_t addr, uint32_t data)
 	else if(arch_instance->endianess == Big_endian)
 		*temp = word_to_BE(data);
 }
+
+/*
+ * free memory space for the banks
+ */
+exception_t mem_free(void)
+{
+	mem_config_t *mc = get_global_memmap();
+	mem_state_t * mem = &global_memory;
+	mem_bank_t *mb = mc->mem_banks;
+	int num = mc->current_num;
+	int bank = 0;
+
+	for (bank = 0; bank < num; bank++) {
+		if(mb[bank].type == MEMTYPE_IO)
+			continue;
+		if (global_memory.rom[bank]){
+			skyeye_free (global_memory.rom[bank]);
+			global_memory.rom[bank] = NULL;
+		}
+	}
+
+	return No_exp;
+}
 /*
  * allocate memory space for the banks
  */
@@ -484,9 +507,6 @@ mem_reset ()
 				skyeye_exit (-1);
 			}
 #endif
-
-
-
 	}/*end  for(i = 0;i < num; i++) */
 
 	return No_exp;

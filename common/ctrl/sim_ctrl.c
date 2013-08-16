@@ -392,11 +392,10 @@ void SIM_restart(void){
 	if(config->mach == NULL){
 		return;
 	}
-	sky_pref_t *pref = get_skyeye_pref();
-	space_obj_free(config->mach->phys_mem);
-	//pthread_cancel();
 	generic_arch_t* arch_instance = get_arch_instance("");
 	SIM_stop(arch_instance);
+	sky_pref_t *pref = get_skyeye_pref();
+	space_obj_free(config->mach->phys_mem);
 	/* Call SIM_exit callback */
 	exec_callback(SIM_exit_callback, arch_instance);
 	printf("Destroy threads.\n");
@@ -407,17 +406,17 @@ void SIM_restart(void){
 	reset_skyeye_config();
 	/* reset mem map */
 	reset_global_memmap();
-	/* reset arch */
-	reset_arch();
+	
 	/* free exec from cell */
 	del_from_cell();
 	/* free the memory */
 	skyeye_erase_map();
+	/* reset arch */
+	reset_arch();
 
 	if(!pref->module_search_dir)
 		pref->module_search_dir = skyeye_strdup(default_lib_dir);
 	SKY_load_all_modules(pref->module_search_dir, NULL);
-
 #ifndef __MINGW32__
 	/* restore the environment */
 	tcsetattr(0, TCSANOW, &pref->saved_term);

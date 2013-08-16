@@ -51,6 +51,10 @@ void
 reset_arch(void)
 {
 	memset(skyeye_archs, 0, sizeof(skyeye_archs));
+	if(running_arch_list){
+		skyeye_free(running_arch_list);
+		running_arch_list = NULL;
+	}
 	return;
 }
 /**
@@ -86,6 +90,8 @@ generic_arch_t * get_arch_instance(const char* arch_name){
 		running_arch_list = skyeye_mm_zero(sizeof(generic_arch_t));
 		skyeye_config_t* config = get_current_config();
 		if(config->arch == NULL){
+			skyeye_free(running_arch_list);
+			running_arch_list = NULL;
 			printf("No valid arch option is provided.\n");
 			return NULL;
 		}
