@@ -60,3 +60,11 @@ exception_t reset_conf_obj(conf_object_t* obj){
 	/* can't find the class 's reset function */
 	return Not_found_exp;
 }
+
+void free_conf_obj(conf_object_t* obj){
+	conf_object_t* class_obj = get_conf_obj(obj->class_name);
+	skyeye_class_t* class_data = class_obj->obj;
+	if(class_data->free_instance)
+		class_data->free_instance(obj);
+	return;
+}

@@ -93,11 +93,12 @@ void c6747_io_reset(void* state){
 }
 
 exception_t set_conf_attr(conf_object_t* obj, char* attr_name, attr_value_t* value);
-
+void c6747_mach_fini(void* state, machine_config_t* mach);
 void c6747_mach_init(void* state,  machine_config_t * mach){
 	exception_t ret;
 	attr_value_t* value;
 	mach->mach_io_reset = c6747_io_reset;
+	mach->mach_fini = c6747_mach_fini;
 
 	addr_space_t* phys_mem = new_addr_space("c6747_mach_space");
 	mach->phys_mem = phys_mem;
@@ -155,3 +156,11 @@ void c6747_mach_init(void* state,  machine_config_t * mach){
 	return;
 }
 
+void c6747_mach_fini(void* state,  machine_config_t * mach){
+	conf_object_t* can_zlg = get_conf_obj("can_zlg_0");
+	if(can_zlg == NULL)
+		; /* maybe freed in other place */
+	else
+		free_conf_obj(can_zlg);
+		
+}

@@ -88,6 +88,7 @@ cli_func_t global_gui = NULL;
 void SIM_init(){
 	sky_pref_t* pref;
 	char* welcome_str = get_front_message();
+	atexit(SIM_fini);
 	/* 
 	 * get the corrent_config_file and do some initialization 
 	 */
@@ -349,6 +350,12 @@ void SIM_fini(){
 	//pthread_cancel();
 	generic_arch_t* arch_instance = get_arch_instance("");
 	SIM_stop(arch_instance);
+	skyeye_config_t* config = get_current_config();
+	if(config->mach != NULL){ /* cleanup and free machine */
+		if(config->mach->mach_fini)
+			config->mach->mach_fini(arch_instance, config->mach);
+	}
+
 	/* Call SIM_exit callback */
         exec_callback(SIM_exit_callback, arch_instance);
 	printf("Destroy threads.\n");

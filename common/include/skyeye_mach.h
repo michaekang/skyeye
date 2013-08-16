@@ -34,6 +34,7 @@ typedef struct machine_config
 {
 	const char *machine_name;	/*e.g.at91,ep7312,clps711x */
 	void (*mach_init) (void * state, struct machine_config * this_mach);	/*should be called when the machine initilization */
+	void (*mach_fini) (void * state, struct machine_config * this_mach);	/*should be called when the machine initilization */
 	uint32 (*mach_io_read_byte) (void * state, uint32 addr);
 	exception_t (*mach_io_write_byte) (void * state, uint32 addr,
 				    uint32 data);

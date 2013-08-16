@@ -25,9 +25,9 @@ typedef struct skyeye_class{
 #endif
 
 void SKY_register_class(const char* name, skyeye_class_t* skyeye_class);
-
 conf_object_t* pre_conf_obj(const char* objname, const char* class_name);
 exception_t reset_conf_obj(conf_object_t* obj);
+void free_conf_obj(conf_object_t* obj);
 #ifdef __cplusplus
 }
 #endif
