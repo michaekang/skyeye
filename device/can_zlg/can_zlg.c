@@ -32,6 +32,7 @@
 #include <memory_space.h>
 #include <skyeye_device.h>
 #include <stdint.h>
+#include <signal.h>
 #include <errno.h>
 #ifndef __MINGW32__
 #include <poll.h>
@@ -63,8 +64,19 @@ const char* uart_prog = "zlg_can_console";
 const char* uart_prog = "zlg_can_console.exe";
 #endif
 
-static int create_can(char * hostname, int port){
-	pid_t pid;
+/**
+* @brief create a process to run zlg_can_console
+*
+* @param hostname
+* @param port
+*
+* @return pid of the new child process
+*/
+#ifdef __MINGW32__
+static DWORD create_can(char * hostname, int port){
+#else
+static pid_t create_can(char * hostname, int port){
+#endif
 	char port_str[32];
 	char can_instance_prog[1024];
 	//char * argv[]={"xterm","-e",uart_instance_prog,"localhost", "2345"};
@@ -75,6 +87,7 @@ static int create_can(char * hostname, int port){
 
 	sprintf(port_str, "%d", port);
 #ifndef __MINGW32__
+	pid_t pid;
 	switch (pid = fork())
     	{
         	case -1:
@@ -94,6 +107,7 @@ static int create_can(char * hostname, int port){
 		default:
 			break;
 	}
+	return pid;
 #else
 	strcat(can_instance_prog, " ");
 	strcat(can_instance_prog, hostname);
@@ -112,10 +126,9 @@ static int create_can(char * hostname, int port){
 		return -1;
 	}
 	else {
-		return 0;
+		return process_information.dwProcessId;
 	}
 #endif
-	return 0;
 }
 
 exception_t open_can_device(conf_object_t* obj){
@@ -212,7 +225,12 @@ retry:
 	gethostname(myhostname, MAXHOSTNAME);
 	//printf("In %s, before main loop\n", __FUNCTION__);
 	/* Create the client xterm */
-	create_can(myhostname, ntohs(server.sin_port));
+	pid_t pid;
+	if((pid = create_can(myhostname, ntohs(server.sin_port))) < 0){
+		SKYEYE_ERR("Can not create can console process.\n");
+		return ret;
+	}
+	dev->can_console_pid = pid;
 	/* main loop */
 	struct	sockaddr_in client;
 	client.sin_family = AF_INET;
@@ -324,7 +342,17 @@ static conf_object_t* new_can_zlg(char* obj_name){
 	info->reserved = 9600; /* baud rate */
 	return dev->obj;
 }
-void free_can_zlg(conf_object_t* dev){
+void free_can_zlg(conf_object_t* obj){
+	can_zlg_device *dev = obj->obj;
+#ifndef __MINGW32__
+	kill(dev->can_console_pid, SIGTERM);
+#else
+	HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, dev->can_console_pid);
+	if(hProcess == NULL)
+		return;
+	TerminateProcess(hProcess, 0);
+		
+#endif
 	
 }
 

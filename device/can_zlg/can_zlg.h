@@ -37,6 +37,11 @@ typedef struct can_zlg_device{
 	dev_info_t* info;
 	can_ops_intf* ops;
 	int conn_socket;
+#ifdef __MINGW32__
+	DWORD can_console_pid;
+#else
+	pid_t can_console_pid;
+#endif
 }can_zlg_device;
 
 #endif
