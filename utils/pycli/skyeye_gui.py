@@ -27,13 +27,37 @@ def GetImage(self, picture, l, h):
 	imageBit = wx.BitmapFromImage(image)
 	return imageBit
 
+
+def GuiDialog(self, message, title, flag):  #Return value: True/False, flag: 0 indicate YES and NO button, 1 indicate YES button only
+	if flag == 0:
+		dlg = wx.MessageDialog(None, message, title, wx.YES_NO)
+		retcode = dlg.ShowModal()
+		if(retcode == wx.ID_YES):
+			dlg.Destroy()
+			return True
+		else:
+			dlg.Destroy()
+			return False
+	elif flag == 1:
+		dlg = wx.MessageDialog(None, message, title, wx.OK)
+		retcode = dlg.ShowModal()
+		if(retcode == wx.ID_OK):
+			dlg.Destroy()
+			return True
+		else:
+			dlg.Destroy()
+			return False
+	else:
+		dlg = wx.MessageDialog(None, "error prompt", title, wx.OK)
+		
+
 OpenID = wx.NewId()
 ChpID = wx.NewId()
 RunID = wx.NewId()
 StopID = wx.NewId()
 DebugID = wx.NewId()
 SetID = wx.NewId()
-SetID = wx.NewId()
+RestartID = wx.NewId()
 HelpID = wx.NewId()
 
 class MainFrame(wx.Frame):
@@ -94,9 +118,9 @@ class MainFrame(wx.Frame):
 		self.MenuBar.Append(self.HelpMenu, C.FontHelpMenu)
 
 		# Add the Tool Bar
-		self.ImageOpen = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/open.png", 50, 50)
-		#self.ImageSet = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/set.png", 50, 50)
-		self.ImageStop = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/stop.png", 50, 50)
+		self.ImageOpen = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/open.png", 45, 45)
+		self.ImageRestart = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/restart.png", 45, 45)
+		self.ImageStop = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/stop.png", 45, 45)
 		self.ImageRun = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/run.png", 45, 45)
 		self.ImageMore = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/debug.png", 52, 50)
 		self.ImageHelp= GetImage(self, os.getenv("SKYEYEBIN") + "./picture/help.png", 40, 40)
@@ -109,15 +133,15 @@ class MainFrame(wx.Frame):
 		self.ToolBar.AddSimpleTool(ChpID, self.ImageChp, C.FontSaveSnapshot)
 		self.ToolBar.AddSeparator()
 		# The button for run and stop
+		self.ToolBar.AddSimpleTool(RestartID, self.ImageRestart, C.FontRestart)
 		self.ToolBar.AddSimpleTool(RunID, self.ImageRun, C.FontRun)
 		self.ToolBar.AddSimpleTool(DebugID, self.ImageMore, C.FontRemoteGdb)
 		self.ToolBar.AddSeparator()
-		#self.ToolBar.AddSimpleTool(SetID, self.ImageSet, C.FontSet)
 		self.ToolBar.AddSimpleTool(HelpID, self.ImageHelp, C.FontUserManu)
 		self.ToolBar.Realize()
 
 		self.Bind(wx.EVT_TOOL, self.OpenConfig, id = OpenID)
-		#self.Bind(wx.EVT_TOOL, self.SetConfig, id = SetID)
+		self.Bind(wx.EVT_TOOL, self.Restart, id = RestartID)
 		self.Bind(wx.EVT_TOOL, self.SaveChp, id = ChpID)
 		self.Bind(wx.EVT_TOOL, self.Run, id = RunID)
 		self.Bind(wx.EVT_TOOL, self.RemoteGdb, id = DebugID)
@@ -126,26 +150,47 @@ class MainFrame(wx.Frame):
 		self.Panel = wx.Panel(self)
 		self.Panel.SetBackgroundColour('White')
 		wx.StaticText(self.Panel, -1, C.FontCPU, (10, 10))
-		self.cpu = wx.StaticText(self.Panel, -1, "NULL", (80, 10))
+		self.cpu = wx.StaticText(self.Panel, -1, C.FontInitStatus, (80, 10))
 		wx.StaticText(self.Panel, -1, C.FontStatus, (10, 50))
-		self.status = wx.StaticText(self.Panel, -1, "NULL", (80, 50))
+		self.status = wx.StaticText(self.Panel, -1, "", (80, 50))
 
-		self.DisableButton()
+		self.InitOpButton()
 
 
 
 	def OpenConfig(self, event):
+		Previous_OpenConfFlag = self.OpenConfFlag
+		if self.OpenConfFlag == 0:        
+			self.OpenConfFlag = 1
+		else:
+			retcode = GuiDialog(self, C.FontReOpenConf, C.FontConfirm, 0)
+			if(retcode == True):
+				self.Restart(0)
+			else:
+				return 
+				
+
 		dialog = wx.FileDialog(None, C.FontOpenConfig, os.getcwd(),"", "All files (*)|*", wx.OPEN)
 	        if dialog.ShowModal() == wx.ID_OK:
 	            configure_file =  dialog.GetPath()
 	            last_path = dialog.GetDirectory()
+		else:
+			self.OpenConfFlag = Previous_OpenConfFlag
+
 		os.chdir(last_path)
 		if configure_file == "":
 			dialog.Destroy()
 			return
 		#change the string of python to string of C.
 		libcommon.com_load_conf(c_char_p(configure_file))
-        	libcommon.SIM_start()
+        	ret = libcommon.SIM_start()
+		if( ret != 0):
+			libcommon.get_err_str.restype = c_char_p
+			pychar = libcommon.get_err_str()
+			GuiDialog(self, pychar, C.FontPrompt, 1)
+			self.OpenConfFlag = Previous_OpenConfFlag
+			return 
+			
 		dialog.Destroy()
 		DspPic = wx.StaticBitmap(self.Panel, -1,  pos=(200,10), size=(200, 200))
 		ImageDSP = GetImage(self, os.getenv("SKYEYEBIN") + "./picture/DSP.jpg", 200, 200)
@@ -155,31 +200,36 @@ class MainFrame(wx.Frame):
 		pychar = c_char_p(pchar)
 		current_mach = pychar.value
 		self.cpu.SetLabel(current_mach.upper())
-		if self.OpenConfFlag == 0:
-			self.EnableButton()
-			self.OpenConfFlag = 1
+		self.OpenConfOpButton()
+
 
 	def Restart(self, event):
+		print "In Restarat"
+		self.RestartOpButton()
         	libcommon.SIM_restart()
+		self.cpu.SetLabel(C.FontInitStatus)
+		self.status.SetLabel("")
+		self.OpenConfFlag = 0
+
 	
 	def Run(self, event):
 		self.ToolBar.DeleteTool(id = RunID)
-		self.ToolBar.InsertSimpleTool(3, StopID, self.ImageStop, C.FontStop)
+		self.ToolBar.InsertSimpleTool(4, StopID, self.ImageStop, C.FontStop)
 		self.Bind(wx.EVT_TOOL, self.Stop, id = StopID)
 		self.ToolBar.Realize()
         	libcommon.SIM_run()
 		self.status.SetLabel(C.FontRun)
-		self.Remote.Enable(0)
-		self.ToolBar.EnableTool(DebugID, 0)
+		self.RunOpButton()
 
 	def Stop(self, event):
 		self.ToolBar.DeleteTool(id = StopID)
-		self.ToolBar.InsertSimpleTool(3, RunID, self.ImageRun, C.FontRun)
+		self.ToolBar.InsertSimpleTool(4, RunID, self.ImageRun, C.FontRun)
 		self.Bind(wx.EVT_TOOL, self.Run, id = RunID)
 		self.ToolBar.Realize()
         	libcommon.SIM_stop()
 		self.status.SetLabel(C.FontStop)
 		self.RefurbishSubGui()
+		self.StopOpButton()
 		
 	def SetConfig(self, event):
 		print "In SetConfig"
@@ -187,18 +237,20 @@ class MainFrame(wx.Frame):
 	def RemoteGdb(self, event):
 		libgdbserver.com_remote_gdb()
 		self.status.SetLabel(C.FontRemoteGdb)
-		self.ToolBar.EnableTool(RunID, 0)
 		self.Bind(wx.EVT_TOOL, self.StopRemoteGdb, id = DebugID)
+		self.Bind(wx.EVT_MENU, self.StopRemoteGdb, id=self.Remote.GetId())
+		self.RemoteOpButton()
 	
 	def StopRemoteGdb(self, event):
 		# SkyEye will be stoped when closing the remote gdb
 		libcommon.SIM_stop()
 		self.status.SetLabel(C.FontStop)
 		self.RefurbishSubGui()
+		self.StopRemoteOpButton()
 
 		libgdbserver.close_remote_gdb()
-		self.ToolBar.EnableTool(RunID, 1)
 		self.Bind(wx.EVT_TOOL, self.RemoteGdb, id = DebugID)
+		self.Bind(wx.EVT_MENU, self.RemoteGdb, id=self.Remote.GetId())
 		
 	def Help(self, event):
 		print "In Help"
@@ -276,28 +328,69 @@ class MainFrame(wx.Frame):
 		else:
 			print "Show Mem is None"
 
-       #This function is used to enable or disable any button
-	def EnableButton(self):                 
+       #This function is used to enable or disable any button for any function
+	def OpenConfOpButton(self):                 
 		self.Registers.Enable(1)
 		self.Memories.Enable(1)
 		self.Remote.Enable(1)
 		self.SaveCh.Enable(1)
 		self.OpenCh.Enable(1)
+		self.DeviceList.Enable(1)
 		self.ToolBar.EnableTool(RunID, 1)
 		self.ToolBar.EnableTool(DebugID, 1)
 		self.ToolBar.EnableTool(ChpID, 1)
 
-
-
-	def DisableButton(self):    
+	def InitOpButton(self):    
 		self.Registers.Enable(0)
 		self.Memories.Enable(0)
 		self.Remote.Enable(0)
 		self.SaveCh.Enable(0)
 		self.OpenCh.Enable(0)
+		self.DeviceList.Enable(0)
 		self.ToolBar.EnableTool(RunID, 0)
 		self.ToolBar.EnableTool(DebugID, 0)
 		self.ToolBar.EnableTool(ChpID, 0)
+
+	def RunOpButton(self):
+		self.Remote.Enable(0)
+		self.SaveCh.Enable(0)
+		self.OpenCh.Enable(0)
+		self.OpenConf.Enable(0)
+		self.ToolBar.EnableTool(OpenID, 0)
+		self.ToolBar.EnableTool(DebugID, 0)
+		self.ToolBar.EnableTool(RestartID, 0)
+		self.ToolBar.EnableTool(ChpID, 0)
+
+	def RemoteOpButton(self):
+		self.SaveCh.Enable(0)
+		self.OpenCh.Enable(0)
+		self.OpenConf.Enable(0)
+		self.ToolBar.EnableTool(OpenID, 0)
+		self.ToolBar.EnableTool(RunID, 0)
+		self.ToolBar.EnableTool(RestartID, 0)
+		self.ToolBar.EnableTool(ChpID, 0)
+
+	def StopRemoteOpButton(self):
+		self.OpenCh.Enable(1)
+		self.SaveCh.Enable(1)
+		self.OpenConf.Enable(1)
+		self.ToolBar.EnableTool(OpenID, 1)
+		self.ToolBar.EnableTool(RunID, 1)
+		self.ToolBar.EnableTool(RestartID, 1)
+		self.ToolBar.EnableTool(ChpID, 1)
+
+	def RestartOpButton(self):
+		self.InitOpButton()
+
+	def StopOpButton(self):
+		self.Remote.Enable(1)
+		self.OpenCh.Enable(1)
+		self.SaveCh.Enable(1)
+		self.OpenConf.Enable(1)
+		self.ToolBar.EnableTool(OpenID, 1)
+		self.ToolBar.EnableTool(DebugID, 1)
+		self.ToolBar.EnableTool(RestartID, 1)
+		self.ToolBar.EnableTool(ChpID, 1)
 
 
 
@@ -310,6 +403,7 @@ class SkyEyeGUI(wx.App):
 		return True
 	def OnExit(self):
 		libcommon.com_quit()
+		wx.GetApp().ExitMainLoop()
 
 if __name__ == '__main__':
 	app = SkyEyeGUI()
