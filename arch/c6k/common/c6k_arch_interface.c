@@ -204,6 +204,11 @@ static void per_cpu_step()
 	c6k_step_once();
 	return;
 }
+static uint32 c6k_get_step(){
+	uint32 step = core->insn_num;
+        return step;
+}
+
 static void per_cpu_stop()
 {
 	return;
@@ -410,6 +415,7 @@ init_c6k_arch ()
 	c6k_arch.step_once = c6k_step_once;
 	c6k_arch.set_pc = c6k_set_pc;
 	c6k_arch.get_pc = c6k_get_pc;
+	c6k_arch.get_step = c6k_get_step;
 	c6k_arch.ICE_write_byte = c6k_ICE_write_byte;
 	c6k_arch.ICE_read_byte = c6k_ICE_read_byte;
 	c6k_arch.parse_cpu = c6k_parse_cpu;
