@@ -47,7 +47,6 @@ const char* default_lib_dir = "/opt/skyeye/lib/skyeye/";
 #else
 const char* default_lib_dir = SKYEYE_MODULE_DIR;
 #endif
-
 /**
 * @brief the default cell of the simulator
 */
@@ -187,7 +186,11 @@ void SIM_init(){
 	}
 	else{
 		if (pref->autoboot == True) {
-			SIM_start();
+			exception_t ret = SIM_start();
+			if(ret != No_exp){
+				printf("Error : %s\n", get_err_str());
+				return ;
+			}
 			SIM_run();
 		}
 	}
@@ -196,10 +199,10 @@ void SIM_init(){
 /**
 * @brief launch the simlator
 */
-void SIM_start(void){
+exception_t SIM_start(void){
 	if(SIM_started){
 		printf("SkyEye has been started\n");
-		return;
+		return Unknown_exp;
 	}
 	sky_pref_t *pref;
 	/* get the current preference for simulator */
@@ -209,8 +212,9 @@ void SIM_start(void){
 		skyeye_read_config(pref->conf_filename);
 
 	if(config->arch == NULL){
+		set_err_info(Arch_err, "Should provide valid arch option in your config file.\n");
 		skyeye_log(Error_log, __FUNCTION__, "Should provide valid arch option in your config file.\n");
-		return;
+		return Conf_format_exp;
 	}
 	generic_arch_t *arch_instance = get_arch_instance(config->arch->arch_name);
 
@@ -242,7 +246,7 @@ void SIM_start(void){
 			printf("load elf %s succeed\n", pref->exec_file);
 		}else{
 			printf("load elf %s fault\n", pref->exec_file);
-			return;
+			return Exec_format_exp;
 		}
 	}
 #ifndef __WIN32__
@@ -280,6 +284,7 @@ void SIM_start(void){
 		}
 	}
 #endif	
+	return No_exp;
 }
 
 /**

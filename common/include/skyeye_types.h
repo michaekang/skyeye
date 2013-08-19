@@ -118,4 +118,14 @@ typedef enum{
 	Conf
 }exception_class_t;
 
+/* For GUI error log */
+typedef enum{
+	/* Arch error */
+	Arch_err = 0,
+	Mach_err,
+}error_no_t;
+
+void set_err_info(error_no_t err, const char* err_str);
+error_no_t get_err_no(void);
+char* get_err_str(void);
 #endif

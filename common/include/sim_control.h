@@ -17,7 +17,7 @@ void SIM_init(void);
 /*
  * read and parse the specific config file and initilization the data.
  */
-void SIM_start(void);
+exception_t SIM_start(void);
 
 /*
  * Launch the simulator.

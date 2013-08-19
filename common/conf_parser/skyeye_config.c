@@ -296,12 +296,8 @@ skyeye_read_config (char* skyeye_conf_filename)
 		*/
 	}
 
-	/* compatiable with the old config file that is no arch option available. */
-
 	skyeye_config_t* config = get_current_config();
-	if(config->arch == NULL){
-		config->arch = get_default_arch();
-	}
+	/* Skyeye should show the error: no arch */
 	/* init config->os if os module not load, "linux" default. */
 	if(config->os == NULL){
 		config->os = (char*)skyeye_mm_zero(sizeof(config->os));

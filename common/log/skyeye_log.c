@@ -30,6 +30,7 @@
 #include "skyeye_options.h"
 #include "skyeye_config.h"
 #include "skyeye_log.h"
+#include "skyeye_types.h"
 /* shenoubang */
 #ifndef __WIN32__
 #include <execinfo.h>
@@ -289,4 +290,29 @@ void skyeye_printf_in_color(COLOR_TYPE type, char *format, ...)
 		fprintf(stderr, "Not supported color type %d\n", type);
 		break;
 	}
+}
+
+static error_no_t skyeye_err_signal_no;
+static char err_string[1024];
+
+void set_err_info(error_no_t err, const char* err_str)
+{
+	skyeye_err_signal_no = err;
+	int len = strlen(err_str);
+	if(len < 1024)
+		memcpy(err_string, err_str, len);
+	else
+		printf("the error log is too long!\n");
+
+	return;
+}
+
+error_no_t get_err_no(void)
+{
+	return skyeye_err_signal_no;
+}
+
+char* get_err_str(void)
+{
+	return err_string;
 }
