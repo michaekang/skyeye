@@ -21,6 +21,7 @@
 /*
  * 06/22/2009   Michael.Kang  <blackfin.kang@gmail.com>
  */
+#include "config.h"
 #include "portable/mman.h"
 #include <stdint.h>
 #include <stdio.h>

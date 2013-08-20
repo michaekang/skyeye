@@ -23,6 +23,7 @@
 /*
  * 01/16/2010   Michael.Kang  <blackfin.kang@gmail.com>
  */
+#include "config.h"
 #include <string.h>
 #include <dis-asm.h>
 #include <assert.h>
@@ -220,7 +221,13 @@ void init_disassemble(){
 	 * choose arch infor since we will select different disassemble function.
 	 */
 	generic_arch_t* arch_instance = get_arch_instance("");
-	machine = arch_instance->arch_name;	
+
+	/*FIXME : It is simple method to use the bfd's tic6x but it is not good! */
+	if((strcmp (arch_instance->arch_name, "c6k"))){
+		machine = arch_instance->arch_name;	
+	}else{
+		machine = "tic6x";
+	}
 	const bfd_arch_info_type *info = bfd_scan_arch (machine);
 	if (info == NULL){
         	//fatal (_("Can't use supplied machine %s"), machine);
