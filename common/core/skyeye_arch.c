@@ -176,13 +176,18 @@ void init_arch(){
 	register_option("arch", do_arch_option, "support different architectures.\n");
 }
 
+
+generic_address_t com_get_pc(void){
+	generic_arch_t* arch_instance = get_arch_instance(NULL);
+	return arch_instance->get_pc();
+}
 #if 0 /* we will dynamiclly load all the arch module */
 extern void init_arm_arch ();
 extern void init_bfin_arch ();
 extern void init_coldfire_arch ();
 extern void init_mips_arch();
 
-extern void init_ppc_arch();
+arch_t*
 extern void init_sparc_arch();
 
 void

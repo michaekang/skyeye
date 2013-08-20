@@ -8,6 +8,7 @@ import skyeye_ir
 import x
 import skyeye_gui_dev as SkyEyeDev
 import skyeye_gui_about as SkyEyeAbout
+import skyeye_gui_disa as SkyEyeDisas
 
 os_info = platform.system()
 if cmp(os_info, "Linux"):
@@ -79,15 +80,17 @@ class MainFrame(wx.Frame):
 		self.Memories = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontShowMems)
 		self.Remote = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontRemoteGdb)
 		self.DeviceList = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontDeviceList)
+		self.Disassembler = wx.MenuItem(self.DebugMenu, wx.NewId(), "反汇编")
 		self.DebugMenu.AppendItem(self.Registers)
 		self.DebugMenu.AppendItem(self.Memories)
 		self.DebugMenu.AppendItem(self.Remote)
 		self.DebugMenu.AppendItem(self.DeviceList)
+		self.DebugMenu.AppendItem(self.Disassembler)
 		self.Bind(wx.EVT_MENU, self.InfoRegs, id=self.Registers.GetId())
 		self.Bind(wx.EVT_MENU, self.ShowMem, id=self.Memories.GetId())
 		self.Bind(wx.EVT_MENU, self.RemoteGdb, id=self.Remote.GetId())
 		self.Bind(wx.EVT_MENU, self.ShowDevice, id=self.DeviceList.GetId())
-			
+		self.Bind(wx.EVT_MENU, self.ShowDisas, id=self.Disassembler.GetId())
 		# Create Menu for File
 		self.FileMenu = wx.Menu()
 		self.OpenConf = wx.MenuItem(self.FileMenu, wx.NewId(), C.FontOpenConfig)
@@ -304,6 +307,12 @@ class MainFrame(wx.Frame):
 		app = wx.PySimpleApp()
 		dialog = SkyEyeAbout.About()
 		dialog.Show()
+		app.MainLoop()
+	
+	def ShowDisas(self, event):
+		app = wx.PySimpleApp()
+		ShowMemFrame = SkyEyeDisas.Disassembler()
+		ShowMemFrame.Show()
 		app.MainLoop()
 
 	def ShowDevice(self, event):
