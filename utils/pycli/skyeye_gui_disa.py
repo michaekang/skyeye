@@ -44,10 +44,10 @@ class TestListCtrl(wx.ListCtrl,
 
 class Disassembler(wx.Dialog):
 	global_input = 0
-	MaxLine = 18
+	MaxLine = 24
 		
 	def __init__(self):
-		wx.Dialog.__init__(self, None, -1, "反汇编", size=(570, 600), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
+		wx.Dialog.__init__(self, None, -1, C.FontDisassembler, size=(570, 600), style=wx.DEFAULT_DIALOG_STYLE|wx.MAXIMIZE_BOX|wx.MINIMIZE_BOX)
         	sizer = wx.GridBagSizer(hgap=5, vgap=5)
 		basicLabel = wx.StaticText(self, -1, C.FontAddr)
 		sizer.Add(basicLabel, pos = (0, 0), flag = wx.LEFT|wx.TOP, border=10)
@@ -57,14 +57,14 @@ class Disassembler(wx.Dialog):
 
 		self.Bind(wx.EVT_TEXT_ENTER, self.InputAddr, self.pwdText)
 
-		groupbox = wx.StaticBox(self, -1, "反汇编", name = "groupbox2_sbox")
+		groupbox = wx.StaticBox(self, -1, C.FontDisassembler, name = "groupbox2_sbox")
         	groupsizer = wx.StaticBoxSizer(groupbox, wx.VERTICAL)
 
 
 
 		self.list = TestListCtrl(self, -1,  style=wx.LC_REPORT|wx.LC_HRULES)
         	self.list.InsertColumn(0, C.FontAddr, format=wx.LIST_FORMAT_LEFT, width=150)
-        	self.list.InsertColumn(1, "汇编",format=wx.LIST_FORMAT_LEFT, width = 345)
+        	self.list.InsertColumn(1, C.FontDisassembler,format=wx.LIST_FORMAT_LEFT, width = 345)
         	groupsizer.Add(self.list, 1, wx.EXPAND|wx.TOP, 10)
 
         	sizer.Add(groupsizer, pos=(1,0),span=(6,2), flag=wx.EXPAND|wx.LEFT|wx.TOP|wx.BOTTOM,border=10)
@@ -74,7 +74,7 @@ class Disassembler(wx.Dialog):
         	sizer.Add(ok_button, pos=(0,2),flag=wx.ALIGN_BOTTOM|wx.TOP|wx.RIGHT,border=10)
 		self.Bind(wx.EVT_BUTTON, self.InputAddr, ok_button)
 
-        	StepiBtn = wx.Button(self,-1, "下一步", size = (60, 30), name= "stepi_button")
+        	StepiBtn = wx.Button(self,-1, C.FontNextStep, size = (60, 30), name= "stepi_button")
         	sizer.Add(StepiBtn, pos=(1,2),flag=wx.ALIGN_CENTER|wx.TOP|wx.RIGHT|wx.BOTTOM,border=10)
 		self.Bind(wx.EVT_BUTTON, self.Stepi, StepiBtn)
 		
@@ -98,13 +98,13 @@ class Disassembler(wx.Dialog):
 		self.Init()
 		pc_value = libcommon.com_get_pc()
                 for i in range(self.MaxLine):
+                        libdisasm.clear_web_disassemble_buf()
                         libdisasm.web_disassemble(c_uint(pc_value))
                         disas_str = libdisasm.read_web_disassemble_buf()
                         # Show the addr and disasemble
                         index = self.list.InsertStringItem(sys.maxint, "NULL")
                         self.list.SetStringItem(index, 0, str(hex(pc_value)))
                         self.list.SetStringItem(index, 1, disas_str)
-                        libdisasm.clear_web_disassemble_buf()
                         pc_value = pc_value + 4
 		pc_value = libcommon.com_get_pc()
 		self.Cur_PC_off = self.list.FindItem(-1, str(hex(pc_value)))

@@ -35,3 +35,6 @@ FontRestart = "复位"
 FontReOpenConf = "镜像已加载， 是否重新加载？"
 FontConfirm = "确认"
 FontPrompt = "提示"
+FontNextStep = "下一步"
+FontDisassembler = "反汇编"
+
