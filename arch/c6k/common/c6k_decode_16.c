@@ -454,8 +454,6 @@ static int exec_l3(c6k_core_t* core, uint32_t insn){
 		else
 			core->gpr[s][dst] = core->gpr[s][src1] + core->gpr[s][src2];
 		DBG("In %s, src1=%d, src2=%d, dst=%d\n", __FUNCTION__, src1, src2, dst);
-		printf("In %s, src1=%d, src2=%d, dst=%d\n", __FUNCTION__, src1, src2, dst);
-
 	}
 	else{
 		NOT_IMP;

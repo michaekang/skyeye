@@ -722,16 +722,24 @@ static int exec_bnop_reg(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
 		int src2 = BITS(18, 22);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
 		//core->pc = core->gpr[GPR_B][src2];
+		int gpr_group = x? ((!s) & 0x1) : s;
 		if(core->delay_slot == 0){
-			core->pfc = core->gpr[GPR_B][src2];
+			core->pfc = core->gpr[gpr_group][src2];
 			core->delay_slot = 5 + 1;
 		}
 		else{
-			NOT_IMP;
+			core->pfc_bak1 = core->gpr[gpr_group][src2];
+                        core->delay_slot_bak1 = 5 + 1 - src1;
+			//NOT_IMP;
 		}
-		/* skip the specific nop */
-		core->delay_slot -= src1;
+		if(core->delay_slot >= src1)
+			/* skip the specific nop */
+			core->delay_slot -= src1;
+		else
+			core->delay_slot = 0;
 
 	}
 	else{
@@ -1255,15 +1263,24 @@ static int exec_ldbu(c6k_core_t* core, uint32_t insn){
 		int dst = BITS(23, 27);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 0);
-		bus_read(8, addr, &core->gpr[s][dst]);
+		int result;
+		//bus_read(8, addr, &core->gpr[s][dst]);
+		bus_read(8, addr, &result);
 		if(op == 1){
 			/* ldbu */
-			core->gpr[s][dst] = core->gpr[s][dst] & 0xFF;
+			//core->gpr[s][dst] = core->gpr[s][dst] & 0xFF;
+			//uint32_t tmp;
+			//bus_read(32, addr & 0xFFFFFFFC, &tmp);
+			//printf("In %s, read word, addr=0x%x, result=0x%x\n", __FUNCTION__, addr & 0xFFFFFFFC, tmp);
+			int result = result & 0xFF;
+			write_buffer(core, dst + s * 32, result);
+			DBG("In %s, pc=0x%x\n", __FUNCTION__, core->pc);
 		}
 		else if(op == 2){
 			/* ldb with sign extend */
-			if(core->gpr[s][dst] & 0x80)
-				core->gpr[s][dst] = 0xFFFFFF00 | (core->gpr[s][dst] & 0xFF);
+			if(result & 0x80)
+				result = 0xFFFFFF00 | (result & 0xFF);
+			write_buffer(core, dst + s * 32, result);
 		}	
 		else{
 			NOT_IMP;
