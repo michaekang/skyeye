@@ -51,7 +51,7 @@ if WIN32
 WIN32_LD_COMMON = -no-undefined -shared -Xlinker -L../common/.libs/ -L/mingw/lib  -L/mingw/third-party-lib -Xlinker -lcommon -Xlinker --export-all-symbol
 libgdbserver_la_LDFLAGS += $(WIN32_LD_COMMON)
 libbus_log_la_LDFLAGS += $(WIN32_LD_COMMON)
-libdisasm_la_LDFLAGS += $(WIN32_LD_COMMON) -Xlinker /mingw/third-party-lib/libopcodes.a -Xlinker /mingw/third-party-lib/libbfd-2-18-50-20070907.dll -Xlinker /mingw/third-party-lib/libiberty.a -Xlinker --export-all-symbol
+libdisasm_la_LDFLAGS += -Xlinker /local/third-party/lib/libopcodes.a -Xlinker /local/third-party/lib/libbfd.a -Xlinker /local/third-party/lib/libiberty.a -Xlinker --export-all-symbol $(WIN32_LD_COMMON) 
 libos_supp_la_LDFLAGS += $(WIN32_LD_COMMON)
 libpmon_la_LDFLAGS += $(WIN32_LD_COMMON)
 libshutdown_la_LDFLAGS += $(WIN32_LD_COMMON)
@@ -70,7 +70,7 @@ skyeye_bin = \"$(prefix)/bin/\"
 DEFS = -g -O2 -D_FILE_OFFSET_BITS=64 -DSTANDALONE -DDEFAULT_INLINE=0 -DSKYEYE_BIN=$(skyeye_bin) @COMMON_CFLAGS@
 
 if WIN32
-INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common -I/mingw/third-party-lib/include/ @COMMON_INCLUDES@ `python-config --cflags`
+INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common -I/local/third-party/include/ @COMMON_INCLUDES@ `python-config --cflags`
 else
 INCLUDES =  -I$(top_srcdir)/third-party/include/ -I$(top_srcdir)/third-party/bfd/ -I$(top_builddir)/third-party/bfd/ -I$(top_srcdir)/common @COMMON_INCLUDES@ `python-config --cflags`
 endif
