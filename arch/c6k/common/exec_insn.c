@@ -1631,8 +1631,17 @@ static int exec_mpyu4(c6k_core_t* core, uint32_t insn){
 static int exec_mpyus(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		int op1 = core->gpr[s][src1] & 0xFFFF;
+		int op2 = core->gpr[s][src2] & 0xFFFF;
+		op2 = SIGN_EXTEND(op2, 16);
+		core->gpr[s][dst] = op1 * op2;
 	}
-	NOT_IMP;
+	core->pc += 4;
+	//NOT_IMP;
 	return 0;
 }
 static int exec_mpyus4(c6k_core_t* core, uint32_t insn){
@@ -3000,7 +3009,7 @@ const ISEITEM insn32_decode_table[] = {
 
 {"mpyu", 0, 6, 2, 4, 0x6},
 {"mpyu4", 0, 6, 2, 4, 0x6},
-{"mpyus", 0, 6, 2, 4, 0x6},
+{"mpyus", 1, 6, 2, 11, 0x3a0},
 {"mpyus4", 0, 6, 2, 4, 0x6},
 {"mpy2", 0, 6, 2, 4, 0x6},
 {"mpy2ir", 0, 6, 2, 4, 0x6},
