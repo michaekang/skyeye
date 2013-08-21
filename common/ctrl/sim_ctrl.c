@@ -394,10 +394,13 @@ void SIM_restart(void){
 		return;
 	}
 	skyeye_config_t* config = get_current_config();
+	generic_arch_t* arch_instance = get_arch_instance("");
 	if(config->mach == NULL){
 		return;
 	}
-	generic_arch_t* arch_instance = get_arch_instance("");
+	if(config->mach->mach_fini)
+		config->mach->mach_fini(arch_instance, config->mach);
+
 	SIM_stop(arch_instance);
 	sky_pref_t *pref = get_skyeye_pref();
 	space_obj_free(config->mach->phys_mem);
