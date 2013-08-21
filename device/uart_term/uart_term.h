@@ -26,6 +26,13 @@ typedef struct skyeye_uart_term{
 #else
 	SOCKET socket;
 #endif
+
+#ifdef __MINGW32__
+	DWORD uart_console_pid;
+#else
+	pid_t uart_console_pid;
+#endif
+
 	BOOL	attached;
 }uart_term_device;
 

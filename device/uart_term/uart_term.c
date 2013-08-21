@@ -41,6 +41,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include <signal.h>
 
 #ifndef __MINGW32__
 /* linux head file */
@@ -139,7 +140,11 @@ static exception_t uart_term_write(conf_object_t *opaque, void* buf, size_t coun
 	return No_exp;
 }
 //#define DBG_XTERM
-static int create_term(uart_term_device* dev_uart, int port){
+#ifdef __MINGW32__
+static DWORD create_term(uart_term_device* dev_uart, int port){
+#else
+static pid_t create_term(uart_term_device* dev_uart, int port){
+#endif
 	pid_t pid;
 	char port_str[32];
 	char uart_instance_prog[1024];
@@ -173,6 +178,7 @@ static int create_term(uart_term_device* dev_uart, int port){
 		default:
 			break;
 	}
+	return pid;
 #else
 #ifdef DBG_XTERM
 	char cmdline[2048] = "C:/skyeye/1.0/bin/rxvt.exe -h always -e ";
@@ -196,13 +202,12 @@ static int create_term(uart_term_device* dev_uart, int port){
 		return -1;
 	}
 	else {
-		return 0;
+		return process_information.dwProcessId;
 		//WaitForSingleObject(process_information.hProcess, INFINITE);
 		//CloseHandle(process_information.hProcess);
 		//CloseHandle(process_information.hThread);
 	}
 #endif
-	return 0;
 }
 
 static int create_uart_console(void* uart){
@@ -292,7 +297,7 @@ retry:
 
 	listen(term_socket, 1);
 	/* Create the client xterm */
-	create_term(dev_uart, ntohs(server.sin_port));
+	dev_uart->uart_console_pid = create_term(dev_uart, ntohs(server.sin_port));
 	/* main loop */
 	do {
 		if (!dev_uart->attached) {
@@ -408,9 +413,19 @@ static conf_object_t* new_uart_term(char* obj_name){
 
 void free_uart_term(conf_object_t* dev){
 	uart_term_device* dev_uart = dev->obj;
+#ifndef __MINGW32__
+	kill(dev_uart->uart_console_pid, SIGTERM);
+#else
+	HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, dev_uart->uart_console_pid);
+	if(hProcess == NULL)
+		return;
+	TerminateProcess(hProcess, 0);
+		
+#endif
 	skyeye_free(dev_uart->receive);
 	skyeye_free(dev_uart->obj);
 	skyeye_free(dev_uart);
+
 	return;
 }
 
