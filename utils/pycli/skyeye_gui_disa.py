@@ -86,7 +86,7 @@ class Disassembler(wx.Dialog):
 		libdisasm.read_web_disassemble_buf.restype = c_char_p
 		libcommon.com_get_pc.restype = c_uint
 
-		self.Refreshput()
+		self.Refurbish()
 
 	def Init(self):
 		self.pwdText.Clear()
@@ -94,7 +94,7 @@ class Disassembler(wx.Dialog):
 		self.Cur_PC_off = 0
 		self.Pre_PC_off = 0 #Pre PC value for restoring the colour
 
-	def Refreshput(self):
+	def Refurbish(self):
 		self.Init()
 		pc_value = libcommon.com_get_pc()
                 for i in range(self.MaxLine):
@@ -134,4 +134,4 @@ class Disassembler(wx.Dialog):
 			self.list.SetItemTextColour(self.Cur_PC_off, wx.RED)
 			self.Pre_PC_off = self.Cur_PC_off
 			return;
-		self.Refreshput()
+		self.Refurbish()

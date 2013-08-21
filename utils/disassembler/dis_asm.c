@@ -150,6 +150,11 @@ void web_init_disassemble() {
 	 */
 	generic_arch_t* arch_instance = get_arch_instance("");
 	machine = arch_instance->arch_name;
+	if((strcmp (arch_instance->arch_name, "c6k"))){
+		machine = arch_instance->arch_name;	
+	}else{
+		machine = "tic6x";
+	}
 	const bfd_arch_info_type *info = bfd_scan_arch(machine);
 	if (info == NULL) {
    //fatal (_("Can't use supplied machine %s"), machine)
@@ -303,9 +308,7 @@ void web_disassemble(generic_address_t addr) {
 	/* if disassemble_fn is NULL, some errors happened. */
 	if (disassemble_fn == NULL)
 		return;
-	printf("0x%x:", addr);
 	disassemble_fn(addr, &disasm_info);
-	printf("\n");
 }
 
 void disassemble(generic_address_t addr){

@@ -64,6 +64,8 @@ HelpID = wx.NewId()
 class MainFrame(wx.Frame):
 	InfoRegsDlg = None
 	ShowMemFrame = None
+	ShowDevRegs = None
+	ShowDisassemble = None
 	OpenConfFlag = 0
 	
 	def __init__(self, parent = None, id = -1,
@@ -80,7 +82,7 @@ class MainFrame(wx.Frame):
 		self.Memories = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontShowMems)
 		self.Remote = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontRemoteGdb)
 		self.DeviceList = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontDeviceList)
-		self.Disassembler = wx.MenuItem(self.DebugMenu, wx.NewId(), "反汇编")
+		self.Disassembler = wx.MenuItem(self.DebugMenu, wx.NewId(), C.FontDisassembler)
 		self.DebugMenu.AppendItem(self.Registers)
 		self.DebugMenu.AppendItem(self.Memories)
 		self.DebugMenu.AppendItem(self.Remote)
@@ -311,14 +313,14 @@ class MainFrame(wx.Frame):
 	
 	def ShowDisas(self, event):
 		app = wx.PySimpleApp()
-		ShowMemFrame = SkyEyeDisas.Disassembler()
-		ShowMemFrame.Show()
+		self.ShowDisassemble = SkyEyeDisas.Disassembler()
+		self.ShowDisassemble.Show()
 		app.MainLoop()
 
 	def ShowDevice(self, event):
 		app = wx.PySimpleApp()
-		frame = SkyEyeDev.DevRegsFrame()
-		frame.Show()
+		self.ShowDevRegs = SkyEyeDev.DevRegsFrame()
+		self.ShowDevRegs.Show()
 		app.MainLoop()
 		
 	def QuitSky(self, event):
@@ -336,6 +338,13 @@ class MainFrame(wx.Frame):
 			self.ShowMemFrame.Refreshput()
 		else:
 			print "Show Mem is None"
+
+		if(self.ShowDevRegs != None):
+			self.ShowDevRegs.RegsRefurbish(None)
+
+		if(self.ShowDisassemble != None):
+			self.ShowDisassemble.Refurbish()
+
 
        #This function is used to enable or disable any button for any function
 	def OpenConfOpButton(self):                 
