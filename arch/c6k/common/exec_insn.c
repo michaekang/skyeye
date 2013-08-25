@@ -31,13 +31,13 @@
 #include "skyeye_bus.h"
 #include "skyeye_uart_ops.h"
 
-//#define DEBUG
+#define DEBUG
 #include <skyeye_log.h>
 
 int exec_32b_insn(c6k_core_t* core, uint32_t insn);
 int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern int exec_16b_insn(c6k_core_t* core, uint32_t insn);
-#define NOT_IMP DBG("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
+#define NOT_IMP printf("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
 #define PR_ALL_REG 0
 void print_all_gpr(c6k_core_t* core){
 	int i;
@@ -375,8 +375,19 @@ static int exec_addah(c6k_core_t* core, uint32_t insn){
 static int exec_addaw(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int op = BITS(7, 12);
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		if(op == 0x38){
+			core->gpr[s][dst] = core->gpr[s][src2] + (core->gpr[s][src1] << 2);
+		}
+		else{
+			NOT_IMP;
+		}
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_addk(c6k_core_t* core, uint32_t insn){
@@ -986,8 +997,31 @@ static int exec_cmpgtu4(c6k_core_t* core, uint32_t insn){
 static int exec_cmplt(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int op = BITS(5, 11);
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
+		if(op == 0x57){
+			if(x)
+				core->gpr[s][dst] = ((int)core->gpr[s][src1] < (int)core->gpr[(!s) & 0x1][src2])? 1: 0;
+			else
+				core->gpr[s][dst] = ((int)core->gpr[s][src1] < (int)core->gpr[s][src2])? 1: 0;
+		}
+		else if(op == 0x56){
+			int op1 = SIGN_EXTEND(src1, 5);
+			if(x)
+				core->gpr[s][dst] = (op1 < (int)core->gpr[(!s) & 0x1][src2])? 1: 0;
+			else
+				core->gpr[s][dst] = (op1 < (int)core->gpr[s][src2])? 1: 0;
+		}
+		else{
+			NOT_IMP;
+		}
+
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_cmplt2(c6k_core_t* core, uint32_t insn){
@@ -1568,9 +1602,20 @@ static int exec_mpylh(c6k_core_t* core, uint32_t insn){
 }
 static int exec_mpylhu(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
-		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
+		int op1 = core->gpr[s][src1] & 0xFFFF;
+		int op2;
+		if(x)
+			op2 = core->gpr[(!s) & 0x1][src2] >> 16;
+		else
+			op2 = core->gpr[s][src2] >> 16;
+		core->gpr[s][dst] = op1 * op2;
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_mpyli(c6k_core_t* core, uint32_t insn){
@@ -1611,10 +1656,11 @@ static int exec_mpysu(c6k_core_t* core, uint32_t insn){
 		int x = BITS(12, 12);
 		int s = BITS(1, 1);
 		if(op == 0x1b){
+			int op1 = SIGN_EXTEND(core->gpr[s][src1] & 0xFFFF, 16);
 			if(x)
-				core->gpr[s][dst] = (core->gpr[s][src1] & 0xFFFF) * (core->gpr[(!s) & 0x1][src2] & 0xFFFF);
+				core->gpr[s][dst] = op1 * (core->gpr[(!s) & 0x1][src2] & 0xFFFF);
 			else
-				core->gpr[s][dst] = (core->gpr[s][src1] & 0xFFFF) * (core->gpr[s][src2] & 0xFFFF);
+				core->gpr[s][dst] = op1 * (core->gpr[s][src2] & 0xFFFF);
 			DBG("In %s, src1=%d, src2=%d\n", __FUNCTION__, src1, src2);
 		}
 		else{
@@ -1634,8 +1680,18 @@ static int exec_mpysu4(c6k_core_t* core, uint32_t insn){
 static int exec_mpyu(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
+		if(x)
+			core->gpr[s][dst] = (core->gpr[s][src1] & 0xFFFF) * (core->gpr[(!s) & 0x1][src2] & 0xFFFF);
+		else
+			core->gpr[s][dst] = (core->gpr[s][src1] & 0xFFFF) * (core->gpr[s][src2] & 0xFFFF);
+		DBG("In %s, src1=%d, src2=%d\n", __FUNCTION__, src1, src2);
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_mpyu4(c6k_core_t* core, uint32_t insn){
@@ -1732,18 +1788,64 @@ static int exec_mvc(c6k_core_t* core, uint32_t insn){
 		int crlo = BITS(18, 22);
 		int dst = BITS(23, 27);
 		int op = BITS(1, 11);
+		int s = BITS(1, 1);
 		if(op == 0x1d1){
 			/* from register to control */
 			int x = BITS(12, 12);
 			int src = BITS(18, 22);
 			int crlo = BITS(23, 27);
-			if(crlo == 0xd){
-				core->ilc = core->gpr[(!x) & 0x1][src];
+			int reg_group = x ? (!s) & 0x1 : s;
+			switch(crlo){
+			case  0xd:
+				core->ilc = core->gpr[reg_group][src];
 				DBG("In %s, src=%d, ilc=%d\n", __FUNCTION__, src, core->ilc);
-			}
-			else{
+				break;
+			case 0x12:
+				core->fadcr = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, fadcr=%d\n", __FUNCTION__, src, core->fadcr);
+				break;
+			case 0x14:
+				core->fmcr = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, fmcr=%d\n", __FUNCTION__, src, core->fmcr);
+				break;
+			case 0x1:
+				core->csr = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, csr=%d\n", __FUNCTION__, src, core->csr);
+				break;
+			case 0x3:
+				core->icr = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, icr=%d\n", __FUNCTION__, src, core->icr);
+				break;
+			case 0x4:
+				core->ier = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, ier=%d\n", __FUNCTION__, src, core->ier);
+				break;
+			case 0x5:
+				core->istp = core->gpr[reg_group][src];
+				DBG("In %s, src=%d, istp=%d\n", __FUNCTION__, src, core->istp);
+				break;
+
+			default:
+				printf("In %s, crlo=0x%x, insn=0x%x\n", __FUNCTION__, crlo, insn);
 				NOT_IMP;
 			}
+		}
+		else if(op == 0x1f1){
+			/* from control register to general register */
+			int x = BITS(12, 12);
+			int src = BITS(18, 22);
+			int dst = BITS(23, 27);
+			int reg_group = x ? (!s) & 0x1 : s;
+			switch(src){
+			case 0x1:
+				core->gpr[reg_group][dst] = core->csr;
+				DBG("In %s, src=%d, csr=%d\n", __FUNCTION__, src, core->csr);
+				break;
+			default:
+				printf("In %s, dst=0x%x, insn=0x%x\n", __FUNCTION__, dst, insn);
+				NOT_IMP;
+			}
+
 		}
 		else{
 			NOT_IMP;
@@ -2822,8 +2924,24 @@ static int exec_unpklu4(c6k_core_t* core, uint32_t insn){
 static int exec_xor(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int op = BITS(2, 11);
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		int x = BITS(12, 12);
+		if(op == 0x376){
+			int op1 = SIGN_EXTEND(src1, 5);
+			if(x)
+				core->gpr[s][dst] = op1 ^ core->gpr[(!s) & 0x1][src2];
+			else
+				core->gpr[s][dst] = op1 ^ core->gpr[s][src2];
+		}
+		else{
+			NOT_IMP;
+		}
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_xormpy(c6k_core_t* core, uint32_t insn){
@@ -2878,7 +2996,8 @@ const ISEITEM insn32_decode_table[] = {
 {"addad", 2, 6, 2, 6, 0x10, 7 ,12, 0x3c},
 {"addad", 2, 6, 2, 6, 0x10, 7 ,12, 0x3d},
 {"addah", 0, 6, 2, 4, 0x6},
-{"addaw", 0, 6, 2, 4, 0x6},
+{"addaw", 2, 6, 2, 6, 0x10, 7, 12, 0x38},
+{"addaw", 2, 6, 2, 6, 0x10, 7, 12, 0x3a},
 {"addk", 1, 6, 2, 6, 0x14},
 {"addkpc", 1, 6, 2, 12, 0x58},
 {"addsub", 0, 6, 2, 4, 0x6},
@@ -2939,7 +3058,10 @@ const ISEITEM insn32_decode_table[] = {
 {"cmpgtu", 2, 6, 2, 4, 0x6, 5, 11, 0x4e},
 {"cmpgtu", 2, 6, 2, 4, 0x6, 5, 11, 0x4f},
 {"cmpgtu4", 0, 6, 2, 4, 0x6},
-{"cmplt", 0, 6, 2, 4, 0x6},
+{"cmplt", 2, 6, 2, 4, 0x6, 5, 11, 0x54},
+{"cmplt", 2, 6, 2, 4, 0x6, 5, 11, 0x55},
+{"cmplt", 2, 6, 2, 4, 0x6, 5, 11, 0x56},
+{"cmplt", 2, 6, 2, 4, 0x6, 5, 11, 0x57},
 {"cmplt2", 0, 6, 2, 4, 0x6},
 {"cmpltu", 2, 6, 2, 4, 0x6, 5, 11, 0x5c},
 {"cmpltu", 2, 6, 2, 4, 0x6, 5, 11, 0x5d},
@@ -3015,7 +3137,7 @@ const ISEITEM insn32_decode_table[] = {
 {"mpyil", 0, 6, 2, 4, 0x6},
 {"mpyilr", 0, 6, 2, 4, 0x6},
 {"mpylh", 0, 6, 2, 4, 0x6},
-{"mpylhu", 0, 6, 2, 4, 0x6},
+{"mpylhu", 1, 6, 2, 11, 0x2e0},
 {"mpyli", 0, 6, 2, 4, 0x6},
 {"mpylir", 0, 6, 2, 4, 0x6},
 {"mpylshu", 0, 6, 2, 4, 0x6},
@@ -3024,7 +3146,7 @@ const ISEITEM insn32_decode_table[] = {
 {"mpysu", 2, 6, 2, 6, 0x0, 7, 11, 0x1e},
 {"mpysu4", 0, 6, 2, 4, 0x6},
 
-{"mpyu", 0, 6, 2, 4, 0x6},
+{"mpyu", 1, 6, 2, 11, 0x3e0},
 {"mpyu4", 0, 6, 2, 4, 0x6},
 {"mpyus", 1, 6, 2, 11, 0x3a0},
 {"mpyus4", 0, 6, 2, 4, 0x6},
@@ -3152,7 +3274,10 @@ const ISEITEM insn32_decode_table[] = {
 {"swenr", 0, 6, 2, 4, 0x6},
 {"unpkhu4", 0, 6, 2, 4, 0x6},
 {"unpklu4", 0, 6, 2, 4, 0x6},
-{"xor", 0, 6, 2, 4, 0x6},
+{"xor", 2, 6, 2, 5, 0x4, 6, 11, 0xa}, /* .S unit */
+{"xor", 2, 6, 2, 5, 0x4, 6, 11, 0xb}, /* .S unit */
+{"xor", 2, 6, 2, 4, 0x6, 5, 11, 0x6e}, /* .L unit */
+{"xor", 2, 6, 2, 4, 0x6, 5, 11, 0x6f}, /* .L unit */
 {"xormpy", 0, 6, 2, 4, 0x6},
 {"xpnd2", 0, 6, 2, 4, 0x6},
 {"xpnd4", 0, 6, 2, 4, 0x6},
@@ -3183,6 +3308,8 @@ insn_action_t insn_action[] = {
 	exec_addad,
 	exec_addah,
 	exec_addaw,
+	exec_addaw,
+
 	exec_addk,
 	exec_addkpc,
 	exec_addsub,
@@ -3248,6 +3375,10 @@ insn_action_t insn_action[] = {
 
 	exec_cmpgtu4,
 	exec_cmplt,
+	exec_cmplt,
+	exec_cmplt,
+	exec_cmplt,
+
 	exec_cmplt2,
 	exec_cmpltu,
 	exec_cmpltu,
@@ -3463,6 +3594,10 @@ insn_action_t insn_action[] = {
 	exec_unpkhu4,
 	exec_unpklu4,
 	exec_xor,
+	exec_xor,
+	exec_xor,
+	exec_xor,
+
 	exec_xormpy,
 	exec_xpnd2,
 	exec_xpnd4,
@@ -3797,7 +3932,7 @@ int exec_32b_insn(c6k_core_t* core, uint32_t insn){
 	}
 	else{
 		//skyeye_log();
-		DBG("In %s, decode error for 0x%x at 0x%x\n", __FUNCTION__, insn, core->pc);
+		printf("In %s, decode error for 0x%x at 0x%x\n", __FUNCTION__, insn, core->pc);
 		exit(-1);
 	}
 	//print_all_gpr(core);
