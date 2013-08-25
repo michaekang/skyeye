@@ -176,7 +176,7 @@ c6k_step_once ()
 	int status;
 	//printf("In %s, pc=0x%x\n", __FUNCTION__, core->pc);
 	uint32_t v;
-	bus_read(32, 0x817b68, &v);
+	//bus_read(32, 0x817b68, &v);
 	core->pce1 = addr & 0xFFFFFFE0;
 	if(core->pc == 0x816680){
 		//printf("In %s, enter abort , pc=0x%x\n", __FUNCTION__, addr);

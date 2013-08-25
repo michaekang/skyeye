@@ -253,3 +253,23 @@ libuart_am335x_la_LDFLAGS = -module
 pkglib_LTLIBRARIES += libuart_am335x.la
 
 
+dev_can_sja1000 = can_sja1000/can_sja1000.c can_sja1000/can_sja1000_module.c
+libcan_sja1000_la_SOURCES = $(dev_can_sja1000)
+libcan_sja1000_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libcan_sja1000.la
+dev_timer_6713 = timer_6713/timer_6713.c timer_6713/timer_6713_module.c
+libtimer_6713_la_SOURCES = $(dev_timer_6713)
+libtimer_6713_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libtimer_6713.la
+dev_intc_6713 = intc_6713/intc_6713.c intc_6713/intc_6713_module.c
+libintc_6713_la_SOURCES = $(dev_intc_6713)
+libintc_6713_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libintc_6713.la
+dev_emif_6713 = emif_6713/emif_6713.c emif_6713/emif_6713_module.c
+libemif_6713_la_SOURCES = $(dev_emif_6713)
+libemif_6713_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libemif_6713.la
+dev_pll_6713 = pll_6713/pll_6713.c pll_6713/pll_6713_module.c
+libpll_6713_la_SOURCES = $(dev_pll_6713)
+libpll_6713_la_LDFLAGS = -module
+pkglib_LTLIBRARIES += libpll_6713.la

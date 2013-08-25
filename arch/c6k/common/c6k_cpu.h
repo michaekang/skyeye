@@ -52,6 +52,11 @@ typedef struct c6k_core{
 	uint32_t ierr;
 	uint32_t ilc;
 	uint32_t itsr;
+/* for c67x core */
+	uint32_t fadcr;
+	uint32_t fmcr;
+	uint32_t csr;
+	uint32_t istp;
 
 	uint32_t pc;
 	uint32_t pfc, pfc_bak1;
