@@ -38,7 +38,7 @@ int exec_32b_insn(c6k_core_t* core, uint32_t insn);
 int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern int exec_16b_insn(c6k_core_t* core, uint32_t insn);
 #define NOT_IMP printf("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
-#define PR_ALL_REG 0
+#define PR_ALL_REG 1
 void print_all_gpr(c6k_core_t* core){
 	int i;
 #if PR_ALL_REG 
@@ -1954,8 +1954,22 @@ static int exec_mvkl(c6k_core_t* core, uint32_t insn){
 static int exec_neg(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int dst = BITS(23, 27);
+		int src2 = BITS(18, 22);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
+		int op1 = BITS(2, 11); 
+		if(op1 == 0x168){
+			if(x)
+				core->gpr[s][dst] = 0 - (int)core->gpr[(!s) & 0x1][src2];
+			else
+				core->gpr[s][dst] = 0 - (int)core->gpr[s][src2];
+		}
+		else{
+			NOT_IMP;
+		}
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_nop(c6k_core_t* core, uint32_t insn){
@@ -2745,28 +2759,30 @@ static int exec_sub(c6k_core_t* core, uint32_t insn){
 			if(x){
 				result = core->gpr[s][src1] - core->gpr[(!s) & 0x1][src2];
 				/* dst is slong type */
-				core->gpr[s][dst] = result & 0xFFFFFFFF;
-				core->gpr[s][dst + 1] = (result >> 32) & 0xFF;
+				//core->gpr[s][dst] = result & 0xFFFFFFFF;
+				//core->gpr[s][dst + 1] = (result >> 32) & 0xFF;
 			}
 			else{
 				result = core->gpr[s][src1] - core->gpr[s][src2];
 				/* dst is slong type */
-				core->gpr[s][dst] = result & 0xFFFFFFFF;
-				core->gpr[s][dst + 1] = (result >> 32) & 0xFF;
+				//core->gpr[s][dst] = result & 0xFFFFFFFF;
+				//core->gpr[s][dst + 1] = (result >> 32) & 0xFF;
 			}
+			write_buffer(core, dst + s * 32, result & 0xFFFFFFFF);
+			write_buffer(core, dst + 1 + s * 32, (result >> 32) & 0xFF);
 			DBG("In %s, ZERO dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
 		}
 		else if(op == 0x7){
 			int result;
 			if(x){
 				result = core->gpr[s][src1] - core->gpr[(!s) & 0x1][src2];
-				core->gpr[s][dst] = result;
+				//core->gpr[s][dst] = result;
 			}
 			else{
 				result = core->gpr[s][src1] - core->gpr[s][src2];
-				/* dst is slong type */
-				core->gpr[s][dst] = result;
+				//core->gpr[s][dst] = result;
 			}
+			write_buffer(core, dst + s * 32, result);
 			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
 		}
 		else if(op == 0x6){
@@ -2774,13 +2790,14 @@ static int exec_sub(c6k_core_t* core, uint32_t insn){
 			int result;
 			if(x){
 				result = src1 - core->gpr[(!s) & 0x1][src2];
-				core->gpr[s][dst] = result;
+				//core->gpr[s][dst] = result;
 			}
 			else{
 				result = src1 - core->gpr[s][src2];
 				/* dst is slong type */
-				core->gpr[s][dst] = result;
+				//core->gpr[s][dst] = result;
 			}
+			write_buffer(core, dst + s * 32, result);
 			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
 
 		}
@@ -2936,6 +2953,14 @@ static int exec_xor(c6k_core_t* core, uint32_t insn){
 				core->gpr[s][dst] = op1 ^ core->gpr[(!s) & 0x1][src2];
 			else
 				core->gpr[s][dst] = op1 ^ core->gpr[s][src2];
+		}
+		else if(op == 0xa8){
+			int op1 = SIGN_EXTEND(src1, 5);
+			if(x)
+				core->gpr[s][dst] = op1 ^ core->gpr[(!s) & 0x1][src2];
+			else
+				core->gpr[s][dst] = op1 ^ core->gpr[s][src2];
+
 		}
 		else{
 			NOT_IMP;
@@ -3169,7 +3194,10 @@ const ISEITEM insn32_decode_table[] = {
 {"mvklh", 0, 6, 2, 4, 0x6},
 {"mvkl", 0, 6, 2, 4, 0x6},
 
-{"neg", 0, 6, 2, 4, 0x6},
+{"neg", 2, 6, 2, 5, 0x8, 6, 11, 0x16},
+{"neg", 2, 6, 2, 4, 0x6, 5, 11, 0x6},
+{"neg", 2, 6, 2, 4, 0x6, 5, 11, 0x24},
+
 {"nop", 2, 6, 1, 12, 0x0, 17, 31, 0x0},
 {"norm", 0, 6, 2, 4, 0x6},
 {"not", 0, 6, 2, 4, 0x6},
@@ -3274,8 +3302,8 @@ const ISEITEM insn32_decode_table[] = {
 {"swenr", 0, 6, 2, 4, 0x6},
 {"unpkhu4", 0, 6, 2, 4, 0x6},
 {"unpklu4", 0, 6, 2, 4, 0x6},
-{"xor", 2, 6, 2, 5, 0x4, 6, 11, 0xa}, /* .S unit */
-{"xor", 2, 6, 2, 5, 0x4, 6, 11, 0xb}, /* .S unit */
+{"xor", 2, 6, 2, 5, 0x8, 6, 11, 0xa}, /* .S unit */
+{"xor", 2, 6, 2, 5, 0x8, 6, 11, 0xb}, /* .S unit */
 {"xor", 2, 6, 2, 4, 0x6, 5, 11, 0x6e}, /* .L unit */
 {"xor", 2, 6, 2, 4, 0x6, 5, 11, 0x6f}, /* .L unit */
 {"xormpy", 0, 6, 2, 4, 0x6},
@@ -3490,6 +3518,9 @@ insn_action_t insn_action[] = {
 	exec_mvkl,
 
 	exec_neg,
+	exec_neg,
+	exec_neg,
+
 	exec_nop,
 	exec_norm,
 	exec_not,
