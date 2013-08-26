@@ -157,6 +157,12 @@ void c6713_mach_init(void* state,  machine_config_t * mach){
 	sja1000_can_ops->stop = can_ops->stop;
 	sja1000_can_ops->transmit = can_ops->transmit;
 	sja1000_can_ops->receive = can_ops->receive;
+
+	memory_space_intf* sja1000_io_memory = (memory_space_intf*)SKY_get_interface(can_sja1000, MEMORY_SPACE_INTF_NAME);
+        ret = add_map(phys_mem, 0xB0000040, 0x10, 0x0, sja1000_io_memory, 1, 1); /* Use reserved address map */
+        if(ret != No_exp){
+                skyeye_log(Error_log, __FUNCTION__, "Can not register io memory for sja1000 controller\n");
+        }
 	
         machine_config_t * this_mach = mach;
         
