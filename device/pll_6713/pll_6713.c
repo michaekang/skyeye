@@ -41,12 +41,26 @@ static exception_t pll_6713_read(conf_object_t *opaque, generic_address_t offset
 	struct pll_6713_device *dev = opaque->obj;
 	pll_6713_reg_t* regs = dev->regs;
 	switch(offset) {
+		case 0x0:
+			*(uint32_t *)buf = regs->pllpid;
+			break;
+		case 0x100:
+			*(uint32_t *)buf = regs->pllcsr;
+			break;
+		case 0x110:
+			*(uint32_t *)buf = regs->pllm;
+			break;
+		case 0x114:
+		case 0x118:
+		case 0x11c:
+		case 0x120:
+			*(uint32_t *)buf = regs->plldiv[(offset - 0x114) / 4];
+			break;
 		default:
 			printf("Can not read the register at 0x%x in pll_6713\n", offset);
 			return Invarg_exp;
 	}
 	return No_exp;
-
 }
 
 static exception_t pll_6713_write(conf_object_t *opaque, generic_address_t offset, uint32_t* buf, size_t count)
@@ -55,6 +69,22 @@ static exception_t pll_6713_write(conf_object_t *opaque, generic_address_t offse
 	pll_6713_reg_t* regs = dev->regs;
 	uint32_t val = *(uint32_t*)buf;
 	switch(offset) {
+		case 0x0:
+			regs->pllpid = val;
+			break;
+		case 0x100:
+			regs->pllcsr = val;
+			break;
+		case 0x110:
+			regs->pllm = val;
+			break;
+		case 0x114:
+		case 0x118:
+		case 0x11c:
+		case 0x120:
+			regs->plldiv[(offset - 0x114) / 4] = val;
+			break;
+
 		default:
 			printf("Can not write the register at 0x%x in pll_6713\n", offset);
 			return Invarg_exp;

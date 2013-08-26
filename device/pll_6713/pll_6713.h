@@ -27,6 +27,11 @@
 #define __pll_6713_H__
 
 typedef struct pll_6713_reg{
+	uint32_t pllpid;
+	uint32_t pllcsr;
+	uint32_t pllm;
+	uint32_t plldiv[4];
+	uint32_t oscdiv1;
 }pll_6713_reg_t;
 
 typedef struct pll_6713_device{
