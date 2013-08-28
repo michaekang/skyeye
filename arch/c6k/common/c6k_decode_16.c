@@ -44,6 +44,8 @@
 
 extern int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern void write_buffer(c6k_core_t* core, int regno, uint32_t result);
+extern void register_branch_event(c6k_core_t* core, generic_address_t target_addr);
+extern void register_memory_event(c6k_core_t* core, uint64_t result, uint32_t reg_no, rw_flag_t rw_flag, bool_t sign_ext, uint32_t width);
 #define NOT_IMP printf("In %s : line %d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
 /* 16 - 18 should be DSZ */
 const ISEITEM insn16_decode_table[] = {
@@ -135,7 +137,13 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 				int base = ptr | 0x4;
 				int ucst = (ucst3 << 3) | ucst_0_2;
 				generic_address_t addr = core->gpr[s][base] + ucst;
+				#if 0
 				bus_read(8, addr, &core->gpr[t][src]);
+				#else
+				uint32_t result;
+				bus_read(8, addr, &result);
+				register_memory_event(core, result, t * 32 + src, RD_FLAG, 0, 8);
+				#endif
 				DBG("In %s, ldbu addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
 			}
 			else if(dsz == 0x1 || dsz == 0x5){
@@ -143,7 +151,13 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 				int base = ptr | 0x4;
 				int ucst = (ucst3 << 3) | ucst_0_2;
 				generic_address_t addr = core->gpr[s][base] + ucst;
+				#if 0
 				bus_read(8, addr, &core->gpr[t][src]);
+				#else
+				uint32_t result;
+				bus_read(8, addr, &result);
+				register_memory_event(core, result, t * 32 + src, RD_FLAG, 0, 8);
+				#endif
 				/* FIXME, sign extend is needed here */
 				DBG("In %s, ldbu addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
 
@@ -157,7 +171,13 @@ static int exec_doff4(c6k_core_t* core, uint32_t insn){
 			int base = ptr | 0x4;
 			int ucst = (ucst3 << 3) | ucst_0_2;
 			generic_address_t addr = core->gpr[s][base] + ucst;
+			#if 0
 			bus_read(32, addr, &core->gpr[t][src]);
+			#else
+			uint32_t result;	
+			bus_read(32, addr, &result);
+			register_memory_event(core, result, t * 32 + src, RD_FLAG, 0, 32);
+			#endif
 			DBG("In %s, stw addr=0x%x, src=%d, base=%d, insn=0x%x\n", __FUNCTION__, addr, src, base, insn);
 			DBG("In %s, header=0x%x, dsz=0x%x\n", __FUNCTION__, core->header, dsz);
 			//sleep(10);
@@ -230,7 +250,13 @@ static int exec_dinc(c6k_core_t* core, uint32_t insn){
 				generic_address_t addr = core->gpr[s][base];
 				core->gpr[s][base] += ucst2;
 				DBG("In %s, addr=0x%x, base=0x%x, ucst2=%d, insn=0x%x\n", __FUNCTION__, addr, core->gpr[s][base], ucst2, insn);
+				#if 0
 				bus_read(8, addr, &core->gpr[t][src]);
+				#else
+				uint32_t result;
+				bus_read(8, addr, &result);
+				register_memory_event(core, result, src + t * 32, RD_FLAG, 0, 8);
+				#endif
 			}
 			else{
 				NOT_IMP;
@@ -327,7 +353,13 @@ static int exec_dstk(c6k_core_t* core, uint32_t insn){
 		//NOT_IMP;
 		/* ldw */
 		generic_address_t addr = core->gpr[GPR_B][15] + (ucst5 << 2);
+		#if 0
 		bus_read(32, addr, &core->gpr[t][src]);
+		#else
+		uint32_t result;
+		bus_read(32, addr, &result);
+		register_memory_event(core, result, t * 32 + src, RD_FLAG, 0, 32);
+		#endif
 		DBG("In %s, LDW@0x%x, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, core->pc, addr, src, ucst5);
 		DBG("In %s, LDW@0x%x, addr=0x%x, src=%d, ucst5\n", __FUNCTION__, core->pc, addr, src, ucst5);
 
@@ -386,8 +418,16 @@ static int exec_dpp(c6k_core_t* core, uint32_t insn){
 			core->gpr[GPR_B][15] = core->gpr[GPR_B][15] + ((ucst0 + 1) << 3);
 			//core->gpr[GPR_B][15] = core->gpr[GPR_B][15] + ((ucst0 + 1) << 2);
 			addr = core->gpr[GPR_B][15];
+			#if 0
 			bus_read(32, addr, &core->gpr[t][src_dst]);
 			bus_read(32, addr + 4, &core->gpr[t][src_dst + 1]);
+			#else
+			uint32_t lsb32, msb32;
+			bus_read(32, addr, &lsb32);
+			bus_read(32, addr + 4, &msb32);
+			uint64_t result = lsb32 | (msb32 << 32);
+			register_memory_event(core, result, t * 32 + src_dst, RD_FLAG, 0, 64);
+			#endif
 			//sleep(10);
 			DBG("In %s, lddw, addr=0x%x\n", __FUNCTION__, addr);
 
@@ -396,8 +436,13 @@ static int exec_dpp(c6k_core_t* core, uint32_t insn){
 			/* ldw ++b15 */
 			core->gpr[GPR_B][15] = core->gpr[GPR_B][15] + ((ucst0 + 1) << 2);
 			addr = core->gpr[GPR_B][15];
+			#if 0
 			bus_read(32, addr, &core->gpr[t][src_dst]);
-
+			#else
+			uint32_t result;
+			bus_read(32, addr, &result);
+			register_memory_event(core, result, src_dst + t * 32, RD_FLAG, 0, 32);
+			#endif	
 		}
 	}
 	else{
@@ -612,15 +657,10 @@ static int exec_sbs7(c6k_core_t* core, uint32_t insn){
 	int scst7 = BITS(6, 12);
 	scst7 = SIGN_EXTEND(scst7, 7);
 	core->pfc = core->pce1 + (scst7 << 1);
-	if(core->delay_slot){
-			NOT_IMP;
-	}
-	
-	core->delay_slot = 5 + 1;
-	/* nop insert */
-	if(core->delay_slot)
-		core->delay_slot -= n3;
-	DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+
+	register_branch_event(core, core->pfc);	
+	core->cycle_num += n3;
+	DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, \n", __FUNCTION__, core->pfc, core->pc, n3);
 	//printf("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
 	core->pc += 2;
 	//NOT_IMP;
@@ -647,7 +687,9 @@ static int exec_scs10(c6k_core_t* core, uint32_t insn){
 		generic_address_t addr = core->pc;
 		//core->pc = (signed int)core->pce1 + scst10;
 		core->pfc = (signed int)core->pce1 + scst10;
-		core->delay_slot = 0;
+		register_branch_event(core, core->pfc);
+		//core->delay_slot = 0;
+		core->cycle_num += 5;
 		DBG("In %s ,scst10=%d, target=0x%x\n", __FUNCTION__, scst10, core->pc);
 		/* Fixme , should calculate the parallel */
 		//core->gpr[s][3] += 4;
@@ -752,30 +794,19 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 			if(A0){
 				/* bnop */
 				core->pfc = core->pce1 + (offset << 1);
-				if(core->delay_slot){
-					NOT_IMP;
-				}
-			
-				core->delay_slot = 5 + 1;
+				register_branch_event(core, core->pfc);
 				/* nop insert */
-				if(core->delay_slot)
-					core->delay_slot -= n3;
-				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+				core->cycle_num += n3;
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d\n", __FUNCTION__, core->pfc, core->pc, n3);
 			}
 			break;
 		case 1:
 			if(!A0){
 				/* bnop */
 				core->pfc = core->pce1 + (offset << 1);
-				if(core->delay_slot){
-					NOT_IMP;
-				}
-
-				core->delay_slot = 5 + 1;
-				/* nop insert */
-				if(core->delay_slot)
-					core->delay_slot -= n3;
-				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+				register_branch_event(core, core->pfc);
+				core->cycle_num += n3;
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d\n", __FUNCTION__, core->pfc, core->pc, n3);
 
 			}
 			break;
@@ -783,30 +814,18 @@ static int exec_sbs7c(c6k_core_t* core, uint32_t insn){
 			if(B0){
 				/* bnop */
 				core->pfc = core->pce1 + (offset << 1);
-				if(core->delay_slot){
-					NOT_IMP;
-				}
-			
-				core->delay_slot = 5 + 1;
-				/* nop insert */
-				if(core->delay_slot)
-					core->delay_slot -= n3;
-				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot);
+				register_branch_event(core, core->pfc);
+				core->cycle_num += n3;
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d\n", __FUNCTION__, core->pfc, core->pc, n3);
 			}
 			break;
 		case 3:
 			if(!B0){
 				/* bnop */
 				core->pfc = core->pce1 + (offset << 1);
-				if(core->delay_slot){
-					NOT_IMP;
-				}
-
-				core->delay_slot = 5 + 1;
-				/* nop insert */
-				if(core->delay_slot)
-					core->delay_slot -= n3;
-				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, delay_slot=%d, scst7=0x%x\n", __FUNCTION__, core->pfc, core->pc, n3, core->delay_slot, offset);
+				register_branch_event(core, core->pfc);
+				core->cycle_num += n3;
+				DBG("In %s, bnop, pfc = 0x%x, pc = 0x%x, n3=%d, scst7=0x%x\n", __FUNCTION__, core->pfc, core->pc, n3, offset);
 
 			}
 			break;
@@ -987,14 +1006,9 @@ static int exec_sx1b(c6k_core_t* core, uint32_t insn){
 	int src2 = BITS(7, 10);
 	int n3 = BITS(13, 15);
 	int s = BITS(0, 0);
-	core->pfc = core->gpr[s][src2];
-	if(core->delay_slot){
-		NOT_IMP;
-	}
-		
-	core->delay_slot = 5 + 1;
-	/* skip the specific nop */
-	core->delay_slot -= n3;
+	core->pfc = core->gpr[s][src2]; 
+	register_branch_event(core, core->pfc);
+	core->cycle_num += n3;
 	DBG("In %s, pfc=0x%x\n", __FUNCTION__, core->pfc);
 
 	core->pc += 2;
@@ -1298,11 +1312,7 @@ static int exec_uspm(c6k_core_t* core, uint32_t insn){
 }
 static int exec_unop(c6k_core_t* core, uint32_t insn){
 	int n3 = BITS(13, 15);
-	if(core->delay_slot >= n3)
-		core->delay_slot -= n3;
-	else
-		core->delay_slot = 0;
-	//NOT_IMP;
+	core->cycle_num += n3;
 	core->pc += 2;
 	return 0;
 }

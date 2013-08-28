@@ -34,11 +34,18 @@
 #define DEBUG
 #include <skyeye_log.h>
 
+#ifdef DBG
+#undef DBG
+#define DBG
+//#define DBG(fmt, ...) do { fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
+#endif
+
+
 int exec_32b_insn(c6k_core_t* core, uint32_t insn);
 int decode_instr(uint32_t insn, int32_t *idx, ISEITEM* table, int table_len);
 extern int exec_16b_insn(c6k_core_t* core, uint32_t insn);
 #define NOT_IMP printf("In %s:%d, not implement at 0x%x\n", __FUNCTION__, __LINE__, core->pc);exit(-1)
-#define PR_ALL_REG 1
+#define PR_ALL_REG 0
 void print_all_gpr(c6k_core_t* core){
 	int i;
 #if PR_ALL_REG 
@@ -99,7 +106,7 @@ static inline int calc_cond(c6k_core_t* core, uint32_t insn){
 	int ret;
 	int creg = cond >> 1;
 	int z = cond & 0x1;
-	DBG("\n\nIn %s, creg=0x%x, z=0x%x pc=0x%x, delay_slot=0x%x, sploop_begin=0x%x\n", __FUNCTION__, creg, z, core->pc, core->delay_slot, core->sploop_begin);
+	DBG("\n\nIn %s, creg=0x%x, z=0x%x pc=0x%x, sploop_begin=0x%x\n", __FUNCTION__, creg, z, core->pc, core->sploop_begin);
 	if(cond == 0)
 		return 1;
 	else{
@@ -153,12 +160,157 @@ void write_back(c6k_core_t* core){
 	return;
 }
 
-static void inline dec_delay_slot(c6k_core_t* core){
-	if(core->delay_slot){
-		//printf("In %s, core->pc=0x%x\n", __FUNCTION__, core->pc);
-		core->delay_slot--;
+void register_branch_event(c6k_core_t* core, generic_address_t target_addr){
+	//if(core->delay_slot_cycle[core->fill_slot_id] == 0){
+	int fill_slot_id = (core->curr_slot_id + BRANCH_DELAY_SLOT) % DELAY_SLOT_NUM;
+	if((core->delay_slot_cycle[fill_slot_id] & BRANCH_EVENT_ID) == 0){
+		core->delay_slot_cycle[fill_slot_id] |= BRANCH_EVENT_ID;
+		//printf("In %s, branch event registered, pfc = 0x%x, pc=0x%x, cycle_num=0x%x, fill_slot_id=%d\n", __FUNCTION__, target_addr, core->pc, core->cycle_num + BRANCH_DELAY_SLOT, fill_slot_id);
+		core->pfc_branch[fill_slot_id] = target_addr;
+		/* branch insn will be triggered after the specific cycle */
+		//core->delay_slot_cycle[fill_slot_id] = core->cycle_num + BRANCH_DELAY_SLOT;
+
+		//DBG("In %s, delay_slot_cycle=%d, pfc_branch[%d]=0x%x\n", __FUNCTION__, core->delay_slot_cycle[core->fill_slot_id], core->fill_slot_id, fill_slot_id);
+		//core->fill_slot_id ++;
+		//core->fill_slot_id %= DELAY_SLOT_NUM; /* the maximum slot number is DELAY_SLOT_NUM */
+			//sleep(10);
+	}
+	else{
+		/* something wrong, two branch triggered at the same cycle */
+		SKYEYE_ERR("The delay slot is occupied.\n");
+		//core->pfc = core->pce1 + (scst21 << 2);
+		//core->delay_slot = 5 + 1;
+		DBG("In %s, pfc=0x%x\n", __FUNCTION__, core->pfc);
+	}
+	return;
+}
+
+void register_memory_event(c6k_core_t* core, uint64_t result, uint32_t reg_no, generic_address_t addr, rw_flag_t rw_flag, bool_t sign_ext, uint32_t width){
+	int fill_slot_id = (core->curr_slot_id + MEM_ACCESS_DELAY_SLOT) % DELAY_SLOT_NUM;
+	if(rw_flag == RD_FLAG){
+		int buf_pos = core->mem_access_buf_pos[fill_slot_id];
+		if(buf_pos < MEM_ACCESS_BUF_SIZE){
+		//printf("In %s, branch event registered, pfc = 0x%x, pc=0x%x, cycle_num=0x%x, fill_slot_id=%d\n", __FUNCTION__, target_addr, core->pc, core->cycle_num + BRANCH_DELAY_SLOT, core->fill_slot_id);
+		//core->pfc_branch[core->fill_slot_id] = target_addr;
+			core->delay_slot_cycle[fill_slot_id] |= MEM_RD_EVENT_ID;
+			/* memory access insn will be triggered after the specific cycle */
+			core->mem_access_result[fill_slot_id][buf_pos] = result;
+			uint32_t mem_access_reg = (reg_no & 0xFF)| (rw_flag << 8) | (width << 16) | (sign_ext << 24);
+			core->mem_access_reg[fill_slot_id][buf_pos] = mem_access_reg;
+			//printf("In %s, register RD, fill_slot_id=%d, core->mem_access_buf_pos=%d, pc=0x%x\n", __FUNCTION__, fill_slot_id, buf_pos, core->pc);
+			core->mem_access_buf_pos[fill_slot_id] ++;
+		}
+		else{
+			//printf("In %s, pc=0x%x\n", __FUNCTION__, core->pc);
+			//SKYEYE_ERR("Only support one RD event in one cycle\n");
+			SKYEYE_ERR(" RD buffer is full in the slot, pc=0x%x\n", core->pc);
+		}
+	}
+	else if(rw_flag == WR_FLAG){
+		if((core->delay_slot_cycle[fill_slot_id] & MEM_WR_EVENT_ID) == 0){
+			core->delay_slot_cycle[fill_slot_id] |= MEM_WR_EVENT_ID;
+			core->mem_wr_addr[fill_slot_id] = addr;
+			core->mem_wr_result[fill_slot_id] = result;
+			uint32_t mem_wr_reg = (reg_no & 0xFF)| (rw_flag << 8) | (width << 16) | (sign_ext << 24);
+			core->mem_wr_reg[fill_slot_id] = mem_wr_reg;
+			//printf("In %s, register WR, fill_slot_id=%d, pc=0x%x\n", __FUNCTION__, fill_slot_id, core->pc);
+
+		//core->delay_slot_cycle[fill_slot_id] = core->cycle_num + MEM_ACCESS_DELAY_SLOT;
+
+		//DBG("In %s, delay_slot_cycle=%d, pfc_branch[%d]=0x%x\n", __FUNCTION__, core->delay_slot_cycle[core->fill_slot_id], core->fill_slot_id, core->pfc_branch[core->mem_access_slot_id]);
+		//core->mem_access_slot_id ++;
+		//core->mem_access_slot_id %= DELAY_SLOT_NUM; /* the maximum slot number is 5 */
+			//sleep(10);
+		}
+		else{
+			//printf("In %s, pc=0x%x\n", __FUNCTION__, core->pc);
+			SKYEYE_ERR("Only support one WR event in one cycle, pc=0x%x\n", core->pc);
+		}
+	}
+	else{
+		printf("In %s, error when memory event registered, pc=0x%x, cycle_num=0x%x, fill_slot_id=%d\n", __FUNCTION__, core->pc, core->cycle_num , fill_slot_id);
+		/* something wrong */
+		SKYEYE_ERR("The delay slot is occupied.\n");
+		//core->pfc = core->pce1 + (scst21 << 2);
+		//core->delay_slot = 5 + 1;
+		DBG("In %s, pfc=0x%x\n", __FUNCTION__, core->pfc);
+	}
+	return;
+}
+
+void check_event(c6k_core_t* core){
+	//printf("In %s,core->curr_slot_id=%d,pc=0x%x, delay_slot_cycle=0x%x\n", __FUNCTION__, core->curr_slot_id, core->pc, core->delay_slot_cycle[core->curr_slot_id]);
+	if(core->delay_slot_cycle[core->curr_slot_id] == 0)
+		return;
+	if(core->delay_slot_cycle[core->curr_slot_id] & BRANCH_EVENT_ID){
+		
+		/* check branch event */
+		if(core->pfc_branch[core->curr_slot_id] != BAD_ADDR){
+			//printf("In %s, branch triggered, pfc = 0x%x, pc=0x%x, cycle_num=0x%x, curr_slot_id=%d\n", __FUNCTION__, core->pfc_branch[core->curr_slot_id], core->pc, core->cycle_num, core->curr_slot_id);
+			core->pc = core->pfc_branch[core->curr_slot_id];
+			core->pfc_branch[core->curr_slot_id] = BAD_ADDR;
+			core->delay_slot_cycle[core->curr_slot_id] &= ~BRANCH_EVENT_ID;
+
+			/* The branch sometimes will triggered in sploop, so we have to reset the sploop buffer */
+			core->sploop_begin = core->sploop_end = BAD_ADDR;
+			core->buffer_pos = 0;
+		}
+	}
+	/* check memory access event */
+	//assert(mem_access_reg != 0); /* we use mem_access_reg[8:15] to record the RW flag */
+
+	if(core->delay_slot_cycle[core->curr_slot_id] & MEM_RD_EVENT_ID){
+		int i = 0;
+		for(; i < core->mem_access_buf_pos[core->curr_slot_id]; i++){
+			uint32_t mem_access_reg = core->mem_access_reg[core->curr_slot_id][i];
+			int reg_no = mem_access_reg & 0xFF;
+			int rw_flag = (mem_access_reg >> 8) & 0xFF;
+			int width = (mem_access_reg >> 16) & 0xFF;
+			uint64_t result = core->mem_access_result[core->curr_slot_id][i];
+			if(mem_access_reg != 0){
+				if(width == 64){
+					core->gpr[reg_no / GPR_NUM_IN_GROUP][reg_no % GPR_NUM_IN_GROUP] = result & 0xFFFFFFFF;
+					core->gpr[reg_no / GPR_NUM_IN_GROUP][(reg_no % GPR_NUM_IN_GROUP) + 1] = result >> 32;
+				}
+				else
+					core->gpr[reg_no / GPR_NUM_IN_GROUP][reg_no % GPR_NUM_IN_GROUP] = result;
+				core->mem_access_reg[core->curr_slot_id][i] = 0x0;
+			}
+		}
+		core->mem_access_buf_pos[core->curr_slot_id] = 0;
+		core->delay_slot_cycle[core->curr_slot_id] &= ~MEM_RD_EVENT_ID;
+		//printf("In %s, RD triggered, curr_slot_id=%d, pc=0x%x\n", __FUNCTION__, core->curr_slot_id, core->pc);
+	}
+	if(core->delay_slot_cycle[core->curr_slot_id] & MEM_WR_EVENT_ID){
+		generic_address_t addr = core->mem_wr_addr[core->curr_slot_id];
+		int width = (core->mem_wr_reg[core->curr_slot_id] >> 16) & 0xFF;
+		uint64_t result = core->mem_wr_result[core->curr_slot_id];
+
+		if(width == 64){
+			bus_write(32, addr, result & 0xFFFFFFFF);
+			bus_write(32, addr + 4, result >> 32);
+		}
+		else
+			bus_write(width, addr, result);
+		core->mem_wr_reg[core->curr_slot_id] = 0x0;
+		core->delay_slot_cycle[core->curr_slot_id] &= ~MEM_WR_EVENT_ID;
+		//printf("In %s, WR triggered, curr_slot_id=%d, pc=0x%x\n", __FUNCTION__, core->curr_slot_id, core->pc);
+	}
+	/* add some check for the other event */
+	
+	return;
+}
+
+void cycle_inc(c6k_core_t* core, int n){
+	int i = 0;
+	for(; i < n; i++){
+		check_event(core);
+		core->cycle_num ++;
+		core->curr_slot_id ++;
+		core->curr_slot_id %= DELAY_SLOT_NUM;
 	}
 }
+
 static void inline record_sploop_buffer(c6k_core_t* core, uint32_t insn, uint32_t compact_flag){
 	if(core->spmask && (core->pc > core->spmask_begin && core->pc <= (core->spmask_end))){
 		//skyeye_printf_in_color(RED, "mask instruction 0x%x, pc=0x%x\n", insn, core->pc);
@@ -181,8 +333,6 @@ static void inline record_sploop_buffer(c6k_core_t* core, uint32_t insn, uint32_
 			core->spmask = 0; /* end of spmask */
 		}
 	}
-}
-static void inline set_delay_slot(c6k_core_t* core){
 }
 #define WORD_ALIGN(a, b) (a << b)
 static inline generic_address_t  calc_addr(c6k_core_t* core, int base, int offset, int mode, int y, int align){
@@ -265,19 +415,22 @@ static int exec_add_l(c6k_core_t* core, uint32_t insn){
 		int dst = BITS(23, 27);
 		int s = BITS(1, 1);
 		int x = BITS(12, 12);
+		int result;
 		if(op == 0x2){
 			int scst5 = SIGN_EXTEND(src1, 5);
 			if(x)
-				core->gpr[s][dst] = core->gpr[(!s) & 0x1][src2] + scst5;
+				result = core->gpr[(!s) & 0x1][src2] + scst5;
 			else
-				core->gpr[s][dst] = core->gpr[s][src2] + scst5;
+				result = core->gpr[s][src2] + scst5;
+			write_buffer(core, dst + s * 32, result);
 			DBG("In %s, op=0x%x, insn=0x%x\n", __FUNCTION__, op, insn);
 		}
 		else if(op == 0x3){
 			if(x)
-				core->gpr[s][dst] = core->gpr[(!s) & 0x1][src2] + core->gpr[s][src1];
+				result = core->gpr[(!s) & 0x1][src2] + core->gpr[s][src1];
 			else
-				core->gpr[s][dst] = core->gpr[s][src2] + core->gpr[s][src1];
+				result = core->gpr[s][src2] + core->gpr[s][src1];
+			write_buffer(core, dst + s * 32, result);
 			DBG("In %s, op=0x%x, insn=0x%x, src1=%d, src2=%d\n", __FUNCTION__, op, insn, src1, src2);
 
 		}
@@ -328,6 +481,9 @@ static int exec_add_d(c6k_core_t* core, uint32_t insn){
 		if(op == 0x12){
 			core->gpr[s][dst] = core->gpr[s][src2] + src1;
 			DBG("In %s, op=0x%x, insn=0x%x, scst5=%d\n", __FUNCTION__, op, insn, src1);
+		}
+		else if(op == 0x10){
+			core->gpr[s][dst] = core->gpr[s][src2] + core->gpr[s][src1];
 		}
 		else{
 			DBG("In %s, op=0x%x, insn=0x%x\n", __FUNCTION__, op, insn);
@@ -416,12 +572,16 @@ static int exec_addkpc(c6k_core_t* core, uint32_t insn){
 		}
 		core->gpr[s][dst] = core->pce1 + (scst7 << 2);
 		/* Add nop specified by ucst3 */
-		DBG("In %s, before ucst3=%d, delay_slot=%d\n", __FUNCTION__, ucst3, core->delay_slot);
+		DBG("In %s, before ucst3=%d, cycle=%d\n", __FUNCTION__, ucst3, core->cycle_num);
+		/*
 		if(core->delay_slot >= ucst3)
 			core->delay_slot -= ucst3;
 		else
 			core->delay_slot = 0;
-		DBG("In %s, after ucst3=%d, delay_slot=%d\n", __FUNCTION__, ucst3, core->delay_slot);
+		*/
+		//core->cycle_num += ucst3;
+		cycle_inc(core, ucst3);
+		DBG("In %s, after ucst3=%d, cycle_num=%d\n", __FUNCTION__, ucst3, core->cycle_num);
 	}
 	//NOT_IMP;
 	core->pc += 4;
@@ -606,22 +766,11 @@ static int exec_b(c6k_core_t* core, uint32_t insn){
 		int scst21 = BITS(7, 27);
 		/* sign extend */
 		scst21 = (scst21 & 0x100000) ? (0xFFE00000 | scst21) : scst21;
-		
-		DBG("In %s, delay_slot=%d, \n", __FUNCTION__, core->delay_slot);
-		if(core->delay_slot != 0){
-			core->pfc_bak1 = core->pce1 + (scst21 << 2);
-			core->delay_slot_bak1 = 5 + 1 - core->delay_slot;
-			DBG("In %s, delay_slot=%d, pfc_bak1=0x%x, delay_slot_bak1 = %d\n", __FUNCTION__, core->delay_slot, core->pfc_bak1, core->delay_slot_bak1);
-			//sleep(10);
-		}
-		else{
-			core->pfc = core->pce1 + (scst21 << 2);
-			core->delay_slot = 5 + 1;
-			DBG("In %s, pfc=0x%x\n", __FUNCTION__, core->pfc);
-		}
+		register_branch_event(core, core->pce1 + (scst21 << 2));
+		//DBG("In %s, delay_slot=%d, \n", __FUNCTION__, core->delay_slot);
+	
 	}
 	core->pc += 4;
-	//NOT_IMP;
 	return 0;
 }
 
@@ -635,29 +784,19 @@ static int exec_b_reg(c6k_core_t* core, uint32_t insn){
 			target_addr = core->gpr[GPR_A][src2];
 		else
 			target_addr = core->gpr[GPR_B][src2];
-		if(core->delay_slot != 0){
-			core->pfc_bak1 = target_addr;
-			core->delay_slot_bak1 = 5 + 1 - core->delay_slot;
-			DBG("In %s, delay_slot=%d, pfc_bak1=0x%x, delay_slot_bak1 = %d\n", __FUNCTION__, core->delay_slot, core->pfc_bak1, core->delay_slot_bak1);
-			//sleep(10);
-		}
-		else{
-			core->pfc = target_addr;
-			core->delay_slot = 5 + 1;
-			DBG("In %s, pfc=0x%x\n", __FUNCTION__, core->pfc);
-		}
-
+		register_branch_event(core, target_addr);
 	}
 	core->pc += 4;
-
 	return 0;
 }
 
 static int exec_b_irp(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		core->pfc = core->irp;
+		register_branch_event(core, core->pfc);
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 
@@ -703,27 +842,20 @@ static int exec_bnop(c6k_core_t* core, uint32_t insn){
 			core->pfc = core->pce1 + (src2 << 1);
 		else
 			core->pfc = core->pce1 + (src2 << 2);
-		if(core->delay_slot == 0){
-			core->delay_slot = 5 + 1;
-			/* skip the specific nop */
-			core->delay_slot -= src1;
-			DBG("In %s, pce1 =0x%x, (src2 << 1) = 0x%x, (src2 << 2)=0x%x\n", __FUNCTION__, core->pce1, src2 << 1, src2 << 2);
-			DBG("In %s, pfc = 0x%x, pc = 0x%x, src2=%d, src1=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc,src2, src1, core->delay_slot);
-
-		}
-		else{
-			DBG("In %s, delay_slot=%d\n", __FUNCTION__, core->delay_slot);
-			NOT_IMP;
-		}
+		register_branch_event(core, core->pfc);
 	}
 	else{
-		DBG("In %s, bnop not taken, pfc = 0x%x, pc = 0x%x, src1=%d, delay_slot=%d\n", __FUNCTION__, core->pfc, core->pc, src1, core->delay_slot);
+		DBG("In %s, bnop not taken, pfc = 0x%x, pc = 0x%x, src1=%d, cycle=%d\n", __FUNCTION__, core->pfc, core->pc, src1, core->cycle_num);
+		#if 0
 		if(core->delay_slot >= src1){
 			core->delay_slot -= (src1);
 		}
 		else
 			core->delay_slot = 0;
+		#endif
 	}
+	//core->cycle_num += src1;
+	cycle_inc(core, src1);
 	core->pc += 4;
 	return 0;
 }
@@ -737,26 +869,13 @@ static int exec_bnop_reg(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		//core->pc = core->gpr[GPR_B][src2];
 		int gpr_group = x? ((!s) & 0x1) : s;
-		if(core->delay_slot == 0){
-			core->pfc = core->gpr[gpr_group][src2];
-			core->delay_slot = 5 + 1;
-		}
-		else{
-			core->pfc_bak1 = core->gpr[gpr_group][src2];
-                        core->delay_slot_bak1 = 5 + 1 - src1;
-			//NOT_IMP;
-		}
-		if(core->delay_slot >= src1)
-			/* skip the specific nop */
-			core->delay_slot -= src1;
-		else
-			core->delay_slot = 0;
-
+		core->pfc = core->gpr[gpr_group][src2];
+		register_branch_event(core, core->pfc);
 	}
 	else{
-		if(core->delay_slot)
-			core->delay_slot -= (src1);
 	}
+	//core->cycle_num += src1;
+	cycle_inc(core, src1);
 	core->pc += 4;
 	return 0;
 }
@@ -776,6 +895,7 @@ static int exec_callp(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		scst21 = SIGN_EXTEND(scst21, 21);
 		core->pfc = core->pce1 + (scst21 << 2);
+		register_branch_event(core, core->pfc);
 		if(insn & 0x1){
 			generic_address_t addr = core->pc + 4;
 			uint32_t word;
@@ -831,10 +951,14 @@ static int exec_callp(c6k_core_t* core, uint32_t insn){
 		}
 		DBG("In %s, pfc=0x%x, return addr=0x%x\n", __FUNCTION__, core->pfc, core->gpr[s][3]);
 		/* insert 5 nop */
+		/*
 		if(core->delay_slot >= 5)
 			core->delay_slot -= 5;
 		else
 			core->delay_slot = 1;
+		*/
+		//core->cycle_num = 5;
+		cycle_inc(core, 5);
 	//}
 	core->pc += 4;
 	return 0;
@@ -1297,24 +1421,23 @@ static int exec_ldbu(c6k_core_t* core, uint32_t insn){
 		int dst = BITS(23, 27);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 0);
-		int result;
+		uint32_t result;
 		//bus_read(8, addr, &core->gpr[s][dst]);
 		bus_read(8, addr, &result);
 		if(op == 1){
 			/* ldbu */
 			//core->gpr[s][dst] = core->gpr[s][dst] & 0xFF;
-			//uint32_t tmp;
-			//bus_read(32, addr & 0xFFFFFFFC, &tmp);
-			//printf("In %s, read word, addr=0x%x, result=0x%x\n", __FUNCTION__, addr & 0xFFFFFFFC, tmp);
-			int result = result & 0xFF;
-			write_buffer(core, dst + s * 32, result);
+			result = result & 0xFF;
+			//write_buffer(core, dst + s * 32, result);
+			register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 8);
 			DBG("In %s, pc=0x%x\n", __FUNCTION__, core->pc);
 		}
 		else if(op == 2){
 			/* ldb with sign extend */
 			if(result & 0x80)
 				result = 0xFFFFFF00 | (result & 0xFF);
-			write_buffer(core, dst + s * 32, result);
+			//write_buffer(core, dst + s * 32, result);
+			register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 8);
 		}	
 		else{
 			NOT_IMP;
@@ -1324,13 +1447,32 @@ static int exec_ldbu(c6k_core_t* core, uint32_t insn){
 	core->pc += 4;
 	return 0;
 }
-static int exec_ldbu_1(c6k_core_t* core, uint32_t insn){
+static int exec_ldbu_15(c6k_core_t* core, uint32_t insn){
+	if(calc_cond(core,insn)){
+		//DST(insn)
+		int ucst15 = BITS(8, 22);
+		int dst = BITS(23, 27);
+		int y = BITS(7, 7);
+		int s = BITS(1, 1);
+
+		uint32_t result;
+		int base = 14 + y ;
+		//bus_read(8, addr, &core->gpr[s][dst]);
+		generic_address_t addr = core->gpr[GPR_B][base] + ucst15;
+		bus_read(8, addr, &result);
+		register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 8);
+	}
+	core->pc += 4;
+	return 0;
+}
+static int exec_ldb_15(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
 	}
 	NOT_IMP;
 	return 0;
 }
+
 static int exec_lddw(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		int dst = BITS(23, 27);
@@ -1340,8 +1482,13 @@ static int exec_lddw(c6k_core_t* core, uint32_t insn){
 		int y = BITS(7, 7);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 3);
-		bus_read(32, addr, &core->gpr[s][dst]);
-		bus_read(32, addr + 4, &core->gpr[s][dst + 1]);
+		uint32_t lsb32, msb32;
+		//bus_read(32, addr, &core->gpr[s][dst]);
+		bus_read(32, addr, &lsb32);
+		//bus_read(32, addr + 4, &core->gpr[s][dst + 1]);
+		bus_read(32, addr + 4, &msb32);
+		uint64_t result = lsb32 | (msb32 << 32);
+		register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 64);
 		//addr = calc_addr(core, base, offset , mode, y, 3);
 		DBG("In %s, addr = 0x%x, data=0x%x\n", __FUNCTION__, addr, core->gpr[s][dst]);
 
@@ -1361,7 +1508,11 @@ static int exec_ldhu(c6k_core_t* core, uint32_t insn){
 			int y = BITS(7, 7);
 			int s = BITS(1, 1);
 			generic_address_t addr = calc_addr(core, base, offset , mode, y, 1);
-			bus_read(16, addr, &core->gpr[s][dst]);
+			uint32_t result;
+			//bus_read(16, addr, &core->gpr[s][dst]);
+			bus_read(16, addr, &result);
+			register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 16);
+			
 			DBG("In %s, addr = 0x%x, data=0x%x\n", __FUNCTION__, addr, core->gpr[s][dst]);
 		}
 		else{
@@ -1393,8 +1544,16 @@ static int exec_ldndw(c6k_core_t* core, uint32_t insn){
 		DBG("In %s, insn = 0x%x, base=0x%x, dst=%d\n", __FUNCTION__, insn, base, dst);
 		/* FIXME, sc bit need to be considered */
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 3);
+		#if 0
 		bus_read(32, addr, &core->gpr[s][dst]);
 		bus_read(32, addr + 4, &core->gpr[s][dst + 1]);
+		#else
+		uint32_t lsb32, msb32;
+		bus_read(32, addr, &lsb32);
+		bus_read(32, addr + 4, &msb32);
+		uint64_t result = lsb32 | (msb32 << 32);
+		register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 64);	
+		#endif
 		if(sc == 0){
 			NOT_IMP;
 		}
@@ -1414,7 +1573,13 @@ static int exec_ldnw(c6k_core_t* core, uint32_t insn){
 		int y = BITS(7, 7);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 2);
+		#if 0
 		bus_read(32, addr, &core->gpr[s][dst]);
+		#else
+		uint32_t result;
+		bus_read(32, addr, &result);
+		register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 32);
+		#endif
 		DBG("In %s, addr = 0x%x, data=0x%x\n", __FUNCTION__, addr, core->gpr[s][dst]);
 
 	}
@@ -1432,7 +1597,13 @@ static int exec_ldw(c6k_core_t* core, uint32_t insn){
 		int y = BITS(7, 7);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 2);
+		#if 0
 		bus_read(32, addr, &core->gpr[s][dst]);
+		#else
+		uint32_t result;	
+		bus_read(32, addr, &result);
+		register_memory_event(core, result, dst + s * 32, BAD_ADDR, RD_FLAG, 0, 32);
+		#endif
 		DBG("In %s, addr = 0x%x, data=0x%x, dst=%d, base%d\n", __FUNCTION__, addr, core->gpr[s][dst], dst, base);
 	}
 	//NOT_IMP;
@@ -1456,8 +1627,35 @@ static int exec_ll(c6k_core_t* core, uint32_t insn){
 static int exec_lmbd(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);	
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int x = BITS(12, 12);
+		int s = BITS(1, 1);
+		int op = BITS(5, 11);
+		if(op == 0x6a){
+			int i = 1;
+			int gpr_group = x ? (!s) & 0x1 : s;
+
+			if(src1 & 0x1){
+				/* count the number of one at leftmost */
+				while(core->gpr[gpr_group][src2] >> (32 - i)){
+					i++;
+				}
+			}
+			else{
+				/* count the number of zero at leftmost */
+				while((core->gpr[gpr_group][src2] >> (32 - i)) == 0){
+					i++;
+				}
+			}
+			core->gpr[gpr_group][dst] = i - 1;
+		}
+		else{
+			NOT_IMP;
+		}
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_max2(c6k_core_t* core, uint32_t insn){
@@ -1663,6 +1861,14 @@ static int exec_mpysu(c6k_core_t* core, uint32_t insn){
 				core->gpr[s][dst] = op1 * (core->gpr[s][src2] & 0xFFFF);
 			DBG("In %s, src1=%d, src2=%d\n", __FUNCTION__, src1, src2);
 		}
+		else if(op == 0x1e){
+			int op1 = SIGN_EXTEND(src1, 5);
+			if(x)
+				core->gpr[s][dst] = op1 * (core->gpr[(!s) & 0x1][src2] & 0xFFFF);
+			else
+				core->gpr[s][dst] = op1 * (core->gpr[s][src2] & 0xFFFF);
+			DBG("In %s, src1=%d, src2=%d\n", __FUNCTION__, src1, src2);
+		}
 		else{
 			NOT_IMP;
 		}
@@ -1841,6 +2047,10 @@ static int exec_mvc(c6k_core_t* core, uint32_t insn){
 				core->gpr[reg_group][dst] = core->csr;
 				DBG("In %s, src=%d, csr=%d\n", __FUNCTION__, src, core->csr);
 				break;
+			case 0x4:
+				core->gpr[reg_group][dst] = core->ier;
+				DBG("In %s, src=%d, ier=%d\n", __FUNCTION__, src, core->ier);
+				break;
 			default:
 				printf("In %s, dst=0x%x, insn=0x%x\n", __FUNCTION__, dst, insn);
 				NOT_IMP;
@@ -1976,10 +2186,13 @@ static int exec_nop(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
 		int src = BITS(13, 16);
+		/*
 		if(core->delay_slot > src)
 			core->delay_slot -= src;
 		else
 			core->delay_slot = 0;
+		*/
+		cycle_inc(core, src);
 	}
 	//NOT_IMP;
 	core->pc += 4;
@@ -2286,6 +2499,14 @@ static int exec_shl(c6k_core_t* core, uint32_t insn){
 				core->gpr[s][dst] = core->gpr[s][src2] << src1;
 			DBG("In %s, src1=0x%x, src2=0x%x\n", __FUNCTION__, src1, src2);
 		}
+		else if(op == 0x33){
+			if(x)
+				core->gpr[s][dst] = core->gpr[(!s) & 0x1][src2] << core->gpr[s][src1];
+			else
+				core->gpr[s][dst] = core->gpr[s][src2] << core->gpr[s][src1];
+			DBG("In %s, src1=0x%x, src2=0x%x\n", __FUNCTION__, src1, src2);
+
+		}
 		else{
 			NOT_IMP;
 		}
@@ -2359,6 +2580,13 @@ static int exec_shru(c6k_core_t* core, uint32_t insn){
 				core->gpr[s][dst] = core->gpr[(!s) & 0x1][src2] >> src1;
 			else
 				core->gpr[s][dst] = core->gpr[s][src2] >> src1;
+			DBG("In %s, src1=%d, dst=%d, result=0x%x\n", __FUNCTION__, src1, dst, core->gpr[s][dst]);
+		}
+		else if(op == 0x27){
+			if(x)
+				core->gpr[s][dst] = core->gpr[(!s) & 0x1][src2] >> core->gpr[s][src1];
+			else
+				core->gpr[s][dst] = core->gpr[s][src2] >> core->gpr[s][src1];
 			DBG("In %s, src1=%d, dst=%d, result=0x%x\n", __FUNCTION__, src1, dst, core->gpr[s][dst]);
 		}
 		else{	
@@ -2611,12 +2839,18 @@ static int exec_stb(c6k_core_t* core, uint32_t insn){
 		int src = BITS(23, 27);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset , mode, y, 0);
+		#if 0
 		bus_write(8, addr, core->gpr[s][src] & 0xFF);
+		#else
+		register_memory_event(core, core->gpr[s][src] & 0xFF, 0xFF, addr, WR_FLAG, 0, 8);
+		#endif
 		DBG("In %s, addr = 0x%x, data=0x%x\n", __FUNCTION__, addr, core->gpr[s][src]);
+		#if 0
 		if(addr >= 0x817ded && addr < (0x817ded + 0x10)){
 			char c = core->gpr[s][src] & 0xFF;
 			skyeye_uart_write(0, &c, 1, NULL);
 		}
+		#endif
 
 	}
 	//NOT_IMP;
@@ -2626,8 +2860,16 @@ static int exec_stb(c6k_core_t* core, uint32_t insn){
 static int exec_stb_15(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int ucst15 = BITS(8, 22);
+		int src = BITS(23, 27);
+		int y = BITS(7, 7);
+		int s = BITS(1, 1);
+		int base =  14 + y;
+		generic_address_t addr = ucst15 + core->gpr[GPR_B][base];
+		register_memory_event(core, core->gpr[s][src] & 0xFF, 0xFF, addr, WR_FLAG, 0, 8);
 	}
-	NOT_IMP;
+	//NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_stdw(c6k_core_t* core, uint32_t insn){
@@ -2641,8 +2883,13 @@ static int exec_stdw(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset, mode, y, 3);
 		/* sc need to be considered */
+		#if 0
 		bus_write(32, addr, core->gpr[s][src]);
 		bus_write(32, addr + 4, core->gpr[s][src + 1]);
+		#else
+		uint64_t result = core->gpr[s][src] | (core->gpr[s][src + 1] << 32);
+		register_memory_event(core, result, s * 32 + src, addr, WR_FLAG, 0, 64);
+		#endif
 		/* FIXME, just for inc/dec base twice for dword */
 		//addr = calc_addr(core, base, offset, mode, y, 3);
 		DBG("In %s, addr=0x%x, src=%d, base=%d\n", __FUNCTION__, addr, src, base);
@@ -2661,8 +2908,11 @@ static int exec_sth(c6k_core_t* core, uint32_t insn){
 		int y = BITS(7, 7);
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset, mode, y, 1);
+		#if 0
 		bus_write(16, addr, core->gpr[s][src] & 0xFFFF);
-
+		#else
+		register_memory_event(core, core->gpr[s][src] & 0xFFFF, s * 32 + src, addr, WR_FLAG, 0, 16);
+		#endif
 	}
 	core->pc += 4;
 	return 0;
@@ -2686,8 +2936,13 @@ static int exec_stndw(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset, mode, y, 3);
 		/* sc need to be considered */
+		#if 0
 		bus_write(32, addr, core->gpr[s][src]);
 		bus_write(32, addr + 4, core->gpr[s][src + 1]);
+		#else
+		uint64_t result = core->gpr[s][src] | (core->gpr[s][src + 1] << 32);
+		register_memory_event(core, result, s * 32 + src, addr, WR_FLAG, 0, 64);
+		#endif
 		/* FIXME, just for inc/dec base twice for dword */
 		//addr = calc_addr(core, base, offset, mode, y, 3);
 		DBG("In %s, addr=0x%x, a[5]=0x%x\n", __FUNCTION__, addr, core->gpr[s][5]);
@@ -2712,7 +2967,11 @@ static int exec_stnw(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset, mode, y, 2);
 		DBG("In %s, addr=0x%x\n", __FUNCTION__, addr);
+		#if 0
 		bus_write(32, addr, core->gpr[s][src]);
+		#else
+		register_memory_event(core, core->gpr[s][src], s * 32 + src, addr, WR_FLAG, 0, 32);
+		#endif
 		//DST(insn)
 
 	}
@@ -2729,7 +2988,11 @@ static int exec_stw(c6k_core_t* core, uint32_t insn){
 		int s = BITS(1, 1);
 		generic_address_t addr = calc_addr(core, base, offset, mode, y, 2);
 		DBG("In %s, addr=0x%x, src=%d, value=0x%x\n", __FUNCTION__, addr, src, core->gpr[s][src]);
+		#if 0
 		bus_write(32, addr, core->gpr[s][src]);
+		#else
+		register_memory_event(core, core->gpr[s][src], s * 32 + src, addr, WR_FLAG, 0, 32);
+		#endif
 		//DST(insn)
 	}
 	//else
@@ -2801,6 +3064,20 @@ static int exec_sub(c6k_core_t* core, uint32_t insn){
 			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
 
 		}
+		else if(op == 0x17){
+			int result;
+			if(x){
+				result = (int)core->gpr[s][src1] - core->gpr[(!s) & 0x1][src2];
+				//core->gpr[s][dst] = result;
+			}
+			else{
+				result = (int)core->gpr[s][src1] - core->gpr[s][src2];
+				//core->gpr[s][dst] = result;
+			}
+			write_buffer(core, dst + s * 32, result);
+			DBG("In %s, dst=%d, src1=%d, src2=%d, result=0x%x\n", __FUNCTION__, dst, src1, src2, result);
+		}
+
 		else{
 			NOT_IMP;
 		}
@@ -2871,8 +3148,19 @@ static int exec_subaw(c6k_core_t* core, uint32_t insn){
 static int exec_subc(c6k_core_t* core, uint32_t insn){
 	if(calc_cond(core,insn)){
 		//DST(insn)
+		int src1 = BITS(13, 17);
+		int src2 = BITS(18, 22);
+		int dst = BITS(23, 27);
+		int s = BITS(1, 1);
+		int x = BITS(12, 12);
+		int gpr_group = x ? (!s) & 0x1 : s;
+		if(core->gpr[s][src1] >= core->gpr[gpr_group][src2]){
+			core->gpr[s][dst] = ((core->gpr[s][src1] - core->gpr[gpr_group][src2]) << 1) + 1;
+		}
+		else
+			core->gpr[s][dst] = core->gpr[s][src1] << 1;
 	}
-	NOT_IMP;
+	core->pc += 4;
 	return 0;
 }
 static int exec_subu(c6k_core_t* core, uint32_t insn){
@@ -2956,6 +3244,14 @@ static int exec_xor(c6k_core_t* core, uint32_t insn){
 		}
 		else if(op == 0xa8){
 			int op1 = SIGN_EXTEND(src1, 5);
+			if(x)
+				core->gpr[s][dst] = op1 ^ core->gpr[(!s) & 0x1][src2];
+			else
+				core->gpr[s][dst] = op1 ^ core->gpr[s][src2];
+
+		}
+		else if(op == 0x37e){
+			int op1 = core->gpr[s][src1];
 			if(x)
 				core->gpr[s][dst] = op1 ^ core->gpr[(!s) & 0x1][src2];
 			else
@@ -3052,7 +3348,7 @@ const ISEITEM insn32_decode_table[] = {
 {"b", 2, 6, 2, 6, 0x4, 29, 31, 0x6},
 
 {"b_reg", 3, 6, 1, 11, 0x1b1, 13, 17, 0x0, 23, 27, 0x0},
-{"b_irp", 0, 6, 2, 4, 0x6},
+{"b_irp", 2, 6, 2, 11, 0x38, 13, 22, 0xc0},
 {"b_nrp", 0, 6, 2, 4, 0x6},
 {"bdec", 0, 6, 2, 4, 0x6},
 
@@ -3129,7 +3425,8 @@ const ISEITEM insn32_decode_table[] = {
 
 {"ldbu", 3, 6, 2, 3, 0x1, 4, 6, 0x1, 8, 8, 0x0},
 {"ldbu", 3, 6, 2, 3, 0x1, 4, 6, 0x2, 8, 8, 0x0},
-{"ldbu_1", 0, 6, 2, 4, 0x6},
+{"ldbu_15", 1, 6, 2, 6, 0x7},
+{"ldb_15", 1, 6, 2, 6, 0xb},
 {"lddw", 2, 6, 2, 6, 0x19, 8, 8, 0x1},
 {"ldhu", 2, 6, 2, 3, 0x1, 4, 6, 0x0},
 {"ldhu_1", 0, 6, 2, 4, 0x6},
@@ -3139,7 +3436,8 @@ const ISEITEM insn32_decode_table[] = {
 {"ldw_15", 1, 6, 2, 6, 0x1b},
 
 {"ll", 0, 6, 2, 4, 0x6},
-{"lmbd", 0, 6, 2, 4, 0x6},
+{"lmbd", 2, 6, 2, 4, 0x6, 5, 11, 0x6a},
+{"lmbd", 2, 6, 2, 4, 0x6, 5, 11, 0x6b},
 {"max2", 0, 6, 2, 4, 0x6},
 {"maxu4", 0, 6, 2, 4, 0x6},
 {"min2", 0, 6, 2, 4, 0x6},
@@ -3233,6 +3531,7 @@ const ISEITEM insn32_decode_table[] = {
 {"shfl", 0, 6, 2, 4, 0x6},
 {"shfl3", 0, 6, 2, 4, 0x6},
 {"shl", 2, 6, 2, 5, 0x8, 6, 11, 0x32},
+{"shl", 2, 6, 2, 5, 0x8, 6, 11, 0x33},
 {"shlmb", 0, 6, 2, 4, 0x6},
 {"shr", 2, 6, 2, 5, 0x8, 6, 11, 0x36},
 {"shr2", 0, 6, 2, 4, 0x6},
@@ -3267,7 +3566,7 @@ const ISEITEM insn32_decode_table[] = {
 {"ssub2", 0, 6, 2, 4, 0x6},
 
 {"stb", 2, 6, 2, 6, 0xd, 8, 8, 0x0},
-{"stb_15", 0, 6, 2, 4, 0x6},
+{"stb_15", 1, 6, 2, 6, 0xf},
 {"stdw", 2, 6, 2, 6, 0x11, 8, 8, 0x1},
 {"sth", 2, 6, 2, 6, 0x15, 8, 8, 0x0},
 {"sth_15", 0, 6, 2, 4, 0x6},
@@ -3291,7 +3590,7 @@ const ISEITEM insn32_decode_table[] = {
 {"subabs4", 0, 6, 2, 4, 0x6},
 {"subah", 0, 6, 2, 4, 0x6},
 {"subaw", 0, 6, 2, 4, 0x6},
-{"subc", 0, 6, 2, 4, 0x6},
+{"subc", 2, 6, 2, 4, 0x6, 5, 11, 0x4b},
 {"subu", 0, 6, 2, 4, 0x6},
 {"sub2", 0, 6, 2, 4, 0x6},
 {"sub4", 0, 6, 2, 4, 0x6},
@@ -3450,7 +3749,8 @@ insn_action_t insn_action[] = {
 
 	exec_ldbu,
 	exec_ldbu,
-	exec_ldbu_1,
+	exec_ldbu_15,
+	exec_ldb_15,
 	exec_lddw,
 	exec_ldhu,
 	exec_ldhu_1,
@@ -3461,6 +3761,8 @@ insn_action_t insn_action[] = {
 
 	exec_ll,
 	exec_lmbd,
+	exec_lmbd,
+
 	exec_max2,
 	exec_maxu4,
 	exec_min2,
@@ -3556,6 +3858,8 @@ insn_action_t insn_action[] = {
 	exec_shfl,
 	exec_shfl3,
 	exec_shl,
+	exec_shl,
+
 	exec_shlmb,
 	exec_shr,
 	exec_shr2,
@@ -3693,34 +3997,11 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 					if(pbit == 0){
 						/* end of parallel, we should write back result */
 						write_back(core);
-						dec_delay_slot(core);
 					}
 					print_all_gpr(core);
 					if(pbit == 0){
-					if(core->delay_slot == 0 && core->pfc != 0){
-						//skyeye_printf_in_color(GREEN, "In %s, branch happened at 0x%x, target=0x%x, core->delay_slot_bak1=%d\n", __FUNCTION__, core->pc, core->pfc, core->delay_slot_bak1);
-						core->pc = core->pfc;
-				
-						if(core->delay_slot_bak1){
-							core->pfc = core->pfc_bak1;
-							core->delay_slot = core->delay_slot_bak1;
-							core->delay_slot_bak1 = 0;
-							core->pfc_bak1 = 0xFFFFFFFF;
-							DBG("In %s, begin to count next branch,target=0x%x,delay_slot=%d\n", __FUNCTION__, core->pfc, core->delay_slot);
-						}
-						else
-							core->pfc = 0;
-						print_all_gpr(core);
-						if(((core->pc - core->pce1) / 4) < (FP_SIZE - 1)){
-							i = ((core->pc - core->pce1) / 4);
-							DBG("In %s, branch triggered inner packet, target=0x%x, i=%d\n", __FUNCTION__, core->pc, i);
-							//continue;
-							return 0;
-						}
-						else
-							return 0;
-
-					}
+						check_event(core);
+						core->cycle_num ++;
 					}
 
 				}
@@ -3734,7 +4015,6 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 
 				if(pbit == 0){
 					write_back(core);
-					dec_delay_slot(core);
 				}
 
 				print_all_gpr(core);
@@ -3749,7 +4029,6 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 				if(pbit == 0){
 					/* end of parallel, we should write back result */
 					write_back(core);
-					dec_delay_slot(core);
 				}
 				print_all_gpr(core);
 			}
@@ -3837,28 +4116,8 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 			}
 			i++;
 			if(pbit == 0){
-			if(core->delay_slot == 0 && core->pfc != 0){
-				//skyeye_printf_in_color(GREEN, "In %s, branch happened at 0x%x, target=0x%x, core->delay_slot_bak1=%d\n", __FUNCTION__, core->pc, core->pfc, core->delay_slot_bak1);
-				core->pc = core->pfc;
-				
-				if(core->delay_slot_bak1){
-					core->pfc = core->pfc_bak1;
-					core->delay_slot = core->delay_slot_bak1;
-					core->delay_slot_bak1 = 0;
-					core->pfc_bak1 = 0xFFFFFFFF;
-					DBG("In %s, begin to count next branch,target=0x%x,delay_slot=%d\n", __FUNCTION__, core->pfc, core->delay_slot);
-				}
-				else
-					core->pfc = 0;
-				print_all_gpr(core);
-				if(((core->pc - core->pce1) / 4) < (FP_SIZE - 1)){
-					i = ((core->pc - core->pce1) / 4);
-					DBG("In %s, branch triggered inner packet, target=0x%x, i=%d\n", __FUNCTION__, core->pc, i);
-				}
-				else
-					return 0;
-
-			}
+				check_event(core);
+				core->cycle_num ++;
 			}
 			/* if we reach new packet region */
 			if((core->pc & 0x1f) == 0)
@@ -3880,7 +4139,6 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 			if(pbit == 0){
 				/* end of parallel, we should write back result */
 				write_back(core);
-				dec_delay_slot(core);
 			}
 			if(core->pc > (core->sploop_begin)){
 				//if((fetch_packet[i -1] & 0x1) == 0){
@@ -3918,31 +4176,16 @@ uint32_t exec_insn(c6k_core_t* core, uint32_t* fetch_packet){
 			}*/
 			//DBG("In %s, instr=0x%x\n", __FUNCTION__, fetch_packet[i]);
 			i++;
-			if(core->delay_slot == 0 && core->pfc != 0){
-				//skyeye_printf_in_color(GREEN, "In %s, branch happened at 0x%x, target=0x%x\n", __FUNCTION__, core->pc, core->pfc);
-				core->pc = core->pfc;
-				if(core->delay_slot_bak1){
-					core->pfc = core->pfc_bak1;
-					core->delay_slot = core->delay_slot_bak1;
-					core->delay_slot_bak1 = 0;
-					core->pfc_bak1 = 0xFFFFFFFF;
-					DBG("In %s, begin to count next branch,target=0x%x,delay_slot=%d\n", __FUNCTION__, core->pfc, core->delay_slot);
-				}
-				else
-					core->pfc = 0;
-
-				/* The branch sometimes will triggered in sploop, so we have to reset the sploop buffer */
-				core->sploop_begin = core->sploop_end = 0xFFFFFFFF;
-				core->buffer_pos = 0;
-
-				if(((core->pc - core->pce1) / 4) < (FP_SIZE)){
-					i = ((core->pc - core->pce1) / 4);
-					DBG("In %s, branch triggered inner packet, target=0x%x, i=%d\n", __FUNCTION__, core->pc, i);
-				}
-				else
-					return 0;
-				print_all_gpr(core);
+			if(pbit == 0){
+				//check_event(core);
+				/*
+				core->curr_slot_id ++;
+				core->curr_slot_id %= DELAY_SLOT_NUM;
+				core->cycle_num ++;
+				*/
+				cycle_inc(core, 1);
 			}
+
 			print_all_gpr(core);
 			/* if we reach new packet region */
 			if((core->pc & 0x1f) == 0){

@@ -77,16 +77,16 @@ static void register_core_chp(c6k_core_t* core){
 	add_chp_data((void*)(&core->pc),sizeof(core->pc), buf);
 	strcpy(buf, "PFC");
 	add_chp_data((void*)(&core->pfc),sizeof(core->pfc), buf);
-	strcpy(buf, "PFC_BAK1");
-	add_chp_data((void*)(&core->pfc_bak1),sizeof(core->pfc_bak1), buf);
-	strcpy(buf, "cycles");
-	add_chp_data((void*)(&core->cycles),sizeof(core->cycles), buf);
+	//strcpy(buf, "PFC_BAK1");
+	//add_chp_data((void*)(&core->pfc_bak1),sizeof(core->pfc_bak1), buf);
+	strcpy(buf, "cycle_num");
+	add_chp_data((void*)(&core->cycle_num),sizeof(core->cycle_num), buf);
 	strcpy(buf, "insn_num");
 	add_chp_data((void*)(&core->insn_num),sizeof(core->insn_num), buf);
 	strcpy(buf, "delay_slot");
 	add_chp_data((void*)(&core->delay_slot),sizeof(core->delay_slot), buf);
-	strcpy(buf, "delay_slot_bak1");
-	add_chp_data((void*)(&core->delay_slot_bak1),sizeof(core->delay_slot_bak1), buf);
+	//strcpy(buf, "delay_slot_bak1");
+	//add_chp_data((void*)(&core->delay_slot_bak1),sizeof(core->delay_slot_bak1), buf);
 	strcpy(buf, "header");
 	add_chp_data((void*)(&core->header),sizeof(core->header), buf);
 	strcpy(buf, "parallel");
@@ -151,6 +151,14 @@ c6k_init_state ()
 	core->spmask_begin = 0xFFFFFFFF;
 	core->buffer_pos = 0;
 
+	/* for 6713 */
+	core->csr = 0x02020100;
+	core->ier = 0x1;
+
+	core->curr_slot_id = 0;
+
+	//core->mem_access_buf_pos = 0;
+	
 	register_core_chp(core);	
 	return;
 }
@@ -193,7 +201,27 @@ c6k_step_once ()
 	}
 	else
 		core->header = 0x0;
-	exec_insn(core, fetch_packet);	
+	
+	uint32_t insn = fetch_packet[(core->pc - core->pce1) / 4];
+	exec_insn(core, fetch_packet);
+		
+	//uint32_t insn = fetch_packet[(core->pc - core->pce1) / 4];
+	static int para_insn_num = 0;
+	if((insn & 0x1) == 0) /* non parallel */
+	{
+#if 0
+		//printf("#PC:0x%x(insn_num=%d)\n", core->pc, core->cycle_num);
+		printf("#PC:0x%x(insn_num=%d)\n", core->pc, ++para_insn_num);
+		for(i = 0; i < 16; i++){
+			if(core->gpr[GPR_A][i] != 0)
+				printf("A%d:0x%x\n", i, core->gpr[GPR_A][i]);
+		}
+		for(i = 0; i < 16; i++){
+			if(core->gpr[GPR_B][i] != 0)
+				printf("B%d:0x%x\n", i, core->gpr[GPR_B][i]);
+		}	
+#endif
+	}
 	if(core->pc == 0)
 		exit(-1);
 	return;
@@ -388,7 +416,7 @@ static uint32 c6k_get_regnum(){
 	return C6K_REGNUM;
 	//return MAX_REG_NUM;
 }
-static char* get_regname_by_id(int id){
+static const char* get_regname_by_id(int id){
         return c6k_regstr[id];
 }
 

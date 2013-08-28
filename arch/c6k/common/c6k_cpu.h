@@ -28,9 +28,23 @@
 #include <stdint.h>
 #include <skyeye_types.h>
 #define SPLOOP_BUFFER_SIZE 32
+
+typedef enum{
+	GPR_A = 0,
+	GPR_B,
+	GPR_GROUP
+}gpr_t;
+#define GPR_NUM_IN_GROUP 32
+#define DELAY_SLOT_NUM 6
+#define BRANCH_DELAY_SLOT 5
+#define BRANCH_EVENT_ID 0x1
+#define MEM_ACCESS_DELAY_SLOT 4
+#define MEM_ACCESS_BUF_SIZE 4
+#define MEM_RD_EVENT_ID 0x2
+#define MEM_WR_EVENT_ID 0x4
 typedef struct c6k_core{
 	/* General Register */
-	uint32_t gpr[2][32];
+	uint32_t gpr[GPR_GROUP][GPR_NUM_IN_GROUP];
 
 	/* Control Register */
 	uint32_t amr;
@@ -59,9 +73,22 @@ typedef struct c6k_core{
 	uint32_t istp;
 
 	uint32_t pc;
-	uint32_t pfc, pfc_bak1;
-	uint64_t cycles, insn_num;
-	uint32_t delay_slot, delay_slot_bak1;
+	uint32_t pfc, pfc_branch[DELAY_SLOT_NUM];
+	uint64_t cycle_num, insn_num;
+	//uint32_t delay_slot, delay_slot_cycle[DELAY_SLOT_NUM], curr_slot_id, fill_slot_id, mem_access_slot_id;
+	uint32_t delay_slot, delay_slot_cycle[DELAY_SLOT_NUM], curr_slot_id, mem_access_slot_id;
+	/* save the result of memory access */
+	uint64_t mem_access_result[DELAY_SLOT_NUM][MEM_ACCESS_BUF_SIZE];
+	/* also store the rw info and other information in mem_access_reg
+	 * [0:7] store the register index, and [8:15] will store RW info
+	 */
+	uint32_t mem_access_reg[DELAY_SLOT_NUM][MEM_ACCESS_BUF_SIZE];
+	uint32_t mem_access_buf_pos[DELAY_SLOT_NUM];
+	/* the address of write operation */
+	uint32_t mem_wr_reg[DELAY_SLOT_NUM];
+	uint64_t mem_wr_result[DELAY_SLOT_NUM];
+	uint32_t mem_wr_addr[DELAY_SLOT_NUM];
+
 	uint32_t header;
 	uint32_t parallel;
 
@@ -76,15 +103,11 @@ typedef struct c6k_core{
 	generic_address_t spmask_begin, spmask_end;
 
 	/* save the result of WB */
-	uint32_t wb_result[64];
-	uint32_t wb_index[64];
+	uint32_t wb_result[GPR_NUM_IN_GROUP * GPR_GROUP];
+	uint32_t wb_index[GPR_NUM_IN_GROUP * GPR_GROUP];
 	uint32_t wb_result_pos;
 	uint32_t wb_flag;
 }c6k_core_t;
-typedef enum{
-	GPR_A = 0,
-	GPR_B
-}gpr_t;
 
 typedef enum{
 	L1_UNIT = 0,
@@ -96,5 +119,11 @@ typedef enum{
 	D1_UNIT,
 	D2_UNIT
 }function_unit_t;
+
+typedef enum{
+	RD_FLAG = 1,
+	WR_FLAG
+}rw_flag_t;
 #define FP_SIZE 8
+#define BAD_ADDR 0xFFFFFFFF
 #endif
