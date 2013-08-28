@@ -27,6 +27,7 @@
 #define __intc_6713_H__
 
 typedef struct intc_6713_reg{
+	uint32_t ext_pol;
 }intc_6713_reg_t;
 
 typedef struct intc_6713_device{

@@ -41,6 +41,9 @@ static exception_t intc_6713_read(conf_object_t *opaque, generic_address_t offse
 	struct intc_6713_device *dev = opaque->obj;
 	intc_6713_reg_t* regs = dev->regs;
 	switch(offset) {
+		case 0x8:
+			*(uint32_t *)buf = regs->ext_pol;
+			break;
 		default:
 			printf("Can not read the register at 0x%x in intc_6713\n", offset);
 			return Invarg_exp;
@@ -55,6 +58,10 @@ static exception_t intc_6713_write(conf_object_t *opaque, generic_address_t offs
 	intc_6713_reg_t* regs = dev->regs;
 	uint32_t val = *(uint32_t*)buf;
 	switch(offset) {
+		case 0x8:
+			regs->ext_pol = val;
+			break;
+
 		default:
 			printf("Can not write the register at 0x%x in intc_6713\n", offset);
 			return Invarg_exp;

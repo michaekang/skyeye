@@ -42,6 +42,18 @@ static exception_t can_sja1000_read(conf_object_t *opaque, generic_address_t off
 	struct can_sja1000_device *dev = opaque->obj;
 	can_sja1000_reg_t* regs = dev->regs;
 	switch(offset) {
+		case 0x0:
+			*(uint8_t *)buf = regs->mode;
+			break;
+		case 0x4:
+			*(uint8_t *)buf = regs->ier;
+			break;
+		case 0x8:
+			*(uint8_t *)buf = regs->output_ctrl;
+			break;
+		case 0xc:
+			*(uint8_t *)buf = regs->error_code;
+			break;
 		default:
 			printf("Can not read the register at 0x%x in can_sja1000\n", offset);
 			return Invarg_exp;
@@ -56,6 +68,19 @@ static exception_t can_sja1000_write(conf_object_t *opaque, generic_address_t of
 	can_sja1000_reg_t* regs = dev->regs;
 	uint32_t val = *(uint32_t*)buf;
 	switch(offset) {
+		case 0x0:
+			regs->mode = val;
+			break;
+		case 0x4:
+			regs->ier = val;
+			break;
+		case 0x8:
+                        regs->output_ctrl = val;
+                        break;
+                case 0xc:
+			regs->error_code = val;
+                        break;
+
 		default:
 			printf("Can not write the register at 0x%x in can_sja1000\n", offset);
 			return Invarg_exp;

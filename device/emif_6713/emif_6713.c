@@ -41,6 +41,32 @@ static exception_t emif_6713_read(conf_object_t *opaque, generic_address_t offse
 	struct emif_6713_device *dev = opaque->obj;
 	emif_6713_reg_t* regs = dev->regs;
 	switch(offset) {
+		case 0x0:
+			*(uint32_t *)buf = regs->gbl_ctl;
+			break;
+		case 0x4:
+			*(uint32_t *)buf = regs->ce_ctl[1];
+			break;
+		case 0x8:
+			*(uint32_t *)buf = regs->ce_ctl[0];
+			break;
+		case 0x10:
+			*(uint32_t *)buf = regs->ce_ctl[2];
+			break;
+		case 0x14:
+			*(uint32_t *)buf = regs->ce_ctl[3];
+			break;
+
+		case 0x18:
+			*(uint32_t *)buf = regs->sd_ctl;
+			break;
+		case 0x1c:
+			*(uint32_t *)buf = regs->sd_tim;
+			break;
+		case 0x20:
+			*(uint32_t *)buf = regs->sd_ext;
+			break;
+
 		default:
 			printf("Can not read the register at 0x%x in emif_6713\n", offset);
 			return Invarg_exp;
@@ -55,6 +81,32 @@ static exception_t emif_6713_write(conf_object_t *opaque, generic_address_t offs
 	emif_6713_reg_t* regs = dev->regs;
 	uint32_t val = *(uint32_t*)buf;
 	switch(offset) {
+		case 0x0:
+			regs->gbl_ctl = val;
+			break;
+		case 0x4:
+			regs->ce_ctl[1] = val;
+			break;
+		case 0x8:
+			regs->ce_ctl[0] = val;
+			break;
+		case 0x10:
+			regs->ce_ctl[2] = val;
+			break;
+		case 0x14:
+			regs->ce_ctl[3] = val;
+			break;
+
+		case 0x18:
+			regs->sd_ctl = val;
+			break;
+		case 0x1c:
+			regs->sd_tim = val;
+			break;
+		case 0x20:
+			regs->sd_ext = val;
+			break;
+
 		default:
 			printf("Can not write the register at 0x%x in emif_6713\n", offset);
 			return Invarg_exp;

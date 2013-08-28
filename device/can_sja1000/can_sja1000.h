@@ -27,6 +27,11 @@
 #define __can_sja1000_H__
 
 typedef struct can_sja1000_reg{
+	uint8_t mode;
+	uint8_t ier;
+	uint8_t output_ctrl;
+	uint8_t error_code;
+	
 }can_sja1000_reg_t;
 
 typedef struct can_sja1000_device{

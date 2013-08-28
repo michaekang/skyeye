@@ -56,6 +56,9 @@ static exception_t pll_6713_read(conf_object_t *opaque, generic_address_t offset
 		case 0x120:
 			*(uint32_t *)buf = regs->plldiv[(offset - 0x114) / 4];
 			break;
+		case 0x124:
+			*(uint32_t *)buf = regs->oscdiv1;
+			break;
 		default:
 			printf("Can not read the register at 0x%x in pll_6713\n", offset);
 			return Invarg_exp;
@@ -84,7 +87,9 @@ static exception_t pll_6713_write(conf_object_t *opaque, generic_address_t offse
 		case 0x120:
 			regs->plldiv[(offset - 0x114) / 4] = val;
 			break;
-
+		case 0x124:
+			regs->oscdiv1 = val;
+			break;
 		default:
 			printf("Can not write the register at 0x%x in pll_6713\n", offset);
 			return Invarg_exp;

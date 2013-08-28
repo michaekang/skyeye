@@ -27,6 +27,11 @@
 #define __emif_6713_H__
 
 typedef struct emif_6713_reg{
+	uint32_t gbl_ctl;
+	uint32_t ce_ctl[4];
+	uint32_t sd_ctl;
+	uint32_t sd_tim;
+	uint32_t sd_ext;
 }emif_6713_reg_t;
 
 typedef struct emif_6713_device{
